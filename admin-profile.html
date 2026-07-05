@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Main - Admin Profili</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/inputs.css" />
+    <link rel="stylesheet" href="css/modal.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon"><i class="fas fa-crown"></i></div>
+                <span>Admin Main</span>
+                <span class="brand-version">v1.0</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                <a href="admins.html" class="nav-link active"><i class="fas fa-users"></i> Admin Customerlar</a>
+                <a href="admin-add.html" class="nav-link"><i class="fas fa-user-plus"></i> Yangi Admin</a>
+                <a href="settings.html" class="nav-link"><i class="fas fa-cog"></i> Sozlamalar</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Chiqish</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button id="menuToggle" class="menu-toggle"><i class="fas fa-bars"></i></button>
+                    <div>
+                        <h2>Admin Profili</h2>
+                        <p class="text-muted">Admin customer ma'lumotlari</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="theme-toggle-small" id="themeToggleSmall"><i class="fas fa-moon"></i></button>
+                    <a href="admins.html" class="btn-secondary"><i class="fas fa-arrow-left"></i> Orqaga</a>
+                </div>
+            </header>
+
+            <section class="profile-container">
+                <div class="profile-header">
+                    <div class="profile-avatar large">
+                        <span id="profileInitial">A</span>
+                    </div>
+                    <div class="profile-info">
+                        <h2 id="profileName">Admin Customer</h2>
+                        <p class="text-muted" id="profileEmail">admin@example.com</p>
+                        <p class="text-muted" id="profilePhone">+998 90 123 45 67</p>
+                        <div class="profile-status">
+                            <span id="profileStatus" class="status-badge active">Faol</span>
+                        </div>
+                        <div class="profile-subscription">
+                            <span id="profileSubscription" class="subscription-badge inactive">Obunasi yo'q</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <p class="stat-label"><i class="fas fa-calendar"></i> Obuna turi</p>
+                        <p class="stat-value" id="profileSubType">Yo'q</p>
+                    </div>
+                    <div class="stat-item">
+                        <p class="stat-label"><i class="fas fa-clock"></i> Obuna muddati</p>
+                        <p class="stat-value" id="profileSubEnd">-</p>
+                    </div>
+                    <div class="stat-item">
+                        <p class="stat-label"><i class="fas fa-money-bill"></i> To'lov</p>
+                        <p class="stat-value" id="profileSubAmount">0 so'm</p>
+                    </div>
+                </div>
+
+                <div class="profile-actions">
+                    <button id="editBtn" class="btn-primary"><i class="fas fa-edit"></i> Tahrirlash</button>
+                    <button id="subscriptionBtn" class="btn-warning"><i class="fas fa-calendar-plus"></i> Obuna sotish</button>
+                    <button id="deleteBtn" class="btn-danger"><i class="fas fa-trash"></i> O'chirish</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ============================================
+    TAHRIRLASH MODAL
+    ============================================ -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> Adminni tahrirlash</h3>
+                <button class="modal-close" id="closeEditModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <div class="form-group">
+                        <label for="editFullName"><i class="fas fa-user"></i> F.I.SH</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="editFullName" placeholder="F.I.SH" required />
+                            <i class="fas fa-check-circle input-icon success"></i>
+                            <i class="fas fa-exclamation-circle input-icon error"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editEmail"><i class="fas fa-envelope"></i> Email</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="editEmail" placeholder="Email" required />
+                            <i class="fas fa-check-circle input-icon success"></i>
+                            <i class="fas fa-exclamation-circle input-icon error"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPhone"><i class="fas fa-phone"></i> Telefon</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="editPhone" placeholder="+998 90 123 45 67" />
+                            <i class="fas fa-check-circle input-icon success"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editStatus"><i class="fas fa-circle"></i> Holati</label>
+                        <div class="input-wrapper">
+                            <select id="editStatus">
+                                <option value="active">Faol</option>
+                                <option value="blocked">Bloklangan</option>
+                                <option value="inactive">Faol emas</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelEditModal">Bekor qilish</button>
+                <button class="btn-primary" id="saveEditModal"><i class="fas fa-save"></i> Saqlash</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="fas fa-moon moon"></i>
+    </button>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/admin-profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Main - Yangi Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/input.css" />
+    <link rel="stylesheet" href="css/modal.css" />
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon"><i class="fas fa-crown"></i></div>
+                <span>Admin Main</span>
+                <span class="brand-version">v1.0</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                <a href="admins.html" class="nav-link"><i class="fas fa-users"></i> Admin Customerlar</a>
+                <a href="admin-add.html" class="nav-link active"><i class="fas fa-user-plus"></i> Yangi Admin</a>
+                <a href="settings.html" class="nav-link"><i class="fas fa-cog"></i> Sozlamalar</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Chiqish</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button id="menuToggle" class="menu-toggle"><i class="fas fa-bars"></i></button>
+                    <div>
+                        <h2>Yangi Admin Customer</h2>
+                        <p class="text-muted">Yangi admin customer qo'shish</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="theme-toggle-small" id="themeToggleSmall"><i class="fas fa-moon"></i></button>
+                    <a href="admins.html" class="btn-secondary"><i class="fas fa-arrow-left"></i> Orqaga</a>
+                </div>
+            </header>
+
+            <section class="form-container">
+                <form id="addAdminForm" class="app-form">
+                    <!-- F.I.SH -->
+                    <div class="form-group">
+                        <label for="fullName"><i class="fas fa-user"></i> F.I.SH</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="fullName" placeholder="Aliyev Alisher Anvarovich" required />
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="email" placeholder="admin@example.com" required autocomplete="email" />
+                        </div>
+                    </div>
+
+                    <!-- Telefon -->
+                    <div class="form-group">
+                        <label for="phone"><i class="fas fa-phone"></i> Telefon</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="phone" placeholder="+998 90 123 45 67" />
+                        </div>
+                    </div>
+
+                    <!-- Parol -->
+                    <div class="form-group">
+                        <label for="password"><i class="fas fa-lock"></i> Parol</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="password" placeholder="••••••••" required minlength="6" autocomplete="new-password" />
+                            <button type="button" class="password-toggle" id="passwordToggle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Obuna turi - MODAL -->
+                    <div class="form-group">
+                        <label for="subscriptionDisplay"><i class="fas fa-calendar"></i> Obuna turi</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="subscriptionDisplay" placeholder="Obuna turini tanlang" readonly />
+                            <input type="hidden" id="subscriptionType" value="none" />
+                            <button type="button" class="btn-secondary" id="openSubscriptionModal" style="position: absolute; right: 4px; top: 4px; padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; z-index: 5;">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Boshlanish sanasi - AVTOMATIK -->
+                    <div class="form-group">
+                        <label for="startDate"><i class="fas fa-calendar-day"></i> Boshlanish sanasi</label>
+                        <div class="input-wrapper">
+                            <input type="date" id="startDate" />
+                        </div>
+                    </div>
+
+                    <!-- Tugash sanasi -->
+                    <div class="form-group">
+                        <label for="endDate"><i class="fas fa-calendar-day"></i> Tugash sanasi</label>
+                        <div class="input-wrapper">
+                            <input type="date" id="endDate" readonly />
+                        </div>
+                    </div>
+
+                    <!-- To'lov miqdori -->
+                    <div class="form-group">
+                        <label for="amount"><i class="fas fa-money-bill"></i> To'lov miqdori</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="amount" readonly placeholder="0 so'm" />
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" id="submitBtn" class="btn-primary"><i class="fas fa-save"></i> Saqlash</button>
+                        <a href="admins.html" class="btn-secondary">Bekor qilish</a>
+                    </div>
+                </form>
+
+                <div id="formMessage" class="form-message"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ============================================
+    OBUNA MODAL - 6 OYLIK QO'SHILGAN
+    ============================================ -->
+    <div class="modal-overlay" id="subscriptionModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-calendar"></i> Obuna turini tanlang</h3>
+                <button class="modal-close" id="closeSubscriptionModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="subscription-options">
+                    <div class="subscription-option" data-value="none" data-amount="0" data-months="0">
+                        <div class="option-icon"><i class="fas fa-ban"></i></div>
+                        <div class="option-info">
+                            <h4>Obuna yo'q</h4>
+                            <p>Hech qanday obuna</p>
+                        </div>
+                        <div class="option-price">0 so'm</div>
+                    </div>
+                    <div class="subscription-option" data-value="monthly" data-amount="299999" data-months="1">
+                        <div class="option-icon"><i class="fas fa-clock"></i></div>
+                        <div class="option-info">
+                            <h4>Oylik</h4>
+                            <p>30 kun / 299,999 so'm</p>
+                        </div>
+                        <div class="option-price">299,999 so'm</div>
+                    </div>
+                    <!-- 6 OYLIK QO'SHILDI -->
+                    <div class="subscription-option" data-value="6months" data-amount="1899999" data-months="6">
+                        <div class="option-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="option-info">
+                            <h4>6 oylik</h4>
+                            <p>180 kun / 1,899,999 so'm</p>
+                        </div>
+                        <div class="option-price">1,899,999 so'm</div>
+                    </div>
+                    <div class="subscription-option" data-value="yearly" data-amount="3599999" data-months="12">
+                        <div class="option-icon"><i class="fas fa-calendar-check"></i></div>
+                        <div class="option-info">
+                            <h4>Yillik</h4>
+                            <p>365 kun / 3,599,999 so'm</p>
+                        </div>
+                        <div class="option-price">3,599,999 so'm</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelSubscriptionModal">Bekor qilish</button>
+                <button class="btn-primary" id="confirmSubscriptionModal">Tanlash</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="fas fa-moon moon"></i>
+    </button>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/admin-add.js"></script>
+</body>
+</html>

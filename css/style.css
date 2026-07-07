@@ -839,6 +839,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
     padding: 0 32px 32px;
+    align-items: stretch;
 }
 
 .chart-card {
@@ -846,6 +847,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-radius: var(--radius);
     padding: 24px;
     border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    height: 100%;
+    min-height: 360px;
+    max-height: 460px;
 }
 
 .chart-header {
@@ -867,7 +875,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .chart-card canvas {
-    max-height: 220px;
+    width: 100% !important;
+    height: 240px !important;
+    max-height: 240px;
     max-width: 100%;
 }
 
@@ -948,6 +958,122 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .subscription-badge.monthly { background: var(--bg-hover); color: var(--text-primary); }
 .subscription-badge.yearly { background: var(--bg-active); color: var(--text-primary); }
 .subscription-badge.inactive { background: var(--bg-hover); color: var(--text-muted); }
+
+/* ============================================
+   SUBSCRIPTION ALERTS
+   ============================================ */
+#subscriptionAlert {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 12px 24px;
+}
+
+.subscription-alert {
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    border: 2px solid;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.subscription-alert.expired {
+    background: #fef2f2;
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+.subscription-alert.warning {
+    background: #fffbeb;
+    border-color: var(--color-warning);
+    color: var(--color-warning);
+}
+
+.subscription-alert.inactive {
+    background: #f3f4f6;
+    border-color: var(--text-muted);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .subscription-alert.expired {
+    background: #3a1a1a;
+    border-color: var(--color-danger);
+}
+
+[data-theme="dark"] .subscription-alert.warning {
+    background: #3a2a0a;
+    border-color: var(--color-warning);
+}
+
+[data-theme="dark"] .subscription-alert.inactive {
+    background: #2c2c2e;
+    border-color: var(--text-muted);
+}
+
+.subscription-alert .alert-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.subscription-alert i {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.subscription-alert .alert-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.subscription-alert .alert-message {
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.subscription-alert .btn-renew,
+.subscription-alert .btn-subscribe {
+    margin-left: auto;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.subscription-alert.expired .btn-renew {
+    background: var(--color-danger);
+    color: white;
+}
+
+.subscription-alert.expired .btn-renew:hover {
+    opacity: 0.9;
+}
+
+.subscription-alert.inactive .btn-subscribe {
+    background: var(--text-primary);
+    color: var(--bg-primary);
+}
+
+.subscription-alert.inactive .btn-subscribe:hover {
+    opacity: 0.8;
+}
 
 /* ============================================
    FORM CONTAINER
@@ -1177,6 +1303,28 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    max-height: 250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+}
+
+.recent-admins::-webkit-scrollbar {
+    width: 6px;
+}
+
+.recent-admins::-webkit-scrollbar-track {
+    background: var(--bg-hover);
+    border-radius: 10px;
+}
+
+.recent-admins::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 10px;
+}
+
+.recent-admins::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
 }
 
 .recent-admin-item {

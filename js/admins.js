@@ -120,7 +120,7 @@ async function deleteAdmin(id) {
     try {
         const result = await API.delete(`/admins/${id}`);
         if (result.success) {
-            alert('✅ Admin Customer o\'chirildi!');
+            alert('✅ Admin Customer faol emas qilindi va tizimga kirishi bloklandi!');
             loadAdmins();
         }
     } catch (error) {

@@ -3,6 +3,8 @@
 // ============================================
 
 let subscriptionChart = null;
+let refreshInterval = null;
+let subscriptionCheckInterval = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     if (!Auth.isAuthenticated()) {
@@ -12,6 +14,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     await loadStatistics();
     await loadRecentAdmins();
+    await checkSubscriptionStatus(); // Check subscription on load
+    
+    // Refresh statistics every 30 seconds for real-time updates
+    refreshInterval = setInterval(() => {
+        loadStatistics();
+        loadRecentAdmins();
+    }, 30000);
+    
+    // Check subscription every 3 seconds for countdown
+    subscriptionCheckInterval = setInterval(() => {
+        checkSubscriptionStatus();
+    }, 3000);
+});
+
+// Cleanup intervals on page unload
+window.addEventListener('beforeunload', () => {
+    if (refreshInterval) clearInterval(refreshInterval);
+    if (subscriptionCheckInterval) clearInterval(subscriptionCheckInterval);
 });
 
 async function loadStatistics() {
@@ -44,7 +64,7 @@ async function loadStatistics() {
 
 async function loadRecentAdmins() {
     try {
-        const data = await API.get('/admins?limit=5');
+        const data = await API.get('/admins?limit=5&status=active');
         if (data.success) {
             const container = document.getElementById('recentAdminsList');
             const admins = data.data || [];
@@ -118,6 +138,80 @@ function createSubscriptionChart(stats) {
             }
         }
     });
+}
+
+// ============================================
+// CHECK SUBSCRIPTION STATUS
+// ============================================
+async function checkSubscriptionStatus() {
+    try {
+        const response = await API.get('/auth/subscription-status');
+        if (response.success) {
+            const subData = response.data;
+            const alertContainer = document.getElementById('subscriptionAlert');
+            
+            if (!alertContainer) {
+                // Create alert container if doesn't exist
+                const newAlert = document.createElement('div');
+                newAlert.id = 'subscriptionAlert';
+                document.body.insertAdjacentElement('afterbegin', newAlert);
+            }
+            
+            const alertEl = document.getElementById('subscriptionAlert');
+            
+            if (subData.status === 'expired') {
+                // Show expired warning
+                alertEl.innerHTML = `
+                    <div class="subscription-alert expired">
+                        <div class="alert-content">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <div>
+                                <p class="alert-title">⚠️ Obuna muddasi tugagan!</p>
+                                <p class="alert-message">Iltimos, qaytadan to'lov qiling. Obunangiz faol emas bo'lib ketdi.</p>
+                            </div>
+                            <button onclick="location.href='settings.html'" class="btn-renew">To'lovni yangilash</button>
+                        </div>
+                    </div>
+                `;
+            } else if (subData.status === 'active') {
+                const remainingTime = subData.remainingTime;
+                if (remainingTime.totalSeconds <= 604800) { // 7 days or less
+                    alertEl.innerHTML = `
+                        <div class="subscription-alert warning">
+                            <div class="alert-content">
+                                <i class="fas fa-clock"></i>
+                                <div>
+                                    <p class="alert-title">⏰ Obuna muddasi tugayotgan</p>
+                                    <p class="alert-message">
+                                        Qolgan vaqt: <strong>${remainingTime.days}k ${remainingTime.hours}s ${remainingTime.minutes}m</strong>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Hide alert if more than 7 days remaining
+                    alertEl.innerHTML = '';
+                }
+            } else {
+                // No active subscription
+                alertEl.innerHTML = `
+                    <div class="subscription-alert inactive">
+                        <div class="alert-content">
+                            <i class="fas fa-info-circle"></i>
+                            <div>
+                                <p class="alert-title">ℹ️ Aktiv obuna mavjud emas</p>
+                                <p class="alert-message">Xizmatlardan to'liq foydalanish uchun obuna sotib oling.</p>
+                            </div>
+                            <button onclick="location.href='settings.html'" class="btn-subscribe">Obuna sotib olish</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    } catch (error) {
+        console.error('Subscription status check error:', error);
+    }
 }
 
 // Chart.js global config

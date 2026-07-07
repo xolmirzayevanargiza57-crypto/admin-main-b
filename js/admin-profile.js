@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const result = await API.delete(`/admins/${adminId}`);
             if (result.success) {
-                alert('✅ Admin Customer o\'chirildi!');
+                alert('✅ Admin Customer faol emas qilindi va tizimga kirishi bloklandi!');
                 window.location.href = 'admins.html';
             }
         } catch (error) {

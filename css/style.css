@@ -556,6 +556,110 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     display: none !important;
 }
 
+.notification-toggle {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.notification-toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+.notification-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--color-danger);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification-panel {
+    position: absolute;
+    top: 88px;
+    right: 24px;
+    width: min(360px, calc(100vw - 32px));
+    max-height: 420px;
+    overflow-y: auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 12px;
+    z-index: 200;
+    display: none;
+}
+
+.notification-panel.show {
+    display: block;
+}
+
+.notification-item {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--bg-hover);
+    margin-bottom: 8px;
+}
+
+.notification-item.unread {
+    border-left: 3px solid var(--color-warning);
+}
+
+.notification-item-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.notification-item p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+
+.notification-item span {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.notification-read {
+    border: none;
+    background: transparent;
+    color: var(--color-success);
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 0;
+}
+
+.notification-empty {
+    padding: 20px 10px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
 /* ============================================
    SIDEBAR
    ============================================ */
@@ -688,6 +792,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     flex: 1;
     margin-left: 260px;
     min-height: 100vh;
+    position: relative;
 }
 
 .top-header {
@@ -852,8 +957,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     min-height: 0;
     overflow: hidden;
     height: 100%;
-    min-height: 360px;
-    max-height: 460px;
+    min-height: 320px;
+    max-height: 420px;
 }
 
 .chart-header {
@@ -876,9 +981,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .chart-card canvas {
     width: 100% !important;
-    height: 240px !important;
-    max-height: 240px;
+    height: 100% !important;
     max-width: 100%;
+    flex: 1;
+    min-height: 220px;
 }
 
 /* ============================================

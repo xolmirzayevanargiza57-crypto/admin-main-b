@@ -55,9 +55,10 @@ const API = {
     async handleResponse(res) {
         const data = await res.json();
         if (!res.ok) {
-            if (res.status === 401 || res.status === 403) {
+            if ((res.status === 401 || res.status === 403) && !res.url.includes('/auth/login')) {
                 localStorage.removeItem('adminToken');
                 localStorage.removeItem('adminUser');
+                localStorage.setItem('authMessage', data.message || 'Sizning hisobingizga kirish taqiqlangan.');
                 window.location.replace('index.html');
             }
             throw new Error(data.message || 'Xatolik yuz berdi');

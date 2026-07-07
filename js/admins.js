@@ -103,6 +103,12 @@ function renderAdmins(admins) {
                     <a href="admin-profile.html?id=${admin._id}" class="btn-secondary" style="padding: 4px 12px; font-size: 0.75rem;">
                         <i class="fas fa-eye"></i> Ko'rish
                     </a>
+                    <button onclick="sendNotification('${admin._id}')" class="btn-secondary" style="padding: 4px 12px; font-size: 0.75rem; margin-left: 4px;">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <button onclick="banAdmin('${admin._id}')" class="btn-danger" style="padding: 4px 12px; font-size: 0.75rem; margin-left: 4px;">
+                        <i class="fas fa-ban"></i>
+                    </button>
                     <button onclick="deleteAdmin('${admin._id}')" class="btn-danger" style="padding: 4px 12px; font-size: 0.75rem; margin-left: 4px;">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -110,6 +116,41 @@ function renderAdmins(admins) {
             </tr>
         `;
     }).join('');
+}
+
+async function sendNotification(id) {
+    const message = prompt('Admin Customerga yuboriladigan xabar matni:');
+    if (!message || !message.trim()) return;
+
+    try {
+        const result = await API.post('/notifications', {
+            title: 'Admin panel xabari',
+            message: message.trim(),
+            type: 'info',
+            recipientId: id,
+            recipientRole: 'admin_customer'
+        });
+        if (result.success) {
+            alert('✅ Xabar yuborildi!');
+        }
+    } catch (error) {
+        alert('❌ Xatolik: ' + error.message);
+    }
+}
+
+async function banAdmin(id) {
+    const reason = prompt('Bloklash sababi:');
+    if (!reason || !reason.trim()) return;
+
+    try {
+        const result = await API.post(`/admins/${id}/ban`, { reason: reason.trim() });
+        if (result.success) {
+            alert('✅ Admin Customer bloklandi va xabar yuborildi!');
+            loadAdmins();
+        }
+    } catch (error) {
+        alert('❌ Xatolik: ' + error.message);
+    }
 }
 
 async function deleteAdmin(id) {
@@ -120,7 +161,7 @@ async function deleteAdmin(id) {
     try {
         const result = await API.delete(`/admins/${id}`);
         if (result.success) {
-            alert('✅ Admin Customer faol emas qilindi va tizimga kirishi bloklandi!');
+            alert('✅ Admin Customer o\'chirildi!');
             loadAdmins();
         }
     } catch (error) {

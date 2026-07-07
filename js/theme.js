@@ -18,6 +18,7 @@ const Theme = {
     applyTheme(theme) {
         const actualTheme = theme === 'system' ? this.getSystemTheme() : theme;
         document.documentElement.setAttribute('data-theme', actualTheme);
+        document.body.setAttribute('data-theme', actualTheme);
         localStorage.setItem('theme', theme);
         this.current = theme;
         this.updateIcons(actualTheme);

@@ -24,6 +24,7 @@ const Auth = {
     logout() {
         localStorage.removeItem('adminToken');
         localStorage.removeItem('adminUser');
+        localStorage.removeItem('authMessage');
         window.location.href = 'index.html';
     },
     
@@ -58,7 +59,12 @@ const Auth = {
                 localStorage.setItem('adminUser', JSON.stringify(data.user));
                 return true;
             }
+
+            localStorage.setItem('authMessage', data.message || 'Sizning hisobingizga kirish taqiqlangan.');
+            this.logout();
+            return false;
         } catch (error) {
+            localStorage.setItem('authMessage', error.message || 'Auth xatosi');
             this.logout();
             return false;
         }

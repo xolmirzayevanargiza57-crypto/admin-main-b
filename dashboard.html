@@ -30,19 +30,19 @@
             </div>
 
             <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-link active">
+                <a href="dashboard.html" class="nav-link active" data-nav-label="navDashboard">
                     <i class="fas fa-chart-pie"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="admins.html" class="nav-link">
+                <a href="admins.html" class="nav-link" data-nav-label="navAdmins">
                     <i class="fas fa-users"></i>
                     <span>Admin Customerlar</span>
                 </a>
-                <a href="admin-add.html" class="nav-link">
+                <a href="admin-add.html" class="nav-link" data-nav-label="navAdd">
                     <i class="fas fa-user-plus"></i>
                     <span>Yangi Admin</span>
                 </a>
-                <a href="settings.html" class="nav-link">
+                <a href="settings.html" class="nav-link" data-nav-label="navSettings">
                     <i class="fas fa-cog"></i>
                     <span>Sozlamalar</span>
                 </a>
@@ -64,13 +64,17 @@
                         <i class="fas fa-bars"></i>
                     </button>
                     <div>
-                        <h2>Dashboard</h2>
+                        <h2 data-i18n="navDashboard">Dashboard</h2>
                         <p class="text-muted">Barcha statistikalar bir joyda</p>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="theme-toggle-small" id="themeToggleSmall">
                         <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="notification-toggle" id="notificationToggle" aria-label="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationBadge">0</span>
                     </button>
                     <div class="user-profile">
                         <div class="user-avatar" id="userAvatar">
@@ -83,6 +87,8 @@
                     </div>
                 </div>
             </header>
+
+            <div id="notificationPanel" class="notification-panel"></div>
 
             <!-- Stats Cards -->
             <section class="stats-grid">
@@ -142,7 +148,9 @@
                     <div class="chart-header">
                         <h3><i class="fas fa-chart-doughnut"></i> Obuna statistikasi</h3>
                     </div>
-                    <canvas id="subscriptionChart"></canvas>
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 220px;">
+                        <canvas id="subscriptionChart"></canvas>
+                    </div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-header">
@@ -163,7 +171,9 @@
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/theme.js"></script>
+    <script src="js/language.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/notifications.js"></script>
     <script src="js/dashboard.js"></script>
 </body>
 </html>

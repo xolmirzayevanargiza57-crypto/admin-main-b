@@ -107,16 +107,18 @@ function createSubscriptionChart(stats) {
     subscriptionChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Oylik', 'Yillik', 'Obunasi yo\'q'],
+            labels: ['Oylik', '6 oylik', 'Yillik', 'Obunasi yo\'q'],
             datasets: [{
-                data: [stats.monthly || 0, stats.yearly || 0, stats.inactive || 0],
+                data: [stats.monthly || 0, stats.sixMonths || 0, stats.yearly || 0, stats.inactive || 0],
                 backgroundColor: [
                     'rgba(52, 199, 89, 0.8)',
+                    'rgba(255, 149, 0, 0.8)',
                     'rgba(0, 122, 255, 0.8)',
                     'rgba(255, 59, 48, 0.8)'
                 ],
                 borderColor: [
                     'rgba(52, 199, 89, 1)',
+                    'rgba(255, 149, 0, 1)',
                     'rgba(0, 122, 255, 1)',
                     'rgba(255, 59, 48, 1)'
                 ],
@@ -125,7 +127,8 @@ function createSubscriptionChart(stats) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
             plugins: {
                 legend: {
                     position: 'bottom',

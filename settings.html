@@ -24,10 +24,10 @@
                 <span class="brand-version">v1.0</span>
             </div>
             <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-link"><i class="fas fa-chart-pie"></i> Dashboard</a>
-                <a href="admins.html" class="nav-link"><i class="fas fa-users"></i> Admin Customerlar</a>
-                <a href="admin-add.html" class="nav-link"><i class="fas fa-user-plus"></i> Yangi Admin</a>
-                <a href="settings.html" class="nav-link active"><i class="fas fa-cog"></i> Sozlamalar</a>
+                <a href="dashboard.html" class="nav-link" data-nav-label="navDashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                <a href="admins.html" class="nav-link" data-nav-label="navAdmins"><i class="fas fa-users"></i> Admin Customerlar</a>
+                <a href="admin-add.html" class="nav-link" data-nav-label="navAdd"><i class="fas fa-user-plus"></i> Yangi Admin</a>
+                <a href="settings.html" class="nav-link active" data-nav-label="navSettings"><i class="fas fa-cog"></i> Sozlamalar</a>
             </nav>
             <div class="sidebar-footer">
                 <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Chiqish</button>
@@ -39,12 +39,16 @@
                 <div class="header-left">
                     <button id="menuToggle" class="menu-toggle"><i class="fas fa-bars"></i></button>
                     <div>
-                        <h2>Sozlamalar</h2>
-                        <p class="text-muted">Tizim sozlamalarini boshqaring</p>
+                        <h2 data-i18n="settingsTitle">Sozlamalar</h2>
+                        <p class="text-muted" data-i18n="settingsSubtitle">Tizim sozlamalarini boshqaring</p>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="theme-toggle-small" id="themeToggleSmall"><i class="fas fa-moon"></i></button>
+                    <button class="notification-toggle" id="notificationToggle" aria-label="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationBadge">0</span>
+                    </button>
                     <div class="user-profile">
                         <div class="user-avatar" id="userAvatar">
                             <span id="userInitial">A</span>
@@ -52,6 +56,8 @@
                     </div>
                 </div>
             </header>
+
+            <div id="notificationPanel" class="notification-panel"></div>
 
             <section class="settings-container">
                 <!-- Profile -->
@@ -120,11 +126,29 @@
                     <div id="passwordMessage" class="form-message"></div>
                 </div>
 
+                <div class="settings-card">
+                    <h3><i class="fas fa-language"></i> <span data-i18n="languageTitle">Til</span></h3>
+                    <div class="theme-options">
+                        <button class="theme-option" data-language-option="uz" id="langUz">
+                            <i class="fas fa-language"></i>
+                            <span>O‘zbek</span>
+                        </button>
+                        <button class="theme-option" data-language-option="en" id="langEn">
+                            <i class="fas fa-globe"></i>
+                            <span>English</span>
+                        </button>
+                    </div>
+                    <p class="text-muted" style="margin-top: 12px; font-size: 0.8125rem;">
+                        <i class="fas fa-info-circle"></i>
+                        <span data-i18n="languageStatus">Hozirgi til</span>: <strong id="languageCurrent">O‘zbek</strong>
+                    </p>
+                </div>
+
                 <!-- ============================================
                 THEME SOZLAMALARI - TO'LIQ
                 ============================================ -->
                 <div class="settings-card">
-                    <h3><i class="fas fa-palette"></i> Tashqi ko'rinish</h3>
+                    <h3><i class="fas fa-palette"></i> <span data-i18n="themeTitle">Tashqi ko'rinish</span></h3>
                     <div class="theme-options">
                         <button class="theme-option active" data-theme="light" id="themeLight">
                             <i class="fas fa-sun"></i>
@@ -165,7 +189,9 @@
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/theme.js"></script>
+    <script src="js/language.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/notifications.js"></script>
     <script src="js/settings.js"></script>
 </body>
 </html>

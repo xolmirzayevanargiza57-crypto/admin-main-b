@@ -11,6 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorText = document.getElementById('errorText');
     const passwordToggle = document.getElementById('passwordToggle');
 
+    const storedMessage = localStorage.getItem('authMessage');
+    if (storedMessage) {
+        showError(storedMessage);
+    }
+
     // Agar allaqachon login qilgan bo'lsa
     if (Auth.isAuthenticated()) {
         window.location.href = 'dashboard.html';
@@ -96,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await Auth.login(email, password);
             
             if (result.success) {
+                localStorage.removeItem('authMessage');
                 // Muvaffaqiyatli login
                 btn.innerHTML = '<i class="fas fa-check"></i> Muvaffaqiyatli!';
                 setTimeout(() => {

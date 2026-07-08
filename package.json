@@ -1,0 +1,13 @@
+{
+  "name": "admin-main",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node backend/server.js",
+    "build": "echo \"No build step required (backend-only repo)\"",
+    "vercel-build": "echo \"vercel build placeholder\""
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

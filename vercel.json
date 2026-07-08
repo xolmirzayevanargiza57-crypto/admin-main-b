@@ -1,0 +1,10 @@
+{
+  "buildCommand": "echo 'Build complete'",
+  "outputDirectory": ".",
+  "public": true,
+  "functions": {
+    "backend/server.js": {
+      "runtime": "nodejs24.x"
+    }
+  }
+}

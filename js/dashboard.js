@@ -38,12 +38,12 @@ async function loadStatistics() {
     try {
         const data = await API.get('/statistics');
         if (data.success) {
-            const stats = data.data.counts;
+            const stats = { ...data.data.counts, chart: data.data.chart };
             
             document.getElementById('totalCount').textContent = formatNumber(stats.total || 0);
             document.getElementById('monthlyCount').textContent = formatNumber(stats.monthly || 0);
             document.getElementById('yearlyCount').textContent = formatNumber(stats.yearly || 0);
-            document.getElementById('inactiveCount').textContent = formatNumber(stats.inactive || 0);
+            document.getElementById('inactiveCount').textContent = formatNumber((stats.inactive || 0) + (stats.noSubscription || 0));
             
             const newThisWeek = document.getElementById('newThisWeek');
             if (stats.newThisWeek > 0) {
@@ -103,29 +103,40 @@ function createSubscriptionChart(stats) {
     if (subscriptionChart) {
         subscriptionChart.destroy();
     }
+
+    const chartData = stats.chart || {
+        labels: ['Oylik', '6 oylik', 'Yillik', 'Faol', 'Faol emas', 'Obunasi yo\'q'],
+        data: [
+            stats.monthly || 0,
+            stats.sixMonths || 0,
+            stats.yearly || 0,
+            stats.activeOther || 0,
+            stats.inactive || 0,
+            stats.noSubscription || 0
+        ]
+    };
     
     subscriptionChart = new Chart(ctx, {
-        type: 'doughnut',
+        type: 'pie',
         data: {
-            labels: ['Oylik', '6 oylik', 'Yillik', 'Faol'],
+            labels: chartData.labels,
             datasets: [{
-                data: [
-                    stats.monthly || 0,
-                    stats.sixMonths || 0,
-                    stats.yearly || 0,
-                    Math.max(0, (stats.total || 0) - ((stats.monthly || 0) + (stats.sixMonths || 0) + (stats.yearly || 0)))
-                ],
+                data: chartData.data,
                 backgroundColor: [
                     'rgba(52, 199, 89, 0.8)',
                     'rgba(255, 149, 0, 0.8)',
                     'rgba(0, 122, 255, 0.8)',
-                    'rgba(255, 59, 48, 0.8)'
+                    'rgba(31, 120, 180, 0.8)',
+                    'rgba(255, 59, 48, 0.8)',
+                    'rgba(142, 142, 147, 0.8)'
                 ],
                 borderColor: [
                     'rgba(52, 199, 89, 1)',
                     'rgba(255, 149, 0, 1)',
                     'rgba(0, 122, 255, 1)',
-                    'rgba(31, 120, 180, 1)'
+                    'rgba(31, 120, 180, 1)',
+                    'rgba(255, 59, 48, 1)',
+                    'rgba(108, 117, 125, 1)'
                 ],
                 borderWidth: 2
             }]
@@ -133,7 +144,6 @@ function createSubscriptionChart(stats) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '70%',
             plugins: {
                 legend: {
                     position: 'bottom',

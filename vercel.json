@@ -1,33 +1,43 @@
 ﻿{
   "version": 2,
+  "builds": [
+    {
+      "src": "**/*",
+      "use": "@vercel/static"
+    }
+  ],
   "routes": [
     {
-      "src": "^/$",
+      "src": "/",
       "dest": "/index.html"
     },
     {
-      "src": "^/dashboard$",
+      "src": "/dashboard",
       "dest": "/dashboard.html"
     },
     {
-      "src": "^/admins$",
+      "src": "/admins",
       "dest": "/admins.html"
     },
     {
-      "src": "^/admin-add$",
+      "src": "/admin-add",
       "dest": "/admin-add.html"
     },
     {
-      "src": "^/settings$",
+      "src": "/settings",
       "dest": "/settings.html"
     },
     {
-      "src": "^/admin-profile$",
+      "src": "/admin-profile",
       "dest": "/admin-profile.html"
     },
     {
-      "src": "^/api/(.*)$",
+      "src": "/api/(.*)",
       "dest": "https://admin-main-backend.onrender.com/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ]
 }

@@ -3,7 +3,7 @@
 // ============================================
 
 const API = {
-    baseURL: '/api',
+    baseURL: 'https://admin-main-backend.onrender.com/api',
     // For local dev you can uncomment and use the explicit localhost URL:
     // baseURL: 'http://localhost:5000/api',
     

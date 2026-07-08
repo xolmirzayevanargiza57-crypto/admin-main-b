@@ -1,33 +1,33 @@
 ﻿{
   "version": 2,
-  "rewrites": [
+  "routes": [
     {
-      "source": "/",
-      "destination": "/index.html"
+      "src": "^/$",
+      "dest": "/index.html"
     },
     {
-      "source": "/dashboard",
-      "destination": "/dashboard.html"
+      "src": "^/dashboard$",
+      "dest": "/dashboard.html"
     },
     {
-      "source": "/admins",
-      "destination": "/admins.html"
+      "src": "^/admins$",
+      "dest": "/admins.html"
     },
     {
-      "source": "/admin-add",
-      "destination": "/admin-add.html"
+      "src": "^/admin-add$",
+      "dest": "/admin-add.html"
     },
     {
-      "source": "/settings",
-      "destination": "/settings.html"
+      "src": "^/settings$",
+      "dest": "/settings.html"
     },
     {
-      "source": "/admin-profile",
-      "destination": "/admin-profile.html"
+      "src": "^/admin-profile$",
+      "dest": "/admin-profile.html"
     },
     {
-      "source": "/api/:path*",
-      "destination": "https://admin-main-backend.onrender.com/api/:path*"
+      "src": "^/api/(.*)$",
+      "dest": "https://admin-main-backend.onrender.com/api/$1"
     }
   ]
 }

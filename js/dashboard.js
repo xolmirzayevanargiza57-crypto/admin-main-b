@@ -43,7 +43,7 @@ async function loadStatistics() {
             document.getElementById('totalCount').textContent = formatNumber(stats.total || 0);
             document.getElementById('monthlyCount').textContent = formatNumber(stats.monthly || 0);
             document.getElementById('yearlyCount').textContent = formatNumber(stats.yearly || 0);
-            document.getElementById('inactiveCount').textContent = formatNumber((stats.inactive || 0) + (stats.noSubscription || 0));
+            document.getElementById('inactiveCount').textContent = formatNumber(stats.noSubscription || 0);
             
             const newThisWeek = document.getElementById('newThisWeek');
             if (stats.newThisWeek > 0) {
@@ -193,24 +193,25 @@ async function checkSubscriptionStatus() {
                 `;
             } else if (subData.status === 'active') {
                 const remainingTime = subData.remainingTime;
-                if (remainingTime.totalSeconds <= 604800) { // 7 days or less
-                    alertEl.innerHTML = `
-                        <div class="subscription-alert warning">
-                            <div class="alert-content">
-                                <i class="fas fa-clock"></i>
-                                <div>
-                                    <p class="alert-title">⏰ Obuna muddasi tugayotgan</p>
-                                    <p class="alert-message">
-                                        Qolgan vaqt: <strong>${remainingTime.days}k ${remainingTime.hours}s ${remainingTime.minutes}m</strong>
-                                    </p>
-                                </div>
+                const thresholdDays = remainingTime.totalSeconds <= 604800 ? 7 : remainingTime.totalSeconds <= 2592000 ? 30 : null;
+                const alertClass = thresholdDays === 7 ? 'warning' : thresholdDays === 30 ? 'info' : 'success';
+                const alertTitle = thresholdDays === 7 ? '⏰ Obuna muddasi tezda tugaydi' : thresholdDays === 30 ? 'ℹ️ Obuna muddatiga oz qoldi' : '✅ Obuna faol';
+                const alertMessage = thresholdDays ?
+                    `Qolgan vaqt: <strong>${remainingTime.days}k ${remainingTime.hours}s ${remainingTime.minutes}m</strong>` :
+                    `Obuna muddatigacha ${remainingTime.days} kun qoldi.`;
+
+                alertEl.innerHTML = `
+                    <div class="subscription-alert ${alertClass}">
+                        <div class="alert-content">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <p class="alert-title">${alertTitle}</p>
+                                <p class="alert-message">${alertMessage}</p>
                             </div>
+                            ${thresholdDays ? "<button onclick=\"location.href='settings.html'\" class=\"btn-renew\">To'lovni yangilash</button>" : ''}
                         </div>
-                    `;
-                } else {
-                    // Hide alert if more than 7 days remaining
-                    alertEl.innerHTML = '';
-                }
+                    </div>
+                `;
             } else {
                 // No active subscription
                 alertEl.innerHTML = `

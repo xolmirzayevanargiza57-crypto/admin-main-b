@@ -1,10 +1,33 @@
-{
-  "buildCommand": "echo 'Build complete'",
-  "outputDirectory": "./",
+﻿{
+  "version": 2,
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/dashboard.html"
+    },
+    {
+      "source": "/admins",
+      "destination": "/admins.html"
+    },
+    {
+      "source": "/admin-add",
+      "destination": "/admin-add.html"
+    },
+    {
+      "source": "/settings",
+      "destination": "/settings.html"
+    },
+    {
+      "source": "/admin-profile",
+      "destination": "/admin-profile.html"
+    },
+    {
       "source": "/api/:path*",
-      "destination": "http://localhost:5000/api/:path*"
+      "destination": "https://admin-main-backend.onrender.com/api/:path*"
     }
   ]
 }

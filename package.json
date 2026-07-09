@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node backend/server.js",
-    "build": "echo \"No build step required (backend-only repo)\"",
+    "build": "echo \"No build step required (static frontend)\"",
     "vercel-build": "echo \"vercel build placeholder\""
   },
   "engines": {

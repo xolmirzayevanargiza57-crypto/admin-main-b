@@ -491,6 +491,25 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     transform: scale(0.98);
 }
 
+.action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.action-buttons .table-action {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    min-width: auto;
+    white-space: nowrap;
+}
+
+.action-buttons .btn-secondary,
+.action-buttons .btn-danger {
+    gap: 6px;
+}
+
 /* ============================================
    ERROR MESSAGE
    ============================================ */
@@ -843,6 +862,17 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     display: flex;
     align-items: center;
     gap: 16px;
+}
+
+.header-right .fa-phone,
+.header-right .fa-phone-alt,
+.header-right .fa-phone-volume,
+.header-right [class*="phone"],
+.user-profile .fa-phone,
+.user-profile .fa-phone-alt,
+.user-profile .fa-phone-volume,
+.user-profile [class*="phone"] {
+    display: none !important;
 }
 
 .user-profile {

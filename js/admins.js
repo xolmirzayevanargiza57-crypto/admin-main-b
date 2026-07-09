@@ -100,38 +100,40 @@ function renderAdmins(admins) {
                     </span>
                 </td>
                 <td>
-                    <a href="admin-profile.html?id=${admin._id}" class="btn-secondary" style="padding: 4px 12px; font-size: 0.75rem;">
-                        <i class="fas fa-eye"></i> Ko'rish
-                    </a>
-                    <button onclick="sendNotification('${admin._id}')" class="btn-secondary" style="padding: 4px 12px; font-size: 0.75rem; margin-left: 4px;">
-                        <i class="fas fa-bell"></i>
-                    </button>
-                    <button onclick="banAdmin('${admin._id}')" class="btn-danger" style="padding: 4px 12px; font-size: 0.75rem; margin-left: 4px;">
-                        <i class="fas fa-ban"></i>
-                    </button>
-                    <button onclick="deleteAdmin('${admin._id}')" class="btn-danger" style="padding: 4px 12px; font-size: 0.75rem; margin-left: 4px;">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <div class="action-buttons">
+                        <a href="admin-profile.html?id=${admin._id}" class="btn-secondary table-action" aria-label="Ko'rish">
+                            <i class="fas fa-eye"></i> Ko'rish
+                        </a>
+                        <button type="button" onclick="sendNotification('${admin._id}', ${JSON.stringify(admin.fullName || '-')} )" class="btn-secondary table-action" aria-label="Xabar yuborish">
+                            <i class="fas fa-bell"></i> Xabar
+                        </button>
+                        <button type="button" onclick="banAdmin('${admin._id}')" class="btn-danger table-action" aria-label="Bloklash">
+                            <i class="fas fa-ban"></i> Blok
+                        </button>
+                        <button type="button" onclick="deleteAdmin('${admin._id}')" class="btn-danger table-action" aria-label="O'chirish">
+                            <i class="fas fa-trash"></i> O'chirish
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
     }).join('');
 }
 
-async function sendNotification(id) {
-    const message = prompt('Admin Customerga yuboriladigan xabar matni:');
+async function sendNotification(id, name) {
+    const message = prompt(`${name} uchun xabar matni:`);
     if (!message || !message.trim()) return;
 
     try {
         const result = await API.post('/notifications', {
-            title: 'Admin panel xabari',
+            title: `${name} uchun yangi xabar`,
             message: message.trim(),
             type: 'info',
             recipientId: id,
             recipientRole: 'admin_customer'
         });
         if (result.success) {
-            alert('✅ Xabar yuborildi!');
+            alert(`✅ ${name} ga xabar yuborildi!`);
         }
     } catch (error) {
         alert('❌ Xatolik: ' + error.message);

@@ -43,10 +43,22 @@
     
     .chart-card {
         padding: 12px;
+        height: auto;
+        max-height: none;
+    }
+    
+    .chart-card.chart-card-fixed {
+        flex: 1 1 auto;
+    }
+    
+    .chart-canvas-wrap {
+        min-height: 220px;
     }
     
     .chart-card canvas {
-        max-height: 150px;
+        width: 100%;
+        height: auto;
+        max-height: 260px;
     }
     
     .data-table {

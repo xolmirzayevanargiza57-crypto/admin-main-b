@@ -574,7 +574,7 @@ async function savePayment() {
 }
 
 // ============================================
-// XABAR YUBORISH MODAL
+// XABAR YUBORISH MODAL - TO'LIQ
 // ============================================
 function initNotificationModal() {
     const modal = document.getElementById('notificationModal');
@@ -590,82 +590,124 @@ function initNotificationModal() {
     // Profile dagi "Xabar yuborish" tugmasi
     const profileSendBtn = document.getElementById('sendNotificationBtn');
     if (profileSendBtn) {
-        profileSendBtn.addEventListener('click', () => {
+        profileSendBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
-            titleInput.value = '';
-            messageInput.value = '';
-            resultDiv.style.display = 'none';
-            resultDiv.className = 'form-message';
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
-            titleInput.focus();
+            
+            if (titleInput) titleInput.value = '';
+            if (messageInput) messageInput.value = '';
+            if (resultDiv) {
+                resultDiv.style.display = 'none';
+                resultDiv.className = 'form-message';
+            }
+            
+            if (sendBtn) {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+            }
+            
+            if (titleInput) titleInput.focus();
         });
     }
     
+    // Yopish tugmalari
     if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
+        closeBtn.addEventListener('click', function() {
             modal.classList.remove('active');
             document.body.style.overflow = '';
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
-        });
-    }
-    
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
-        });
-    }
-    
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-                document.body.style.overflow = '';
+            if (sendBtn) {
                 sendBtn.disabled = false;
                 sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
             }
         });
     }
     
-    // Enter + Ctrl tugmasi
-    messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && e.ctrlKey) {
-            e.preventDefault();
-            sendNotification();
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            if (sendBtn) {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+            }
+        });
+    }
+    
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+                }
+            }
+        });
+    }
+    
+    // ESC tugmasi
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            if (sendBtn) {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+            }
         }
     });
     
-    // Xabar yuborish
-    sendBtn.addEventListener('click', async () => {
-        await sendNotification();
-    });
+    // Enter + Ctrl tugmasi
+    if (messageInput) {
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                e.preventDefault();
+                sendNotification();
+            }
+        });
+    }
     
+    // ASOSIY YUBORISH TUGMASI
+    if (sendBtn) {
+        sendBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            sendNotification();
+        });
+    }
+    
+    // ============================================
+    // XABAR YUBORISH FUNKSIYASI
+    // ============================================
     async function sendNotification() {
-        const title = titleInput.value.trim();
-        const message = messageInput.value.trim();
+        const title = titleInput ? titleInput.value.trim() : '';
+        const message = messageInput ? messageInput.value.trim() : '';
         
         if (!title) {
             showNotificationResult('❌ Iltimos, sarlavhani kiriting!', 'error');
-            titleInput.focus();
+            if (titleInput) titleInput.focus();
             return;
         }
         
         if (!message) {
             showNotificationResult('❌ Iltimos, xabar matnini kiriting!', 'error');
-            messageInput.focus();
+            if (messageInput) messageInput.focus();
             return;
         }
         
-        sendBtn.disabled = true;
-        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...';
+        if (sendBtn) {
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...';
+        }
         showNotificationResult('⏳ Xabar yuborilmoqda...', 'info');
         
         try {
+            console.log('📨 Xabar yuborilmoqda:', { title, message, recipientId: adminId });
+            
             const response = await API.post('/notifications', {
                 title: title,
                 message: message,
@@ -675,33 +717,46 @@ function initNotificationModal() {
                 expiresInDays: 30
             });
             
+            console.log('📨 Xabar javobi:', response);
+            
             if (response.success) {
                 showNotificationResult('✅ Xabar muvaffaqiyatli yuborildi!', 'success');
-                titleInput.value = '';
-                messageInput.value = '';
+                if (titleInput) titleInput.value = '';
+                if (messageInput) messageInput.value = '';
+                
                 setTimeout(() => {
-                    modal.classList.remove('active');
-                    document.body.style.overflow = '';
-                    sendBtn.disabled = false;
-                    sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+                    if (modal) {
+                        modal.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                    if (sendBtn) {
+                        sendBtn.disabled = false;
+                        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+                    }
                 }, 2000);
             } else {
                 showNotificationResult('❌ Xabar yuborishda xatolik: ' + (response.message || 'Noma\'lum xatolik'), 'error');
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+                }
             }
         } catch (error) {
             console.error('❌ Xabar yuborish xatosi:', error);
-            showNotificationResult('❌ Xabar yuborishda xatolik: ' + error.message, 'error');
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+            showNotificationResult('❌ Xabar yuborishda xatolik: ' + (error.message || 'Server xatosi!'), 'error');
+            if (sendBtn) {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+            }
         }
     }
     
     function showNotificationResult(msg, type) {
+        if (!resultDiv) return;
         resultDiv.textContent = msg;
         resultDiv.className = 'form-message ' + type;
         resultDiv.style.display = 'block';
+        
         setTimeout(() => {
             if (type !== 'success') {
                 resultDiv.style.display = 'none';

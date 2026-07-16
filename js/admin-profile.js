@@ -25,10 +25,11 @@ document.addEventListener('DOMContentLoaded', () => {
     loadProfile();
     initEditModal();
     initPaymentModal();
+    initNotificationModal();
     initButtons();
     
     // ============================================
-    // JORIY PAROL TOGGLE (KO'RSATISH/YASHIRISH)
+    // JORIY PAROL TOGGLE
     // ============================================
     const currentPasswordToggle = document.getElementById('currentPasswordToggle');
     if (currentPasswordToggle) {
@@ -48,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // ============================================
-    // YANGI PAROL TOGGLE (KO'RSATISH/YASHIRISH)
+    // YANGI PAROL TOGGLE
     // ============================================
     const editPasswordToggle = document.getElementById('editPasswordToggle');
     if (editPasswordToggle) {
@@ -344,7 +345,6 @@ function openEditModal() {
     document.getElementById('editStatus').value = currentAdmin.status || 'active';
     document.getElementById('editPassword').value = '';
     
-    // JORIY PAROL - FAQAT YULDUZCHALAR KO'RINADI
     const currentPasswordDisplay = document.getElementById('currentPasswordDisplay');
     if (currentPasswordDisplay) {
         currentPasswordDisplay.value = '••••••••••';
@@ -359,7 +359,7 @@ function openEditModal() {
 }
 
 // ============================================
-// TAHRIRLASHNI SAQLASH (PAROL BILAN)
+// TAHRIRLASHNI SAQLASH
 // ============================================
 async function saveEdit() {
     const fullName = document.getElementById('editFullName').value.trim();
@@ -386,7 +386,6 @@ async function saveEdit() {
             status: status === 'none' ? 'inactive' : status
         };
         
-        // Agar yangi parol kiritilgan bo'lsa, yangilaymiz
         if (newPassword && newPassword.length >= 6) {
             updateData.password = newPassword;
         } else if (newPassword && newPassword.length < 6) {
@@ -487,9 +486,6 @@ function initPaymentModal() {
     }
 }
 
-// ============================================
-// TO'LOVNI SAQLASH
-// ============================================
 async function savePayment() {
     const paymentType = document.getElementById('paymentType').value;
     const amount = document.getElementById('paymentAmount').value.trim();
@@ -578,6 +574,131 @@ async function savePayment() {
 }
 
 // ============================================
+// XABAR YUBORISH MODAL
+// ============================================
+function initNotificationModal() {
+    const modal = document.getElementById('notificationModal');
+    const sendBtn = document.getElementById('sendNotificationBtn');
+    const closeBtn = document.getElementById('closeNotificationModal');
+    const cancelBtn = document.getElementById('cancelNotificationModal');
+    const titleInput = document.getElementById('notificationTitle');
+    const messageInput = document.getElementById('notificationMessage');
+    const resultDiv = document.getElementById('notificationResult');
+    
+    if (!modal || !sendBtn) return;
+    
+    // Profile dagi "Xabar yuborish" tugmasi
+    const profileSendBtn = document.getElementById('sendNotificationBtn');
+    if (profileSendBtn) {
+        profileSendBtn.addEventListener('click', () => {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            titleInput.value = '';
+            messageInput.value = '';
+            resultDiv.style.display = 'none';
+            resultDiv.className = 'form-message';
+            titleInput.focus();
+        });
+    }
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
+    
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    }
+    
+    // Enter + Ctrl tugmasi
+    messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && e.ctrlKey) {
+            e.preventDefault();
+            sendNotification();
+        }
+    });
+    
+    // Xabar yuborish
+    sendBtn.addEventListener('click', async () => {
+        await sendNotification();
+    });
+    
+    async function sendNotification() {
+        const title = titleInput.value.trim();
+        const message = messageInput.value.trim();
+        
+        if (!title) {
+            showNotificationResult('❌ Iltimos, sarlavhani kiriting!', 'error');
+            titleInput.focus();
+            return;
+        }
+        
+        if (!message) {
+            showNotificationResult('❌ Iltimos, xabar matnini kiriting!', 'error');
+            messageInput.focus();
+            return;
+        }
+        
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...';
+        showNotificationResult('⏳ Xabar yuborilmoqda...', 'info');
+        
+        try {
+            const response = await API.post('/notifications', {
+                title: title,
+                message: message,
+                type: 'info',
+                recipientId: adminId,
+                recipientRole: 'admin_customer'
+            });
+            
+            if (response.success) {
+                showNotificationResult('✅ Xabar muvaffaqiyatli yuborildi!', 'success');
+                titleInput.value = '';
+                messageInput.value = '';
+                setTimeout(() => {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }, 2000);
+            } else {
+                showNotificationResult('❌ Xabar yuborishda xatolik: ' + (response.message || 'Noma\'lum xatolik'), 'error');
+            }
+        } catch (error) {
+            console.error('❌ Xabar yuborish xatosi:', error);
+            showNotificationResult('❌ Xabar yuborishda xatolik: ' + error.message, 'error');
+        } finally {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+        }
+    }
+    
+    function showNotificationResult(msg, type) {
+        resultDiv.textContent = msg;
+        resultDiv.className = 'form-message ' + type;
+        resultDiv.style.display = 'block';
+        setTimeout(() => {
+            if (type !== 'success') {
+                resultDiv.style.display = 'none';
+            }
+        }, 6000);
+    }
+}
+
+// ============================================
 // TUGMALAR
 // ============================================
 function initButtons() {
@@ -634,9 +755,6 @@ function initButtons() {
     }
 }
 
-// ============================================
-// OBUNANI YANGILASH
-// ============================================
 async function updateSubscription(type, customDuration = null) {
     try {
         const data = { subscriptionType: type };
@@ -659,9 +777,6 @@ async function updateSubscription(type, customDuration = null) {
     }
 }
 
-// ============================================
-// XATOLIK
-// ============================================
 function showError(message) {
     const container = document.querySelector('.profile-container');
     if (container) {

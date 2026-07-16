@@ -28,7 +28,27 @@ document.addEventListener('DOMContentLoaded', () => {
     initButtons();
     
     // ============================================
-    // PAROL TOGGLE (Tahrirlash modalida)
+    // JORIY PAROL TOGGLE (KO'RSATISH/YASHIRISH)
+    // ============================================
+    const currentPasswordToggle = document.getElementById('currentPasswordToggle');
+    if (currentPasswordToggle) {
+        currentPasswordToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const input = document.getElementById('currentPasswordDisplay');
+            if (input) {
+                const type = input.type === 'password' ? 'text' : 'password';
+                input.type = type;
+                const icon = this.querySelector('i');
+                if (icon) {
+                    icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+                }
+            }
+        });
+    }
+    
+    // ============================================
+    // YANGI PAROL TOGGLE (KO'RSATISH/YASHIRISH)
     // ============================================
     const editPasswordToggle = document.getElementById('editPasswordToggle');
     if (editPasswordToggle) {
@@ -36,11 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             e.stopPropagation();
             const input = document.getElementById('editPassword');
-            const type = input.type === 'password' ? 'text' : 'password';
-            input.type = type;
-            const icon = this.querySelector('i');
-            if (icon) {
-                icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+            if (input) {
+                const type = input.type === 'password' ? 'text' : 'password';
+                input.type = type;
+                const icon = this.querySelector('i');
+                if (icon) {
+                    icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+                }
             }
         });
     }
@@ -148,7 +170,7 @@ function renderProfile(admin) {
         subTypeEl.textContent = typeMap[subType] || 'Yo\'q';
     }
     
-    // Obuna muddati - ✅ TO'G'RI VAQT FORMATI
+    // Obuna muddati
     const subEndEl = document.getElementById('profileSubEnd');
     if (subEndEl) {
         if (sub.endDate && subStatus === 'active') {
@@ -193,7 +215,7 @@ function renderProfile(admin) {
 }
 
 // ============================================
-// SUBSCRIPTION TARIXI - TO'G'RI VAQT FORMATI
+// SUBSCRIPTION TARIXI
 // ============================================
 function renderSubscriptionHistory(history) {
     const historyList = document.getElementById('historyList');
@@ -205,7 +227,6 @@ function renderSubscriptionHistory(history) {
     }
     
     historyList.innerHTML = history.map((item, index) => {
-        // ✅ To'g'ri vaqt formatida ko'rsatish
         const startDate = item.startDate ? new Date(item.startDate).toLocaleString('uz-UZ', {
             year: 'numeric',
             month: '2-digit',
@@ -321,7 +342,16 @@ function openEditModal() {
     document.getElementById('editEmail').value = currentAdmin.email || '';
     document.getElementById('editPhone').value = currentAdmin.phone || '';
     document.getElementById('editStatus').value = currentAdmin.status || 'active';
-    document.getElementById('editPassword').value = ''; // ✅ Bo'sh
+    document.getElementById('editPassword').value = '';
+    
+    // ✅ JORIY PAROLNI KO'RSATISH (yulduzchalar bilan)
+    const currentPasswordDisplay = document.getElementById('currentPasswordDisplay');
+    if (currentPasswordDisplay) {
+        currentPasswordDisplay.type = 'password';
+        currentPasswordDisplay.value = '●●●●●●●●●●';
+        // Eski parolni saqlash (yangi parol kiritilmaganda ishlatish uchun)
+        currentPasswordDisplay.dataset.oldPassword = currentAdmin.password || '';
+    }
     
     document.getElementById('editModal').classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -355,15 +385,15 @@ async function saveEdit() {
             status: status === 'none' ? 'inactive' : status
         };
         
-        // ✅ Agar parol kiritilgan bo'lsa, yangilaymiz
+        // ✅ Agar yangi parol kiritilgan bo'lsa, yangilaymiz
         if (newPassword && newPassword.length >= 6) {
             updateData.password = newPassword;
         } else if (newPassword && newPassword.length < 6) {
             alert('Yangi parol kamida 6 ta belgi bo\'lishi kerak!');
             return;
         }
+        // ✅ Yangi parol kiritilmagan bo'lsa, eski parol saqlanadi (hech narsa qilmaymiz)
         
-        // ✅ "Obunasi yo'q" tanlansa, subscription ni ham yangilash
         if (status === 'none') {
             updateData.subscription = {
                 type: 'none',
@@ -406,7 +436,6 @@ function initPaymentModal() {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
         
-        // Inputlarni tozalash
         document.getElementById('paymentAmount').value = '';
         document.getElementById('paymentType').value = 'monthly';
         document.getElementById('customDays').value = '0';
@@ -472,7 +501,6 @@ async function savePayment() {
     const endTime = document.getElementById('paymentEndTime').value;
     const note = document.getElementById('paymentNote').value.trim();
     
-    // ✅ Validatsiya
     if (!amount || amount === '') {
         alert('❌ To\'lov miqdorini kiriting!');
         document.getElementById('paymentAmount').focus();

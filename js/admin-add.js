@@ -1,5 +1,5 @@
 // ============================================
-// ADMIN ADD - TO'LIQ (VAQTNI QO'LDA KIRITISH)
+// ADMIN ADD - TO'LIQ
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function() {
             amountInput.value = '';
         } else {
             customGroup.style.display = 'none';
-            // Avtomatik narx
             const amounts = {
                 'none': 0,
                 'monthly': 299999,
@@ -47,13 +46,11 @@ document.addEventListener('DOMContentLoaded', function() {
             };
             amountInput.value = amounts[this.value] || '';
         }
-        
-        // Tugash sanasini avtomatik hisoblash
         calculateEndDate();
     });
 
     // ============================================
-    // TUGASH SANASINI HISOBLASH
+    // TUGASH SANASINI HISOBLASH (TO'G'RI)
     // ============================================
     function calculateEndDate() {
         const type = subscriptionType.value;
@@ -65,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         const startDateObj = new Date(start);
-        let endDateObj = new Date(startDateObj);
+        const endDateObj = new Date(startDateObj);
         
         if (type === 'custom') {
             const days = parseInt(customDays.value) || 0;
@@ -87,7 +84,14 @@ document.addEventListener('DOMContentLoaded', function() {
             endDateObj.setDate(endDateObj.getDate() + days);
         }
         
-        endDate.value = endDateObj.toISOString().slice(0, 16);
+        // ✅ Mahalliy vaqt formatida (datetime-local uchun)
+        const year = endDateObj.getFullYear();
+        const month = String(endDateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(endDateObj.getDate()).padStart(2, '0');
+        const hours = String(endDateObj.getHours()).padStart(2, '0');
+        const minutes = String(endDateObj.getMinutes()).padStart(2, '0');
+        
+        endDate.value = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
     }
 
     // ============================================
@@ -167,7 +171,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let isValid = true;
 
-        // Validatsiya
         if (!fullName || fullName.length === 0) {
             fullNameInput.classList.add('error');
             fullNameInput.classList.remove('success');
@@ -222,7 +225,6 @@ document.addEventListener('DOMContentLoaded', function() {
         messageDiv.style.display = 'none';
 
         try {
-            // ✅ Custom duration yig'ish
             let customDuration = null;
             if (type === 'custom') {
                 customDuration = {

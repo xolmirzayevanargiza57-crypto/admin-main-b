@@ -89,40 +89,71 @@
                         </div>
                     </div>
 
-                    <!-- Obuna turi - MODAL -->
+                    <!-- ============================================
+                    OBUNA TURI - TO'G'RIDAN-TO'G'RI SELECT
+                    ============================================ -->
                     <div class="form-group">
-                        <label for="subscriptionDisplay"><i class="fas fa-calendar"></i> Obuna turi</label>
+                        <label for="subscriptionType"><i class="fas fa-calendar"></i> Obuna turi</label>
                         <div class="input-wrapper">
-                            <input type="text" id="subscriptionDisplay" placeholder="Obuna turini tanlang" readonly />
-                            <input type="hidden" id="subscriptionType" value="none" />
-                            <button type="button" class="btn-secondary" id="openSubscriptionModal" style="position: absolute; right: 4px; top: 4px; padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; z-index: 5;">
-                                <i class="fas fa-chevron-down"></i>
-                            </button>
+                            <select id="subscriptionType" required>
+                                <option value="none">Obuna yo'q</option>
+                                <option value="monthly">Oylik (30 kun) - 299,999 so'm</option>
+                                <option value="6months">6 oylik (180 kun) - 1,899,999 so'm</option>
+                                <option value="yearly">Yillik (365 kun) - 3,599,999 so'm</option>
+                                <option value="custom">Custom (qo'lda vaqt)</option>
+                            </select>
                         </div>
                     </div>
 
-                    <!-- Boshlanish sanasi - AVTOMATIK -->
+                    <!-- ============================================
+                    CUSTOM VAQT (KUN/SOAT/DAQIQA/SEKUND)
+                    ============================================ -->
+                    <div id="customDurationGroup" style="display: none;">
+                        <div class="form-group">
+                            <label><i class="fas fa-clock"></i> Vaqtni belgilang</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+                                <div class="input-wrapper">
+                                    <input type="number" id="customDays" placeholder="Kun" min="0" value="0" />
+                                </div>
+                                <div class="input-wrapper">
+                                    <input type="number" id="customHours" placeholder="Soat" min="0" value="0" />
+                                </div>
+                                <div class="input-wrapper">
+                                    <input type="number" id="customMinutes" placeholder="Daqiqa" min="0" value="0" />
+                                </div>
+                                <div class="input-wrapper">
+                                    <input type="number" id="customSeconds" placeholder="Sekund" min="0" value="0" />
+                                </div>
+                            </div>
+                            <small class="text-muted">💡 Misol: 2 daqiqa = 0 kun, 0 soat, 2 daqiqa, 0 sekund</small>
+                        </div>
+                    </div>
+
+                    <!-- Boshlanish sanasi -->
                     <div class="form-group">
                         <label for="startDate"><i class="fas fa-calendar-day"></i> Boshlanish sanasi</label>
                         <div class="input-wrapper">
-                            <input type="date" id="startDate" />
+                            <input type="datetime-local" id="startDate" />
                         </div>
+                        <small class="text-muted">💡 Bo'sh qoldirilsa, hozirgi vaqt olinadi</small>
                     </div>
 
                     <!-- Tugash sanasi -->
                     <div class="form-group">
                         <label for="endDate"><i class="fas fa-calendar-day"></i> Tugash sanasi</label>
                         <div class="input-wrapper">
-                            <input type="date" id="endDate" readonly />
+                            <input type="datetime-local" id="endDate" />
                         </div>
+                        <small class="text-muted">💡 Bo'sh qoldirilsa, avtomatik hisoblanadi</small>
                     </div>
 
                     <!-- To'lov miqdori -->
                     <div class="form-group">
-                        <label for="amount"><i class="fas fa-money-bill"></i> To'lov miqdori</label>
+                        <label for="amount"><i class="fas fa-money-bill"></i> To'lov miqdori (so'm)</label>
                         <div class="input-wrapper">
-                            <input type="text" id="amount" readonly placeholder="0 so'm" />
+                            <input type="number" id="amount" placeholder="Masalan: 299999" />
                         </div>
+                        <small class="text-muted">💡 Bo'sh qoldirilsa, avtomatik narx qo'yiladi</small>
                     </div>
 
                     <div class="form-actions">
@@ -134,59 +165,6 @@
                 <div id="formMessage" class="form-message"></div>
             </section>
         </main>
-    </div>
-
-    <!-- ============================================
-    OBUNA MODAL - 6 OYLIK QO'SHILGAN
-    ============================================ -->
-    <div class="modal-overlay" id="subscriptionModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3><i class="fas fa-calendar"></i> Obuna turini tanlang</h3>
-                <button class="modal-close" id="closeSubscriptionModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="subscription-options">
-                    <div class="subscription-option" data-value="none" data-amount="0" data-months="0">
-                        <div class="option-icon"><i class="fas fa-ban"></i></div>
-                        <div class="option-info">
-                            <h4>Obuna yo'q</h4>
-                            <p>Hech qanday obuna</p>
-                        </div>
-                        <div class="option-price">0 so'm</div>
-                    </div>
-                    <div class="subscription-option" data-value="monthly" data-amount="299999" data-months="1">
-                        <div class="option-icon"><i class="fas fa-clock"></i></div>
-                        <div class="option-info">
-                            <h4>Oylik</h4>
-                            <p>30 kun / 299,999 so'm</p>
-                        </div>
-                        <div class="option-price">299,999 so'm</div>
-                    </div>
-                    <!-- 6 OYLIK QO'SHILDI -->
-                    <div class="subscription-option" data-value="6months" data-amount="1899999" data-months="6">
-                        <div class="option-icon"><i class="fas fa-calendar-alt"></i></div>
-                        <div class="option-info">
-                            <h4>6 oylik</h4>
-                            <p>180 kun / 1,899,999 so'm</p>
-                        </div>
-                        <div class="option-price">1,899,999 so'm</div>
-                    </div>
-                    <div class="subscription-option" data-value="yearly" data-amount="3599999" data-months="12">
-                        <div class="option-icon"><i class="fas fa-calendar-check"></i></div>
-                        <div class="option-info">
-                            <h4>Yillik</h4>
-                            <p>365 kun / 3,599,999 so'm</p>
-                        </div>
-                        <div class="option-price">3,599,999 so'm</div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" id="cancelSubscriptionModal">Bekor qilish</button>
-                <button class="btn-primary" id="confirmSubscriptionModal">Tanlash</button>
-            </div>
-        </div>
     </div>
 
     <!-- Theme Toggle -->

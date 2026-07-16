@@ -344,12 +344,13 @@ function openEditModal() {
     document.getElementById('editStatus').value = currentAdmin.status || 'active';
     document.getElementById('editPassword').value = '';
     
-    // ✅ JORIY PAROLNI KO'RSATISH (yulduzchalar bilan)
+    // JORIY PAROL - FAQAT YULDUZCHALAR KO'RINADI
     const currentPasswordDisplay = document.getElementById('currentPasswordDisplay');
     if (currentPasswordDisplay) {
+        currentPasswordDisplay.value = '••••••••••';
         currentPasswordDisplay.type = 'password';
-        currentPasswordDisplay.value = '●●●●●●●●●●';
-        // Eski parolni saqlash (yangi parol kiritilmaganda ishlatish uchun)
+        currentPasswordDisplay.style.fontSize = '1.2rem';
+        currentPasswordDisplay.style.letterSpacing = '2px';
         currentPasswordDisplay.dataset.oldPassword = currentAdmin.password || '';
     }
     
@@ -385,14 +386,13 @@ async function saveEdit() {
             status: status === 'none' ? 'inactive' : status
         };
         
-        // ✅ Agar yangi parol kiritilgan bo'lsa, yangilaymiz
+        // Agar yangi parol kiritilgan bo'lsa, yangilaymiz
         if (newPassword && newPassword.length >= 6) {
             updateData.password = newPassword;
         } else if (newPassword && newPassword.length < 6) {
             alert('Yangi parol kamida 6 ta belgi bo\'lishi kerak!');
             return;
         }
-        // ✅ Yangi parol kiritilmagan bo'lsa, eski parol saqlanadi (hech narsa qilmaymiz)
         
         if (status === 'none') {
             updateData.subscription = {

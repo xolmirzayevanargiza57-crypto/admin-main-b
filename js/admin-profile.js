@@ -26,6 +26,21 @@ document.addEventListener('DOMContentLoaded', () => {
     initEditModal();
     initPaymentModal();
     initButtons();
+    
+    // ============================================
+    // PAROL TOGGLE (Tahrirlash modalida)
+    // ============================================
+    document.getElementById('editPasswordToggle')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const input = document.getElementById('editPassword');
+        const type = input.type === 'password' ? 'text' : 'password';
+        input.type = type;
+        const icon = this.querySelector('i');
+        if (icon) {
+            icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        }
+    });
 });
 
 // ============================================
@@ -276,21 +291,14 @@ function initEditModal() {
 function openEditModal() {
     if (!currentAdmin) return;
     
-    const fullNameEl = document.getElementById('editFullName');
-    const emailEl = document.getElementById('editEmail');
-    const phoneEl = document.getElementById('editPhone');
-    const statusEl = document.getElementById('editStatus');
+    document.getElementById('editFullName').value = currentAdmin.fullName || '';
+    document.getElementById('editEmail').value = currentAdmin.email || '';
+    document.getElementById('editPhone').value = currentAdmin.phone || '';
+    document.getElementById('editStatus').value = currentAdmin.status || 'active';
+    document.getElementById('editPassword').value = ''; // ✅ Bo'sh
     
-    if (fullNameEl) fullNameEl.value = currentAdmin.fullName || '';
-    if (emailEl) emailEl.value = currentAdmin.email || '';
-    if (phoneEl) phoneEl.value = currentAdmin.phone || '';
-    if (statusEl) statusEl.value = currentAdmin.status || 'active';
-    
-    const editModal = document.getElementById('editModal');
-    if (editModal) {
-        editModal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
+    document.getElementById('editModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
 }
 
 async function saveEdit() {
@@ -298,6 +306,7 @@ async function saveEdit() {
     const email = document.getElementById('editEmail').value.trim();
     const phone = document.getElementById('editPhone').value.trim();
     const status = document.getElementById('editStatus').value;
+    const newPassword = document.getElementById('editPassword').value.trim();
     
     if (!fullName || !email) {
         alert('F.I.SH va Email majburiy!');
@@ -317,6 +326,14 @@ async function saveEdit() {
             status: status === 'none' ? 'inactive' : status
         };
         
+        // ✅ Agar parol kiritilgan bo'lsa, yangilaymiz
+        if (newPassword && newPassword.length >= 6) {
+            updateData.password = newPassword;
+        } else if (newPassword && newPassword.length < 6) {
+            alert('Yangi parol kamida 6 ta belgi bo\'lishi kerak!');
+            return;
+        }
+        
         if (status === 'none') {
             updateData.subscription = {
                 type: 'none',
@@ -331,11 +348,9 @@ async function saveEdit() {
         
         if (response.success) {
             alert('✅ Admin muvaffaqiyatli yangilandi!');
-            const editModal = document.getElementById('editModal');
-            if (editModal) {
-                editModal.classList.remove('active');
-                document.body.style.overflow = '';
-            }
+            document.getElementById('editModal').classList.remove('active');
+            document.body.style.overflow = '';
+            document.getElementById('editPassword').value = '';
             loadProfile();
         }
     } catch (error) {
@@ -361,25 +376,15 @@ function initPaymentModal() {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
         
-        const amountInput = document.getElementById('paymentAmount');
-        const typeSelect = document.getElementById('paymentType');
-        const daysInput = document.getElementById('customDays');
-        const hoursInput = document.getElementById('customHours');
-        const minutesInput = document.getElementById('customMinutes');
-        const secondsInput = document.getElementById('customSeconds');
-        const endDateInput = document.getElementById('paymentEndDate');
-        const endTimeInput = document.getElementById('paymentEndTime');
-        const noteInput = document.getElementById('paymentNote');
-        
-        if (amountInput) amountInput.value = '';
-        if (typeSelect) typeSelect.value = 'monthly';
-        if (daysInput) daysInput.value = '0';
-        if (hoursInput) hoursInput.value = '0';
-        if (minutesInput) minutesInput.value = '0';
-        if (secondsInput) secondsInput.value = '0';
-        if (endDateInput) endDateInput.value = '';
-        if (endTimeInput) endTimeInput.value = '';
-        if (noteInput) noteInput.value = '';
+        document.getElementById('paymentAmount').value = '';
+        document.getElementById('paymentType').value = 'monthly';
+        document.getElementById('customDays').value = '0';
+        document.getElementById('customHours').value = '0';
+        document.getElementById('customMinutes').value = '0';
+        document.getElementById('customSeconds').value = '0';
+        document.getElementById('paymentEndDate').value = '';
+        document.getElementById('paymentEndTime').value = '';
+        document.getElementById('paymentNote').value = '';
         
         if (customGroup) customGroup.style.display = 'none';
     });
@@ -491,11 +496,8 @@ async function savePayment() {
             }
             alert(msg);
             
-            const modal = document.getElementById('paymentModal');
-            if (modal) {
-                modal.classList.remove('active');
-                document.body.style.overflow = '';
-            }
+            document.getElementById('paymentModal').classList.remove('active');
+            document.body.style.overflow = '';
             loadProfile();
         }
     } catch (error) {

@@ -83,15 +83,19 @@
                 </div>
 
                 <div class="subscription-history">
-                    <h3><i class="fas fa-history"></i> To'lov Tarixи</h3>
+                    <h3><i class="fas fa-history"></i> To'lov Tarixi</h3>
                     <div id="historyList" class="history-list">
-                        <p class="text-muted">To'lov tarixи yo'q</p>
+                        <p class="text-muted">To'lov tarixi yo'q</p>
                     </div>
                 </div>
 
+                <!-- ✅ TO'LIQ TUGMALAR -->
                 <div class="profile-actions">
                     <button id="editBtn" class="btn-primary"><i class="fas fa-edit"></i> Tahrirlash</button>
                     <button id="subscriptionBtn" class="btn-warning"><i class="fas fa-calendar-plus"></i> Obuna sotish</button>
+                    <button id="addPaymentBtn" class="btn-success" style="background: #34c759; color: white; border: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-money-bill-wave"></i> To'lov qo'shish
+                    </button>
                     <button id="deleteBtn" class="btn-danger"><i class="fas fa-trash"></i> O'chirish</button>
                 </div>
             </section>
@@ -113,23 +117,18 @@
                         <label for="editFullName"><i class="fas fa-user"></i> F.I.SH</label>
                         <div class="input-wrapper">
                             <input type="text" id="editFullName" placeholder="F.I.SH" required />
-                            <i class="fas fa-check-circle input-icon success"></i>
-                            <i class="fas fa-exclamation-circle input-icon error"></i>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="editEmail"><i class="fas fa-envelope"></i> Email</label>
                         <div class="input-wrapper">
                             <input type="email" id="editEmail" placeholder="Email" required />
-                            <i class="fas fa-check-circle input-icon success"></i>
-                            <i class="fas fa-exclamation-circle input-icon error"></i>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="editPhone"><i class="fas fa-phone"></i> Telefon</label>
                         <div class="input-wrapper">
                             <input type="text" id="editPhone" placeholder="+998 90 123 45 67" />
-                            <i class="fas fa-check-circle input-icon success"></i>
                         </div>
                     </div>
                     <div class="form-group">
@@ -139,7 +138,6 @@
                                 <option value="active">Faol</option>
                                 <option value="blocked">Bloklangan</option>
                                 <option value="inactive">Faol emas</option>
-                                <option value="none">Obunasi yo'q</option>
                             </select>
                         </div>
                     </div>
@@ -148,6 +146,89 @@
             <div class="modal-footer">
                 <button class="btn-secondary" id="cancelEditModal">Bekor qilish</button>
                 <button class="btn-primary" id="saveEditModal"><i class="fas fa-save"></i> Saqlash</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+    TO'LOV QO'SHISH MODAL
+    ============================================ -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal" style="max-width: 560px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-money-bill-wave"></i> To'lov qo'shish</h3>
+                <button class="modal-close" id="closePaymentModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentForm">
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Obuna turi</label>
+                        <div class="input-wrapper">
+                            <select id="paymentType" required>
+                                <option value="monthly">Oylik (30 kun) - 299,999 so'm</option>
+                                <option value="6months">6 oylik (180 kun) - 1,899,999 so'm</option>
+                                <option value="yearly">Yillik (365 kun) - 3,599,999 so'm</option>
+                                <option value="custom">Custom (qo'lda vaqt)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-money-bill"></i> To'lov miqdori (so'm)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="paymentAmount" placeholder="299999" required />
+                        </div>
+                    </div>
+
+                    <!-- ✅ Custom vaqt (kun/soat/daqiqa/sekund) -->
+                    <div id="customDurationGroup" style="display: none;">
+                        <div class="form-group">
+                            <label><i class="fas fa-clock"></i> Vaqtni belgilang</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+                                <div class="input-wrapper">
+                                    <input type="number" id="customDays" placeholder="Kun" min="0" value="0" />
+                                </div>
+                                <div class="input-wrapper">
+                                    <input type="number" id="customHours" placeholder="Soat" min="0" value="0" />
+                                </div>
+                                <div class="input-wrapper">
+                                    <input type="number" id="customMinutes" placeholder="Daqiqa" min="0" value="0" />
+                                </div>
+                                <div class="input-wrapper">
+                                    <input type="number" id="customSeconds" placeholder="Sekund" min="0" value="0" />
+                                </div>
+                            </div>
+                            <small class="text-muted">💡 Misol: 2 daqiqa = 0 kun, 0 soat, 2 daqiqa, 0 sekund</small>
+                        </div>
+                    </div>
+
+                    <!-- ✅ Tugash vaqtini aniq belgilash -->
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-day"></i> Tugash vaqti (ixtiyoriy)</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div class="input-wrapper">
+                                <input type="date" id="paymentEndDate" />
+                            </div>
+                            <div class="input-wrapper">
+                                <input type="time" id="paymentEndTime" step="1" />
+                            </div>
+                        </div>
+                        <small class="text-muted">💡 Bo'sh qoldirilsa, hozirgi vaqtdan boshlab hisoblanadi</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-sticky-note"></i> Izoh (ixtiyoriy)</label>
+                        <div class="input-wrapper">
+                            <textarea id="paymentNote" placeholder="To'lov haqida izoh..." rows="2"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelPaymentModal">Bekor qilish</button>
+                <button class="btn-primary" id="savePaymentModal" style="background: #34c759; color: white;">
+                    <i class="fas fa-save"></i> To'lovni qo'shish
+                </button>
             </div>
         </div>
     </div>

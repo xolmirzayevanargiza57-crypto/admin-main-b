@@ -687,6 +687,10 @@ function initNotificationModal() {
         const title = titleInput ? titleInput.value.trim() : '';
         const message = messageInput ? messageInput.value.trim() : '';
         
+        console.log('🔍 1. Title:', title);
+        console.log('🔍 2. Message:', message);
+        console.log('🔍 3. Admin ID:', adminId);
+        
         if (!title) {
             showNotificationResult('❌ Iltimos, sarlavhani kiriting!', 'error');
             if (titleInput) titleInput.focus();
@@ -706,7 +710,7 @@ function initNotificationModal() {
         showNotificationResult('⏳ Xabar yuborilmoqda...', 'info');
         
         try {
-            console.log('📨 Xabar yuborilmoqda:', { title, message, recipientId: adminId });
+            console.log('📨 4. API so\'rov yuborilmoqda...');
             
             const response = await API.post('/notifications', {
                 title: title,
@@ -717,7 +721,7 @@ function initNotificationModal() {
                 expiresInDays: 30
             });
             
-            console.log('📨 Xabar javobi:', response);
+            console.log('📨 5. API javobi:', response);
             
             if (response.success) {
                 showNotificationResult('✅ Xabar muvaffaqiyatli yuborildi!', 'success');
@@ -742,7 +746,7 @@ function initNotificationModal() {
                 }
             }
         } catch (error) {
-            console.error('❌ Xabar yuborish xatosi:', error);
+            console.error('❌ 6. Xabar yuborish xatosi:', error);
             showNotificationResult('❌ Xabar yuborishda xatolik: ' + (error.message || 'Server xatosi!'), 'error');
             if (sendBtn) {
                 sendBtn.disabled = false;

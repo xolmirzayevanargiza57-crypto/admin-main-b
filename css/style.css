@@ -2057,3 +2057,71 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         font-size: 1.25rem;
     }
 }
+
+
+/* ============================================
+   THEME OPTIONS - TUZATILGAN
+   ============================================ */
+.theme-options {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.theme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 20px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 80px;
+    flex: 1;
+    max-width: 140px;
+}
+
+.theme-option:hover {
+    border-color: var(--text-muted);
+    transform: translateY(-2px);
+}
+
+.theme-option.active {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+    background: var(--bg-active);
+}
+
+.theme-option i {
+    font-size: 1.25rem;
+}
+
+.theme-option span {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* ============================================
+   RESPONSIVE - THEME OPTIONS
+   ============================================ */
+@media (max-width: 480px) {
+    .theme-options {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .theme-option {
+        max-width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        padding: 10px 16px;
+    }
+    
+    .theme-option i {
+        font-size: 1rem;
+    }
+}

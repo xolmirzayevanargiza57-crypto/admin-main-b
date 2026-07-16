@@ -3,7 +3,7 @@
 // ============================================
 
 const API = {
-    // ✅ FAQAT RENDER - localhost YO'Q!
+    // ✅ RENDER URL (TO'G'RI)
     baseURL: 'https://admin-main-backend.onrender.com/api',
     
     getToken() {
@@ -20,12 +20,16 @@ const API = {
 
     async request(endpoint, options = {}) {
         try {
-            const res = await fetch(`${this.baseURL}${endpoint}`, {
+            const url = `${this.baseURL}${endpoint}`;
+            console.log('📡 API so\'rov:', url); // ✅ Debug uchun
+            
+            const res = await fetch(url, {
                 ...options,
                 headers: this.getHeaders()
             });
             return this.handleResponse(res);
         } catch (error) {
+            console.error('❌ API xatosi:', error);
             const message = error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError')
                 ? 'Tarmoq xatosi! Serverga ulanib bo\'lmadi. Qayta urinib ko\'ring.'
                 : (error?.message || 'Tarmoq xatosi! Qayta urinib ko\'ring.');
@@ -71,6 +75,10 @@ const API = {
             
             if (res.status === 404) {
                 throw new Error('Server topilmadi! API manzilini tekshiring.');
+            }
+            
+            if (res.status === 500) {
+                throw new Error('Server xatosi! Iltimos, keyinroq urinib ko\'ring.');
             }
             
             if ((res.status === 401 || res.status === 403) && !res.url.includes('/auth/login')) {

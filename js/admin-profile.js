@@ -597,6 +597,8 @@ function initNotificationModal() {
             messageInput.value = '';
             resultDiv.style.display = 'none';
             resultDiv.className = 'form-message';
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
             titleInput.focus();
         });
     }
@@ -605,6 +607,8 @@ function initNotificationModal() {
         closeBtn.addEventListener('click', () => {
             modal.classList.remove('active');
             document.body.style.overflow = '';
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
         });
     }
     
@@ -612,6 +616,8 @@ function initNotificationModal() {
         cancelBtn.addEventListener('click', () => {
             modal.classList.remove('active');
             document.body.style.overflow = '';
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
         });
     }
     
@@ -620,6 +626,8 @@ function initNotificationModal() {
             if (e.target === modal) {
                 modal.classList.remove('active');
                 document.body.style.overflow = '';
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
             }
         });
     }
@@ -663,7 +671,8 @@ function initNotificationModal() {
                 message: message,
                 type: 'info',
                 recipientId: adminId,
-                recipientRole: 'admin_customer'
+                recipientRole: 'admin_customer',
+                expiresInDays: 30
             });
             
             if (response.success) {
@@ -673,14 +682,17 @@ function initNotificationModal() {
                 setTimeout(() => {
                     modal.classList.remove('active');
                     document.body.style.overflow = '';
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
                 }, 2000);
             } else {
                 showNotificationResult('❌ Xabar yuborishda xatolik: ' + (response.message || 'Noma\'lum xatolik'), 'error');
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
             }
         } catch (error) {
             console.error('❌ Xabar yuborish xatosi:', error);
             showNotificationResult('❌ Xabar yuborishda xatolik: ' + error.message, 'error');
-        } finally {
             sendBtn.disabled = false;
             sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
         }

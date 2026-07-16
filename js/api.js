@@ -3,8 +3,8 @@
 // ============================================
 
 const API = {
-    // ✅ BASE URL - /api NI QO'SHMANG!
-    baseURL: 'https://admin-main-backend.onrender.com',
+    // ✅ BASE URL - /api ni qo'shing!
+    baseURL: 'https://admin-main-backend.onrender.com/api',  // ← /api qo'shildi!
     
     getToken() {
         return localStorage.getItem('adminToken');
@@ -25,10 +25,8 @@ const API = {
 
     async request(endpoint, options = {}) {
         try {
-            // ✅ endpoint /api/... bilan boshlanishi kerak
             const url = `${this.baseURL}${endpoint}`;
             console.log('📡 API so\'rov:', url);
-            console.log('📦 Headers:', this.getHeaders());
             
             const res = await fetch(url, {
                 ...options,
@@ -40,13 +38,12 @@ const API = {
         } catch (error) {
             console.error('❌ API xatosi:', error);
             
-            // ✅ Aniq xatolik xabari
             if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
                 throw new Error('🌐 Tarmoq xatosi! Serverga ulanib bo\'lmadi.\n' +
                                '💡 Tekshiring:\n' +
                                '1. Internet aloqangiz borligini\n' +
                                '2. Backend server ishlayotganligini\n' +
-                               '3. CORS sozlamalarini');
+                               `3. Manzil: ${this.baseURL}`);
             }
             
             throw error;
@@ -54,9 +51,7 @@ const API = {
     },
     
     async get(endpoint) {
-        return this.request(endpoint, { 
-            method: 'GET' 
-        });
+        return this.request(endpoint, { method: 'GET' });
     },
     
     async post(endpoint, data) {
@@ -74,9 +69,7 @@ const API = {
     },
     
     async delete(endpoint) {
-        return this.request(endpoint, { 
-            method: 'DELETE' 
-        });
+        return this.request(endpoint, { method: 'DELETE' });
     },
     
     async handleResponse(res) {
@@ -92,21 +85,14 @@ const API = {
             data = null;
         }
 
-        // ✅ 404 holatida aniq xabar
         if (res.status === 404) {
-            throw new Error('🔍 Server topilmadi!\n' +
-                           '💡 API manzilini tekshiring:\n' +
-                           `   ${this.baseURL}\n` +
-                           '💡 Backend server ishlayotganligini tekshiring:\n' +
-                           '   https://admin-main-backend.onrender.com/api/health');
+            throw new Error(`🔍 API topilmadi!\n💡 Manzil: ${this.baseURL}${res.url.split('/api')[1] || ''}`);
         }
 
-        // ✅ 500 holatida
         if (res.status === 500) {
             throw new Error('🔧 Server xatosi! Iltimos, keyinroq urinib ko\'ring.');
         }
 
-        // ✅ 401/403 holatida
         if ((res.status === 401 || res.status === 403) && !res.url.includes('/auth/login')) {
             localStorage.removeItem('adminToken');
             localStorage.removeItem('adminUser');
@@ -124,10 +110,10 @@ const API = {
     }
 };
 
-// ✅ Health check funksiyasi - server ishlayotganligini tekshirish
+// ✅ Health check
 API.checkHealth = async function() {
     try {
-        const response = await fetch(`${this.baseURL}/api/health`);
+        const response = await fetch(`${this.baseURL}/health`);
         if (response.ok) {
             const data = await response.json();
             console.log('✅ Server sog\'lom:', data);
@@ -139,33 +125,3 @@ API.checkHealth = async function() {
         return { success: false, error: error.message };
     }
 };
-
-// ✅ Sahifa yuklanganda health check
-document.addEventListener('DOMContentLoaded', async () => {
-    // Faqat login sahifasida emas
-    const isLoginPage = window.location.pathname.includes('index.html') || 
-                         window.location.pathname === '/' ||
-                         window.location.pathname.endsWith('/');
-    
-    if (!isLoginPage) {
-        const result = await API.checkHealth();
-        if (!result.success) {
-            console.warn('⚠️ Serverga ulanish muammosi:', result.error);
-            // Xatolikni ko'rsatish (ixtiyoriy)
-            const panel = document.getElementById('notificationPanel');
-            if (panel) {
-                panel.innerHTML = `
-                    <div class="notification-item" style="border-left: 3px solid #ff3b30;">
-                        <div class="notification-item-top">
-                            <strong>⚠️ Server muammosi</strong>
-                        </div>
-                        <p>Backend serverga ulanib bo'lmadi. Iltimos, keyinroq urinib ko'ring.</p>
-                        <span>${new Date().toLocaleString()}</span>
-                    </div>
-                `;
-                panel.classList.add('show');
-                setTimeout(() => panel.classList.remove('show'), 8000);
-            }
-        }
-    }
-});

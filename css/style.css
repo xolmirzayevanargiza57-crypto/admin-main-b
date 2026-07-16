@@ -1485,11 +1485,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* ============================================
-   THEME OPTIONS
+   THEME OPTIONS - TUZATILGAN (BIR MAROTABA)
    ============================================ */
 .theme-options {
     display: flex;
     gap: 12px;
+    flex-wrap: wrap;
 }
 
 .theme-option {
@@ -1497,17 +1498,21 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    padding: 16px 24px;
+    padding: 12px 20px;
     border: 2px solid var(--border-color);
     border-radius: var(--radius-sm);
     background: var(--bg-card);
     color: var(--text-muted);
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s ease;
+    min-width: 80px;
+    flex: 1;
+    max-width: 140px;
 }
 
 .theme-option:hover {
     border-color: var(--text-muted);
+    transform: translateY(-2px);
 }
 
 .theme-option.active {
@@ -1517,12 +1522,33 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .theme-option i {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
 }
 
 .theme-option span {
     font-size: 0.75rem;
     font-weight: 500;
+}
+
+/* ============================================
+   RESPONSIVE - THEME OPTIONS
+   ============================================ */
+@media (max-width: 480px) {
+    .theme-options {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .theme-option {
+        max-width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        padding: 10px 16px;
+    }
+    
+    .theme-option i {
+        font-size: 1rem;
+    }
 }
 
 /* ============================================
@@ -1722,6 +1748,24 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* ============================================
+   SIDEBAR OVERLAY
+   ============================================ */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 99;
+}
+
+.sidebar-overlay.show {
+    display: block;
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 @media (max-width: 1024px) {
@@ -1865,16 +1909,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         padding: 28px 20px;
     }
     
-    .theme-options {
-        flex-wrap: wrap;
-    }
-    
-    .theme-option {
-        flex: 1;
-        min-width: 60px;
-        padding: 12px 16px;
-    }
-    
     .theme-toggle {
         bottom: 16px;
         right: 16px;
@@ -1974,154 +2008,5 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     .data-table td {
         padding: 8px 10px;
         font-size: 0.7rem;
-    }
-}
-
-/* Sidebar Overlay */
-.sidebar-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: 99;
-}
-
-.sidebar-overlay.show {
-    display: block;
-}
-
-/* ============================================
-   THEME OPTIONS - TUZATILGAN
-   ============================================ */
-.theme-options {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.theme-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding: 16px 24px;
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    background: var(--bg-card);
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    min-width: 80px;
-    flex: 1;
-}
-
-.theme-option:hover {
-    border-color: var(--text-muted);
-    transform: translateY(-2px);
-}
-
-.theme-option.active {
-    border-color: var(--text-primary);
-    color: var(--text-primary);
-    background: var(--bg-active);
-}
-
-.theme-option i {
-    font-size: 1.5rem;
-}
-
-.theme-option span {
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-
-/* ============================================
-   RESPONSIVE - THEME OPTIONS
-   ============================================ */
-@media (max-width: 480px) {
-    .theme-options {
-        flex-direction: column;
-    }
-    
-    .theme-option {
-        width: 100%;
-        flex-direction: row;
-        justify-content: center;
-        padding: 12px 16px;
-    }
-    
-    .theme-option i {
-        font-size: 1.25rem;
-    }
-}
-
-
-/* ============================================
-   THEME OPTIONS - TUZATILGAN
-   ============================================ */
-.theme-options {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.theme-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding: 12px 20px;
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    background: var(--bg-card);
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    min-width: 80px;
-    flex: 1;
-    max-width: 140px;
-}
-
-.theme-option:hover {
-    border-color: var(--text-muted);
-    transform: translateY(-2px);
-}
-
-.theme-option.active {
-    border-color: var(--text-primary);
-    color: var(--text-primary);
-    background: var(--bg-active);
-}
-
-.theme-option i {
-    font-size: 1.25rem;
-}
-
-.theme-option span {
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-
-/* ============================================
-   RESPONSIVE - THEME OPTIONS
-   ============================================ */
-@media (max-width: 480px) {
-    .theme-options {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .theme-option {
-        max-width: 100%;
-        flex-direction: row;
-        justify-content: center;
-        padding: 10px 16px;
-    }
-    
-    .theme-option i {
-        font-size: 1rem;
     }
 }

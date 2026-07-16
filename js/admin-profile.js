@@ -1,5 +1,5 @@
 // ============================================
-// ADMIN PROFILE - TO'LIQ (TUZATILGAN)
+// ADMIN PROFILE - TO'LIQ
 // ============================================
 
 let adminId = null;
@@ -22,16 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('🔍 Admin ID:', adminId);
     
-    // ✅ Profilni yuklash
     loadProfile();
-    
-    // ✅ Tahrirlash modal
     initEditModal();
-    
-    // ✅ To'lov modal
     initPaymentModal();
-    
-    // ✅ Tugmalar
     initButtons();
 });
 
@@ -79,7 +72,7 @@ function renderProfile(admin) {
         initialEl.textContent = initial;
     }
     
-    // ✅ STATUS - TO'G'RI
+    // Status
     const statusEl = document.getElementById('profileStatus');
     if (statusEl) {
         if (admin.status === 'active') {
@@ -94,14 +87,13 @@ function renderProfile(admin) {
         }
     }
     
-    // ✅ SUBSCRIPTION - TO'G'RI
+    // Subscription
     const sub = admin.subscription || {};
     const subType = sub.type || 'none';
     const subStatus = sub.status || 'inactive';
     
     const subLabelEl = document.getElementById('profileSubscription');
     if (subLabelEl) {
-        // ✅ Agar status 'active' va obuna turi 'none' bo'lmasa
         if (admin.status === 'active' && subType !== 'none' && subStatus === 'active') {
             if (subType === 'monthly') {
                 subLabelEl.textContent = '✅ Oylik (299,999 so\'m)';
@@ -151,7 +143,6 @@ function renderProfile(admin) {
                 minute: '2-digit'
             });
             
-            // ✅ Qancha vaqt qolganini hisoblash
             const now = new Date();
             const diff = endDate - now;
             if (diff > 0) {
@@ -176,7 +167,7 @@ function renderProfile(admin) {
         amountEl.textContent = amount.toLocaleString() + ' so\'m';
     }
     
-    // ✅ Subscription history (paymentHistory)
+    // Payment history
     const history = admin.paymentHistory || admin.subscriptionHistory || [];
     renderSubscriptionHistory(history);
 }
@@ -271,7 +262,6 @@ function initEditModal() {
         });
     }
     
-    // Enter tugmasi
     const editForm = document.getElementById('editForm');
     if (editForm) {
         editForm.addEventListener('keydown', (e) => {
@@ -320,12 +310,24 @@ async function saveEdit() {
     }
     
     try {
-        const response = await API.put(`/admins/${adminId}`, {
+        const updateData = {
             fullName,
             email,
             phone,
-            status
-        });
+            status: status === 'none' ? 'inactive' : status
+        };
+        
+        if (status === 'none') {
+            updateData.subscription = {
+                type: 'none',
+                status: 'inactive',
+                startDate: null,
+                endDate: null,
+                amount: 0
+            };
+        }
+        
+        const response = await API.put(`/admins/${adminId}`, updateData);
         
         if (response.success) {
             alert('✅ Admin muvaffaqiyatli yangilandi!');
@@ -355,12 +357,10 @@ function initPaymentModal() {
     
     if (!modal || !addBtn) return;
     
-    // Modal ochish
     addBtn.addEventListener('click', () => {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
         
-        // Default qiymatlar
         const amountInput = document.getElementById('paymentAmount');
         const typeSelect = document.getElementById('paymentType');
         const daysInput = document.getElementById('customDays');
@@ -371,7 +371,7 @@ function initPaymentModal() {
         const endTimeInput = document.getElementById('paymentEndTime');
         const noteInput = document.getElementById('paymentNote');
         
-        if (amountInput) amountInput.value = '299999';
+        if (amountInput) amountInput.value = '';
         if (typeSelect) typeSelect.value = 'monthly';
         if (daysInput) daysInput.value = '0';
         if (hoursInput) hoursInput.value = '0';
@@ -384,27 +384,14 @@ function initPaymentModal() {
         if (customGroup) customGroup.style.display = 'none';
     });
     
-    // Custom tanlanganda vaqt maydonlari chiqadi
     if (paymentType) {
         paymentType.addEventListener('change', () => {
             if (customGroup) {
                 customGroup.style.display = paymentType.value === 'custom' ? 'block' : 'none';
             }
-            
-            const amountInput = document.getElementById('paymentAmount');
-            if (amountInput) {
-                const amounts = {
-                    'monthly': '299999',
-                    '6months': '1899999',
-                    'yearly': '3599999',
-                    'custom': '1000'
-                };
-                amountInput.value = amounts[paymentType.value] || '1000';
-            }
         });
     }
     
-    // Yopish
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
             modal.classList.remove('active');
@@ -428,7 +415,6 @@ function initPaymentModal() {
         });
     }
     
-    // Saqlash
     if (saveBtn) {
         saveBtn.addEventListener('click', async () => {
             await savePayment();
@@ -436,12 +422,9 @@ function initPaymentModal() {
     }
 }
 
-// ============================================
-// TO'LOVNI SAQLASH
-// ============================================
 async function savePayment() {
     const paymentType = document.getElementById('paymentType').value;
-    const amount = parseInt(document.getElementById('paymentAmount').value);
+    const amount = document.getElementById('paymentAmount').value.trim();
     const customDays = parseInt(document.getElementById('customDays').value) || 0;
     const customHours = parseInt(document.getElementById('customHours').value) || 0;
     const customMinutes = parseInt(document.getElementById('customMinutes').value) || 0;
@@ -450,20 +433,30 @@ async function savePayment() {
     const endTime = document.getElementById('paymentEndTime').value;
     const note = document.getElementById('paymentNote').value.trim();
     
-    if (!amount || amount <= 0) {
-        alert('To\'lov miqdorini kiriting!');
+    if (!amount || amount === '') {
+        alert('❌ To\'lov miqdorini kiriting!');
+        document.getElementById('paymentAmount').focus();
         return;
+    }
+    
+    const amountNumber = parseInt(amount);
+    if (isNaN(amountNumber) || amountNumber <= 0) {
+        alert('❌ To\'lov miqdori 0 dan katta bo\'lishi kerak!');
+        document.getElementById('paymentAmount').focus();
+        return;
+    }
+    
+    if (paymentType === 'custom') {
+        if (customDays === 0 && customHours === 0 && customMinutes === 0 && customSeconds === 0) {
+            alert('❌ Hech qanday vaqt belgilanmadi!');
+            return;
+        }
     }
     
     let customDuration = null;
     let endDateTime = null;
     
-    // Custom vaqt
     if (paymentType === 'custom') {
-        if (customDays === 0 && customHours === 0 && customMinutes === 0 && customSeconds === 0) {
-            alert('Hech qanday vaqt belgilanmadi!');
-            return;
-        }
         customDuration = { 
             days: customDays, 
             hours: customHours, 
@@ -472,18 +465,17 @@ async function savePayment() {
         };
     }
     
-    // Tugash vaqti
     if (endDate && endTime) {
         endDateTime = new Date(`${endDate}T${endTime}`);
         if (isNaN(endDateTime.getTime())) {
-            alert('Noto\'g\'ri vaqt formati!');
+            alert('❌ Noto\'g\'ri vaqt formati!');
             return;
         }
     }
     
     try {
         const response = await API.post(`/admins/${adminId}/payment`, {
-            amount: amount,
+            amount: amountNumber,
             subscriptionType: paymentType,
             customDuration: customDuration,
             endDate: endDateTime ? endDateTime.toISOString() : null,
@@ -515,7 +507,6 @@ async function savePayment() {
 // TUGMALAR
 // ============================================
 function initButtons() {
-    // Obuna sotish
     const subscriptionBtn = document.getElementById('subscriptionBtn');
     if (subscriptionBtn) {
         subscriptionBtn.addEventListener('click', () => {
@@ -549,7 +540,6 @@ function initButtons() {
         });
     }
     
-    // O'chirish
     const deleteBtn = document.getElementById('deleteBtn');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', async () => {
@@ -570,9 +560,6 @@ function initButtons() {
     }
 }
 
-// ============================================
-// OBUNANI YANGILASH
-// ============================================
 async function updateSubscription(type, customDuration = null) {
     try {
         const data = { subscriptionType: type };
@@ -595,9 +582,6 @@ async function updateSubscription(type, customDuration = null) {
     }
 }
 
-// ============================================
-// XATOLIK
-// ============================================
 function showError(message) {
     const container = document.querySelector('.profile-container');
     if (container) {

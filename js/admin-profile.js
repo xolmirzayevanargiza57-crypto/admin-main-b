@@ -30,17 +30,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================
     // PAROL TOGGLE (Tahrirlash modalida)
     // ============================================
-    document.getElementById('editPasswordToggle')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const input = document.getElementById('editPassword');
-        const type = input.type === 'password' ? 'text' : 'password';
-        input.type = type;
-        const icon = this.querySelector('i');
-        if (icon) {
-            icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-        }
-    });
+    const editPasswordToggle = document.getElementById('editPasswordToggle');
+    if (editPasswordToggle) {
+        editPasswordToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const input = document.getElementById('editPassword');
+            const type = input.type === 'password' ? 'text' : 'password';
+            input.type = type;
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+            }
+        });
+    }
 });
 
 // ============================================
@@ -145,7 +148,7 @@ function renderProfile(admin) {
         subTypeEl.textContent = typeMap[subType] || 'Yo\'q';
     }
     
-    // Obuna muddati
+    // Obuna muddati - ✅ TO'G'RI VAQT FORMATI
     const subEndEl = document.getElementById('profileSubEnd');
     if (subEndEl) {
         if (sub.endDate && subStatus === 'active') {
@@ -155,7 +158,9 @@ function renderProfile(admin) {
                 month: 'long',
                 day: 'numeric',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
             });
             
             const now = new Date();
@@ -188,7 +193,7 @@ function renderProfile(admin) {
 }
 
 // ============================================
-// SUBSCRIPTION TARIXI
+// SUBSCRIPTION TARIXI - TO'G'RI VAQT FORMATI
 // ============================================
 function renderSubscriptionHistory(history) {
     const historyList = document.getElementById('historyList');
@@ -200,8 +205,26 @@ function renderSubscriptionHistory(history) {
     }
     
     historyList.innerHTML = history.map((item, index) => {
-        const startDate = item.startDate ? new Date(item.startDate).toLocaleString('uz-UZ') : '-';
-        const endDate = item.endDate ? new Date(item.endDate).toLocaleString('uz-UZ') : '-';
+        // ✅ To'g'ri vaqt formatida ko'rsatish
+        const startDate = item.startDate ? new Date(item.startDate).toLocaleString('uz-UZ', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        }) : '-';
+        
+        const endDate = item.endDate ? new Date(item.endDate).toLocaleString('uz-UZ', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        }) : '-';
         
         const typeLabel = {
             'monthly': 'Oylik',
@@ -288,6 +311,9 @@ function initEditModal() {
     }
 }
 
+// ============================================
+// TAHRIRLASH MODAL OCHISH
+// ============================================
 function openEditModal() {
     if (!currentAdmin) return;
     
@@ -301,6 +327,9 @@ function openEditModal() {
     document.body.style.overflow = 'hidden';
 }
 
+// ============================================
+// TAHRIRLASHNI SAQLASH (PAROL BILAN)
+// ============================================
 async function saveEdit() {
     const fullName = document.getElementById('editFullName').value.trim();
     const email = document.getElementById('editEmail').value.trim();
@@ -334,6 +363,7 @@ async function saveEdit() {
             return;
         }
         
+        // ✅ "Obunasi yo'q" tanlansa, subscription ni ham yangilash
         if (status === 'none') {
             updateData.subscription = {
                 type: 'none',
@@ -376,6 +406,7 @@ function initPaymentModal() {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
         
+        // Inputlarni tozalash
         document.getElementById('paymentAmount').value = '';
         document.getElementById('paymentType').value = 'monthly';
         document.getElementById('customDays').value = '0';
@@ -427,6 +458,9 @@ function initPaymentModal() {
     }
 }
 
+// ============================================
+// TO'LOVNI SAQLASH
+// ============================================
 async function savePayment() {
     const paymentType = document.getElementById('paymentType').value;
     const amount = document.getElementById('paymentAmount').value.trim();
@@ -438,6 +472,7 @@ async function savePayment() {
     const endTime = document.getElementById('paymentEndTime').value;
     const note = document.getElementById('paymentNote').value.trim();
     
+    // ✅ Validatsiya
     if (!amount || amount === '') {
         alert('❌ To\'lov miqdorini kiriting!');
         document.getElementById('paymentAmount').focus();
@@ -492,7 +527,16 @@ async function savePayment() {
             const sub = response.data.subscription || {};
             let msg = '✅ To\'lov muvaffaqiyatli qo\'shildi!\n';
             if (sub.endDate) {
-                msg += '📅 Tugash vaqti: ' + new Date(sub.endDate).toLocaleString('uz-UZ');
+                const end = new Date(sub.endDate);
+                msg += '📅 Tugash vaqti: ' + end.toLocaleString('uz-UZ', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
             }
             alert(msg);
             
@@ -562,6 +606,9 @@ function initButtons() {
     }
 }
 
+// ============================================
+// OBUNANI YANGILASH
+// ============================================
 async function updateSubscription(type, customDuration = null) {
     try {
         const data = { subscriptionType: type };
@@ -584,6 +631,9 @@ async function updateSubscription(type, customDuration = null) {
     }
 }
 
+// ============================================
+// XATOLIK
+// ============================================
 function showError(message) {
     const container = document.querySelector('.profile-container');
     if (container) {

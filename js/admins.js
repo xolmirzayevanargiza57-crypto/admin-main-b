@@ -1,5 +1,5 @@
 // ============================================
-// ADMINS - O'CHIRISH TUGMASI BILAN
+// ADMINS - TO'LIQ CRUD
 // ============================================
 
 let currentAdmins = [];
@@ -57,7 +57,7 @@ async function loadAdmins() {
         }
     } catch (error) {
         console.error('Admin yuklash xatosi:', error);
-        showEmpty('Xatolik yuz berdi');
+        showEmpty('Xatolik yuz berdi: ' + error.message);
     }
 }
 
@@ -101,16 +101,13 @@ function renderAdmins(admins) {
                 </td>
                 <td>
                     <div class="action-buttons">
-                        <a href="admin-profile.html?id=${admin._id}" class="btn-secondary table-action" aria-label="Ko'rish">
+                        <a href="admin-profile.html?id=${admin._id}" class="btn-secondary table-action">
                             <i class="fas fa-eye"></i> Ko'rish
                         </a>
-                        <button type="button" onclick="sendNotification('${admin._id}', ${JSON.stringify(admin.fullName || '-')} )" class="btn-secondary table-action" aria-label="Xabar yuborish">
-                            <i class="fas fa-bell"></i> Xabar
-                        </button>
-                        <button type="button" onclick="banAdmin('${admin._id}')" class="btn-danger table-action" aria-label="Bloklash">
+                        <button onclick="banAdmin('${admin._id}')" class="btn-danger table-action">
                             <i class="fas fa-ban"></i> Blok
                         </button>
-                        <button type="button" onclick="deleteAdmin('${admin._id}')" class="btn-danger table-action" aria-label="O'chirish">
+                        <button onclick="deleteAdmin('${admin._id}')" class="btn-danger table-action">
                             <i class="fas fa-trash"></i> O'chirish
                         </button>
                     </div>
@@ -120,34 +117,14 @@ function renderAdmins(admins) {
     }).join('');
 }
 
-async function sendNotification(id, name) {
-    const message = prompt(`${name} uchun xabar matni:`);
-    if (!message || !message.trim()) return;
-
-    try {
-        const result = await API.post('/notifications', {
-            title: `${name} uchun yangi xabar`,
-            message: message.trim(),
-            type: 'info',
-            recipientId: id,
-            recipientRole: 'admin_customer'
-        });
-        if (result.success) {
-            alert(`✅ ${name} ga xabar yuborildi!`);
-        }
-    } catch (error) {
-        alert('❌ Xatolik: ' + error.message);
-    }
-}
-
 async function banAdmin(id) {
-    const reason = prompt('Bloklash sababi:');
-    if (!reason || !reason.trim()) return;
+    const reason = prompt('Bloklash sababi (ixtiyoriy):');
+    if (reason === null) return;
 
     try {
-        const result = await API.post(`/admins/${id}/ban`, { reason: reason.trim() });
+        const result = await API.post(`/admins/${id}/ban`, { reason: reason?.trim() || 'Admin panelda cheklov' });
         if (result.success) {
-            alert('✅ Admin Customer bloklandi va xabar yuborildi!');
+            alert('✅ Admin Customer bloklandi!');
             loadAdmins();
         }
     } catch (error) {

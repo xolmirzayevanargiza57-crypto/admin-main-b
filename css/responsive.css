@@ -78,6 +78,10 @@
         font-size: 0.8rem;
         width: 100%;
     }
+
+    .action-buttons .table-action {
+        width: auto;
+    }
     
     .profile-header {
         padding: 16px;
@@ -144,6 +148,19 @@
     
     .profile-stats {
         grid-template-columns: 1fr 1fr;
+    }
+    
+    .subscription-history {
+        padding: 16px;
+    }
+    
+    .history-item {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .history-left {
+        width: 100%;
     }
     
     .profile-actions {

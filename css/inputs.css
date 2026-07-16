@@ -669,13 +669,18 @@ input[type="color"]:focus {
    ============================================ */
 .input-wrapper .input-icon {
     position: absolute;
-    right: 48px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
     font-size: 1rem;
     display: none !important;
     pointer-events: none;
-    z-index: 2;
+    z-index: 4;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* SUCCESS - faqat success class qo'shilganda */

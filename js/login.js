@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.disabled = false;
             }
         } catch (error) {
-            showError('Tarmoq xatosi! Qayta urinib ko\'ring.');
+            showError(error.message || 'Tarmoq xatosi! Qayta urinib ko\'ring.');
             btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Kirish';
             btn.disabled = false;
         }

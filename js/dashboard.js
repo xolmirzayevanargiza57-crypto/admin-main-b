@@ -104,24 +104,28 @@ function createSubscriptionChart(stats) {
         subscriptionChart.destroy();
     }
 
-    const chartData = stats.chart || {
-        labels: ['Oylik', '6 oylik', 'Yillik', 'Faol', 'Faol emas', 'Obunasi yo\'q'],
-        data: [
-            stats.monthly || 0,
-            stats.sixMonths || 0,
-            stats.yearly || 0,
-            stats.activeOther || 0,
-            stats.inactive || 0,
-            stats.noSubscription || 0
-        ]
-    };
+    // Alohida hisoblar:
+    // "Faol emas" = status='inactive' va subscription.type != 'none' (pul to'lamagan lekin tamimlangan)
+    // "Obunasi yo'q" = subscription.type = 'none' (tamimlangan)
+    const inactiveCount = stats.inactive || 0;              // Faol emas
+    const noSubscriptionCount = stats.noSubscription || 0;  // Obunasi yo'q
+
+    const labels = ['Oylik', '6 oylik', 'Yillik', 'Faol', 'Faol emas', 'Obunasi yo\'q'];
+    const values = [
+        stats.monthly || 0,
+        stats.sixMonths || 0,
+        stats.yearly || 0,
+        stats.activeOther || 0,
+        inactiveCount,
+        noSubscriptionCount
+    ];
     
     subscriptionChart = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: chartData.labels,
+            labels,
             datasets: [{
-                data: chartData.data,
+                data: values,
                 backgroundColor: [
                     'rgba(52, 199, 89, 0.8)',
                     'rgba(255, 149, 0, 0.8)',
@@ -165,67 +169,9 @@ async function checkSubscriptionStatus() {
     try {
         const response = await API.get('/auth/subscription-status');
         if (response.success) {
-            const subData = response.data;
             const alertContainer = document.getElementById('subscriptionAlert');
-            
-            if (!alertContainer) {
-                // Create alert container if doesn't exist
-                const newAlert = document.createElement('div');
-                newAlert.id = 'subscriptionAlert';
-                document.body.insertAdjacentElement('afterbegin', newAlert);
-            }
-            
-            const alertEl = document.getElementById('subscriptionAlert');
-            
-            if (subData.status === 'expired') {
-                // Show expired warning
-                alertEl.innerHTML = `
-                    <div class="subscription-alert expired">
-                        <div class="alert-content">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <div>
-                                <p class="alert-title">⚠️ Obuna muddasi tugagan!</p>
-                                <p class="alert-message">Iltimos, qaytadan to'lov qiling. Obunangiz faol emas bo'lib ketdi.</p>
-                            </div>
-                            <button onclick="location.href='settings.html'" class="btn-renew">To'lovni yangilash</button>
-                        </div>
-                    </div>
-                `;
-            } else if (subData.status === 'active') {
-                const remainingTime = subData.remainingTime;
-                const thresholdDays = remainingTime.totalSeconds <= 604800 ? 7 : remainingTime.totalSeconds <= 2592000 ? 30 : null;
-                const alertClass = thresholdDays === 7 ? 'warning' : thresholdDays === 30 ? 'info' : 'success';
-                const alertTitle = thresholdDays === 7 ? '⏰ Obuna muddasi tezda tugaydi' : thresholdDays === 30 ? 'ℹ️ Obuna muddatiga oz qoldi' : '✅ Obuna faol';
-                const alertMessage = thresholdDays ?
-                    `Qolgan vaqt: <strong>${remainingTime.days}k ${remainingTime.hours}s ${remainingTime.minutes}m</strong>` :
-                    `Obuna muddatigacha ${remainingTime.days} kun qoldi.`;
-
-                alertEl.innerHTML = `
-                    <div class="subscription-alert ${alertClass}">
-                        <div class="alert-content">
-                            <i class="fas fa-clock"></i>
-                            <div>
-                                <p class="alert-title">${alertTitle}</p>
-                                <p class="alert-message">${alertMessage}</p>
-                            </div>
-                            ${thresholdDays ? "<button onclick=\"location.href='settings.html'\" class=\"btn-renew\">To'lovni yangilash</button>" : ''}
-                        </div>
-                    </div>
-                `;
-            } else {
-                // No active subscription
-                alertEl.innerHTML = `
-                    <div class="subscription-alert inactive">
-                        <div class="alert-content">
-                            <i class="fas fa-info-circle"></i>
-                            <div>
-                                <p class="alert-title">ℹ️ Aktiv obuna mavjud emas</p>
-                                <p class="alert-message">Xizmatlardan to'liq foydalanish uchun obuna sotib oling.</p>
-                            </div>
-                            <button onclick="location.href='settings.html'" class="btn-subscribe">Obuna sotib olish</button>
-                        </div>
-                    </div>
-                `;
+            if (alertContainer) {
+                alertContainer.innerHTML = '';
             }
         }
     } catch (error) {

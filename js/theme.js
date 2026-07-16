@@ -1,5 +1,5 @@
 // ============================================
-// THEME - LIGHT / DARK / SYSTEM (TUZATILGAN)
+// THEME - LIGHT / DARK / SYSTEM (TO'LIQ)
 // ============================================
 
 const Theme = {

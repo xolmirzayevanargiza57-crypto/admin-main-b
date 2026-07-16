@@ -1,38 +1,3 @@
 ﻿{
-  "outputDirectory": ".",
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/dashboard",
-      "dest": "/dashboard.html"
-    },
-    {
-      "src": "/admins",
-      "dest": "/admins.html"
-    },
-    {
-      "src": "/admin-add",
-      "dest": "/admin-add.html"
-    },
-    {
-      "src": "/settings",
-      "dest": "/settings.html"
-    },
-    {
-      "src": "/admin-profile",
-      "dest": "/admin-profile.html"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "https://admin-main-backend.onrender.com/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
-  "cleanUrls": true
+  "outputDirectory": "."
 }

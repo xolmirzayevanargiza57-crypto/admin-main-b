@@ -2160,10 +2160,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* ============================================
-   JADVAL - TO'LIQ SCROLL BILAN
+   TABLE - GORIZONTAL SCROLL BILAN
    ============================================ */
 
-/* ✅ Jadval konteyneri - scroll ko'rinishi uchun */
+/* ✅ Jadval konteyneri - scroll uchun */
 .table-container {
     padding: 0 32px 32px;
     overflow-x: auto;
@@ -2173,19 +2173,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     width: 100%;
     max-width: 100%;
     position: relative;
-    display: block;  /* ✅ Muhim! */
+    display: block;
 }
 
-/* ✅ Jadval - scroll bo'lishi uchun */
+/* ✅ Jadval o'zi - konteynerdan keng */
 .data-table {
     width: 100%;
-    min-width: 900px;  /* ✅ Yetarlicha keng */
+    min-width: 850px;
     background: var(--bg-card);
     border-radius: var(--radius);
     border-collapse: collapse;
     border: 1px solid var(--border-color);
     table-layout: fixed;
-    display: table;  /* ✅ Muhim! */
+    display: table;
 }
 
 /* ✅ Ustunlar kengligi */
@@ -2194,7 +2194,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .data-table th:nth-child(3) { width: 20%; min-width: 150px; }
 .data-table th:nth-child(4) { width: 12%; min-width: 80px; }
 .data-table th:nth-child(5) { width: 10%; min-width: 70px; }
-.data-table th:nth-child(6) { width: 20%; min-width: 180px; }  /* ✅ Harakatlar ustuni */
+.data-table th:nth-child(6) { width: 20%; min-width: 170px; }
 
 .data-table th {
     padding: 14px 18px;
@@ -2230,10 +2230,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background: var(--bg-hover);
 }
 
-/* ✅ Scrollbar - KO'RINADIGAN QILISH */
+/* ✅ SCROLLBAR */
 .table-container::-webkit-scrollbar {
-    height: 10px;
-    width: 10px;
+    height: 8px;
 }
 
 .table-container::-webkit-scrollbar-track {
@@ -2250,14 +2249,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background: var(--text-secondary);
 }
 
-/* ✅ Firefox scrollbar */
-.table-container {
-    scrollbar-width: auto;
-    scrollbar-color: var(--text-muted) var(--bg-hover);
-}
-
 /* ============================================
-   MOBIL UCHUN
+   RESPONSIVE - TABLET VA MOBIL
    ============================================ */
 @media (max-width: 992px) {
     .table-container {
@@ -2276,10 +2269,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         padding: 10px 14px;
         font-size: 0.75rem;
     }
-    
-    .data-table td:last-child {
-        min-width: 150px;
-    }
 }
 
 @media (max-width: 768px) {
@@ -2291,13 +2280,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     }
     
     .data-table {
-        min-width: 650px;
+        min-width: 620px;
         font-size: 0.7rem;
     }
     
     .data-table th,
     .data-table td {
-        padding: 8px 12px;
+        padding: 8px 10px;
         font-size: 0.65rem;
         max-width: 100px;
     }
@@ -2318,28 +2307,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     }
     
     .action-buttons .table-action {
-        padding: 4px 8px;
-        font-size: 0.6rem;
+        padding: 3px 6px;
+        font-size: 0.55rem;
         white-space: nowrap;
         border-radius: 4px;
     }
     
     .action-buttons .table-action i {
-        font-size: 0.55rem;
+        font-size: 0.5rem;
         margin-right: 2px;
-    }
-    
-    /* ✅ Scroll indikator - ko'rinadigan qilish */
-    .table-scroll-indicator {
-        display: block;
-        text-align: center;
-        padding: 6px 0 10px;
-        font-size: 0.7rem;
-        color: var(--text-muted);
-    }
-    
-    .table-scroll-indicator i {
-        animation: scrollPulse 1.5s ease-in-out infinite;
     }
 }
 
@@ -2349,7 +2325,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     }
     
     .data-table {
-        min-width: 520px;
+        min-width: 480px;
         font-size: 0.6rem;
     }
     
@@ -2361,40 +2337,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     }
     
     .data-table td:last-child {
-        min-width: 110px;
-        max-width: 110px;
+        min-width: 100px;
+        max-width: 100px;
     }
     
     .action-buttons .table-action {
-        padding: 2px 5px;
-        font-size: 0.5rem;
+        padding: 2px 4px;
+        font-size: 0.45rem;
     }
     
     .action-buttons .table-action i {
-        font-size: 0.45rem;
-        margin-right: 1px;
-    }
-}
-
-/* ✅ Scroll pulse animatsiyasi */
-@keyframes scrollPulse {
-    0%, 100% { transform: translateX(0); opacity: 0.4; }
-    50% { transform: translateX(8px); opacity: 1; }
-}
-
-/* ✅ Agar scroll indikator ko'rinmasa, qo'lda ko'rsatish */
-.scroll-hint {
-    display: none;
-    text-align: center;
-    padding: 4px 0 10px;
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    background: var(--bg-card);
-    border-radius: 0 0 var(--radius) var(--radius);
-}
-
-@media (max-width: 768px) {
-    .scroll-hint {
-        display: block;
+        font-size: 0.4rem;
     }
 }

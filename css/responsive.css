@@ -2,35 +2,143 @@
    RESPONSIVE - BARCHA QURILMALAR UCHUN
    ============================================ */
 
-/* ===== SMARTPHONE (max 480px) ===== */
-@media (max-width: 480px) {
-    .sidebar {
-        width: 100%;
-        max-width: 320px;
+/* ===== LAPTOP (1024px - 1280px) ===== */
+@media (max-width: 1280px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 16px 24px;
+        gap: 14px;
     }
     
+    .charts-grid {
+        gap: 14px;
+        padding: 0 24px 24px;
+    }
+}
+
+/* ===== TABLET (768px - 1024px) ===== */
+@media (max-width: 1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .profile-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .user-info {
+        display: none;
+    }
+}
+
+/* ===== MOBILE (max 768px) ===== */
+@media (max-width: 768px) {
+    /* Sidebar */
+    .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 200;
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+        width: 100%;
+        overflow-x: hidden;
+    }
+    
+    .menu-toggle {
+        display: block !important;
+    }
+    
+    /* Top header */
     .top-header {
-        padding: 10px 12px;
+        padding: 10px 14px;
+        gap: 8px;
+        flex-wrap: nowrap;
+    }
+    
+    .header-left {
+        flex: 1;
+        min-width: 0;
+        gap: 8px;
     }
     
     .header-left h2 {
         font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
+    .header-left .text-muted {
+        display: none;
+    }
+    
+    .header-right {
+        gap: 6px;
+        flex-shrink: 0;
+    }
+    
+    .header-right .btn-secondary {
+        padding: 5px 10px;
+        font-size: 0.7rem;
+        border-radius: 6px;
+        white-space: nowrap;
+    }
+    
+    .header-right .btn-secondary i {
+        font-size: 0.65rem;
+        margin-right: 2px;
+    }
+    
+    .user-profile {
+        display: none !important;
+    }
+    
+    .theme-toggle-small {
+        display: inline-flex !important;
+        width: 28px;
+        height: 28px;
+        font-size: 0.7rem;
+        border-radius: 50%;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-primary);
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    /* Stats */
     .stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
         padding: 8px 12px;
         gap: 8px;
     }
     
     .stat-card {
-        padding: 12px;
+        padding: 10px 12px;
+        gap: 10px;
     }
     
     .stat-icon {
-        width: 36px;
-        height: 36px;
-        font-size: 0.9rem;
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
     }
     
     .stat-info .stat-value {
@@ -38,133 +146,151 @@
     }
     
     .stat-info .stat-label {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
+    }
+    
+    /* Charts */
+    .charts-grid {
+        grid-template-columns: 1fr;
+        padding: 0 12px 12px;
+        gap: 10px;
     }
     
     .chart-card {
         padding: 12px;
         height: auto;
-        max-height: none;
-    }
-    
-    .chart-card.chart-card-fixed {
-        flex: 1 1 auto;
+        max-height: 320px;
     }
     
     .chart-canvas-wrap {
-        min-height: 220px;
+        min-height: 180px;
     }
     
     .chart-card canvas {
-        width: 100%;
-        height: auto;
-        max-height: 260px;
+        max-height: 200px;
+    }
+    
+    /* Recent Admins */
+    .recent-admins.scrollable {
+        max-height: 250px;
+        min-height: 150px;
+    }
+    
+    /* Table */
+    .table-container {
+        padding: 0 12px 12px;
+        overflow-x: auto;
     }
     
     .data-table {
         font-size: 0.7rem;
+        min-width: 600px;
     }
     
     .data-table th,
     .data-table td {
         padding: 6px 8px;
+        white-space: nowrap;
     }
     
+    .data-table th i {
+        display: none;
+    }
+    
+    .action-buttons {
+        flex-wrap: nowrap;
+        gap: 3px;
+    }
+    
+    .action-buttons .table-action {
+        padding: 3px 6px;
+        font-size: 0.6rem;
+        white-space: nowrap;
+    }
+    
+    .action-buttons .table-action i {
+        font-size: 0.6rem;
+        margin-right: 2px;
+    }
+    
+    /* Filter */
+    .filter-pill {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+    
+    .toolbar {
+        padding: 8px 12px;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .search-box {
+        width: 100%;
+        min-width: unset;
+    }
+    
+    .search-box input {
+        padding: 6px 10px 6px 28px;
+        font-size: 0.75rem;
+    }
+    
+    .filter-box {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    
+    .filter-pills {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    
+    /* Buttons */
     .btn-primary,
     .btn-secondary,
     .btn-danger,
     .btn-warning {
-        padding: 10px 16px;
-        font-size: 0.8rem;
-        width: 100%;
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        border-radius: 6px;
     }
-
-    .action-buttons .table-action {
-        width: auto;
+    
+    /* Forms */
+    .form-container {
+        padding: 8px 12px;
+    }
+    
+    .app-form {
+        padding: 14px;
+    }
+    
+    .app-form .form-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    /* Profile */
+    .profile-container {
+        padding: 8px 12px;
     }
     
     .profile-header {
-        padding: 16px;
-    }
-    
-    .profile-avatar.large {
-        width: 72px;
-        height: 72px;
-        font-size: 1.75rem;
-    }
-    
-    .profile-info h2 {
-        font-size: 1.1rem;
-    }
-    
-    .login-card {
-        padding: 20px 16px;
-    }
-    
-    .login-logo h1 {
-        font-size: 1.25rem;
-    }
-    
-    .logo-icon {
-        width: 56px;
-        height: 56px;
-    }
-    
-    .logo-icon i {
-        font-size: 24px;
-    }
-    
-    .settings-card {
-        padding: 14px 16px;
-    }
-    
-    .theme-options {
         flex-direction: column;
-    }
-    
-    .theme-option {
-        width: 100%;
-        flex-direction: row;
-        justify-content: center;
-        padding: 10px;
-    }
-}
-
-/* ===== TABLET (481px - 768px) ===== */
-@media (min-width: 481px) and (max-width: 768px) {
-    .sidebar {
-        width: 280px;
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr 1fr;
-        padding: 12px 16px;
-    }
-    
-    .charts-grid {
-        grid-template-columns: 1fr;
-        padding: 0 16px 16px;
-    }
-    
-    .profile-stats {
-        grid-template-columns: 1fr 1fr;
-    }
-    
-    .subscription-history {
+        text-align: center;
         padding: 16px;
-    }
-    
-    .history-item {
-        flex-direction: column;
         gap: 12px;
     }
     
-    .history-left {
-        width: 100%;
+    .profile-stats {
+        grid-template-columns: 1fr;
+        padding: 12px 16px;
+        gap: 10px;
     }
     
     .profile-actions {
         flex-direction: column;
+        gap: 8px;
     }
     
     .profile-actions .btn-primary,
@@ -174,8 +300,19 @@
         justify-content: center;
     }
     
+    /* Settings */
+    .settings-container {
+        padding: 8px 12px;
+        gap: 12px;
+    }
+    
+    .settings-card {
+        padding: 14px 16px;
+    }
+    
     .settings-actions {
         flex-direction: column;
+        gap: 8px;
     }
     
     .settings-actions .btn-secondary,
@@ -183,46 +320,204 @@
         width: 100%;
         justify-content: center;
     }
-}
-
-/* ===== DESKTOP (769px - 1024px) ===== */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+    
+    /* Theme */
+    .theme-options {
+        flex-direction: column;
+        align-items: stretch;
     }
     
-    .charts-grid {
+    .theme-option {
+        max-width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        padding: 10px 16px;
+    }
+    
+    .theme-option i {
+        font-size: 1rem;
+    }
+    
+    /* Login */
+    .login-card {
+        padding: 24px 20px;
+    }
+    
+    /* Date */
+    .date-group {
         grid-template-columns: 1fr;
+        gap: 0;
     }
     
-    .profile-stats {
-        grid-template-columns: repeat(2, 1fr);
+    /* Theme toggle floating */
+    .theme-toggle {
+        bottom: 16px;
+        right: 16px;
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
+    }
+    
+    /* Scrollbar - hide on mobile */
+    .recent-admins::-webkit-scrollbar {
+        width: 4px;
     }
 }
 
-/* ===== LARGE DESKTOP (1025px+) ===== */
-@media (min-width: 1025px) {
-    .stats-grid {
-        grid-template-columns: repeat(4, 1fr);
+/* ===== KICHIK TELEFON (max 480px) ===== */
+@media (max-width: 480px) {
+    .top-header {
+        padding: 6px 10px;
+        gap: 6px;
     }
     
-    .charts-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .header-left h2 {
+        font-size: 0.75rem;
     }
     
-    .profile-stats {
-        grid-template-columns: repeat(3, 1fr);
+    .header-right .btn-secondary {
+        padding: 3px 6px;
+        font-size: 0.6rem;
+        border-radius: 4px;
     }
-}
-
-/* ===== SIDEBAR TOGGLE (Mobile) ===== */
-@media (max-width: 768px) {
+    
+    .header-right .btn-secondary i {
+        display: none;
+    }
+    
     .menu-toggle {
-        display: block !important;
+        font-size: 0.85rem;
+        padding: 2px;
     }
     
-    .sidebar.open {
-        transform: translateX(0);
+    .theme-toggle-small {
+        width: 24px;
+        height: 24px;
+        font-size: 0.6rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        padding: 6px 8px;
+        gap: 6px;
+    }
+    
+    .stat-card {
+        padding: 8px 10px;
+        gap: 8px;
+    }
+    
+    .stat-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 0.7rem;
+    }
+    
+    .stat-info .stat-value {
+        font-size: 0.9rem;
+    }
+    
+    .stat-info .stat-label {
+        font-size: 0.6rem;
+    }
+    
+    .chart-card {
+        padding: 10px;
+        max-height: 280px;
+    }
+    
+    .chart-canvas-wrap {
+        min-height: 150px;
+    }
+    
+    .data-table {
+        font-size: 0.6rem;
+        min-width: 480px;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 4px 6px;
+    }
+    
+    .action-buttons .table-action {
+        padding: 2px 4px;
+        font-size: 0.5rem;
+    }
+    
+    .action-buttons .table-action i {
+        font-size: 0.5rem;
+    }
+    
+    .filter-pill {
+        padding: 3px 6px;
+        font-size: 0.6rem;
+    }
+    
+    .login-card {
+        padding: 20px 16px;
+    }
+    
+    .login-logo h1 {
+        font-size: 1.1rem;
+    }
+    
+    .logo-icon {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .logo-icon i {
+        font-size: 20px;
+    }
+    
+    .theme-toggle {
+        bottom: 12px;
+        right: 12px;
+        width: 38px;
+        height: 38px;
+        font-size: 0.9rem;
+    }
+}
+
+/* ===== JUDDA KICHIK TELEFON (max 360px) ===== */
+@media (max-width: 360px) {
+    .top-header {
+        padding: 4px 6px;
+        gap: 4px;
+    }
+    
+    .header-left h2 {
+        font-size: 0.65rem;
+    }
+    
+    .header-right .btn-secondary {
+        padding: 2px 4px;
+        font-size: 0.5rem;
+    }
+    
+    .menu-toggle {
+        font-size: 0.7rem;
+    }
+    
+    .theme-toggle-small {
+        width: 20px;
+        height: 20px;
+        font-size: 0.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        padding: 4px 6px;
+        gap: 4px;
+    }
+    
+    .stat-card {
+        padding: 6px 8px;
+    }
+    
+    .stat-info .stat-value {
+        font-size: 0.8rem;
     }
 }
 
@@ -246,4 +541,22 @@
         border: 1px solid #ccc !important;
         box-shadow: none !important;
     }
+}
+
+/* ============================================
+   SIDEBAR OVERLAY (MOBILE)
+   ============================================ */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 150;
+}
+
+.sidebar-overlay.show {
+    display: block;
 }

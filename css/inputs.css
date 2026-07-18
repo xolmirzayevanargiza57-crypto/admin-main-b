@@ -1,0 +1,741 @@
+/* ============================================
+   INPUTS - TO'LIQ VA XATOLARSIZ
+   ============================================ */
+
+/* ============================================
+   FORM GROUP
+   ============================================ */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.form-group label i {
+    margin-right: 8px;
+    color: var(--text-muted);
+    width: 16px;
+    text-align: center;
+}
+
+/* ============================================
+   INPUT WRAPPER
+   ============================================ */
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input-wrapper input,
+.input-wrapper select,
+.input-wrapper textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 0.9375rem;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* Password input uchun qo'shimcha joy - iconlar uchun */
+.input-wrapper input[type="password"] {
+    padding-right: 112px;
+}
+
+/* Focus */
+.input-wrapper input:focus,
+.input-wrapper select:focus,
+.input-wrapper textarea:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .input-wrapper input:focus,
+[data-theme="dark"] .input-wrapper select:focus,
+[data-theme="dark"] .input-wrapper textarea:focus {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
+}
+
+/* Hover */
+.input-wrapper input:hover,
+.input-wrapper select:hover,
+.input-wrapper textarea:hover {
+    border-color: var(--text-muted);
+}
+
+/* Placeholder */
+.input-wrapper input::placeholder,
+.input-wrapper textarea::placeholder {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+/* Disabled / Readonly */
+.input-wrapper input:disabled,
+.input-wrapper input:read-only,
+.input-wrapper select:disabled,
+.input-wrapper textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--bg-hover);
+}
+
+.input-wrapper input:not([type="password"]) {
+    padding-right: 44px;
+}
+
+/* ============================================
+   VALIDATION ICONLAR (✅ va ⚠️)
+   ============================================ */
+.input-wrapper .input-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    display: none !important;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* SUCCESS - faqat success class qo'shilganda ko'rinadi */
+.input-wrapper input.success + .input-icon.success,
+.input-wrapper input.success ~ .input-icon.success {
+    display: block !important;
+    color: var(--color-success);
+}
+
+/* ERROR - faqat error class qo'shilganda ko'rinadi */
+.input-wrapper input.error + .input-icon.error,
+.input-wrapper input.error ~ .input-icon.error {
+    display: block !important;
+    color: var(--color-danger);
+}
+
+/* Input success/error chegaralari */
+.input-wrapper input.success {
+    border-color: var(--color-success);
+}
+
+.input-wrapper input.error {
+    border-color: var(--color-danger);
+}
+
+/* ============================================
+   PASSWORD TOGGLE (👁️) - ENG O'NG TOMONDA
+   ============================================ */
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    font-size: 1rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    z-index: 3;
+}
+
+.password-toggle:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.password-toggle:focus {
+    outline: none;
+}
+
+.password-toggle i {
+    pointer-events: none;
+}
+
+/* ============================================
+   SEARCH INPUT
+   ============================================ */
+.search-box {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    z-index: 2;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 14px 10px 40px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 0.875rem;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.search-box input:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .search-box input:focus {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
+}
+
+/* ============================================
+   SELECT
+   ============================================ */
+.input-wrapper select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238e8e93' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+.input-wrapper select:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .input-wrapper select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23636366' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+}
+
+[data-theme="dark"] .input-wrapper select:focus {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
+}
+
+/* ============================================
+   TEXTAREA
+   ============================================ */
+.input-wrapper textarea {
+    min-height: 80px;
+    resize: vertical;
+    padding: 12px 16px;
+    line-height: 1.6;
+    font-family: 'Inter', sans-serif;
+}
+
+.input-wrapper textarea:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .input-wrapper textarea:focus {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
+}
+
+/* ============================================
+   DATE INPUT (KALENDAR)
+   ============================================ */
+input[type="date"] {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 40px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0.6;
+    cursor: pointer;
+    padding: 4px;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.6;
+}
+
+input[type="date"]:hover::-webkit-calendar-picker-indicator {
+    opacity: 1;
+}
+
+/* ============================================
+   DATE GROUP (2 ta kalendar yonma-yon)
+   ============================================ */
+.date-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.date-group .form-group {
+    margin-bottom: 0;
+}
+
+/* ============================================
+   CHECKBOX
+   ============================================ */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--text-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.checkbox-label:hover {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .checkbox-label input[type="checkbox"] {
+    accent-color: var(--text-primary);
+}
+
+/* ============================================
+   RADIO
+   ============================================ */
+.radio-group {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.radio-label input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--text-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.radio-label:hover {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .radio-label input[type="radio"] {
+    accent-color: var(--text-primary);
+}
+
+/* ============================================
+   INPUT HELP TEXT
+   ============================================ */
+.input-help {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.input-help i {
+    margin-right: 4px;
+}
+
+/* ============================================
+   FILE INPUT
+   ============================================ */
+.input-wrapper input[type="file"] {
+    padding: 10px 14px;
+    cursor: pointer;
+}
+
+.input-wrapper input[type="file"]::file-selector-button {
+    padding: 6px 16px;
+    border: none;
+    border-radius: 6px;
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-right: 12px;
+}
+
+.input-wrapper input[type="file"]::file-selector-button:hover {
+    background: var(--bg-active);
+}
+
+[data-theme="dark"] .input-wrapper input[type="file"]::file-selector-button {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .input-wrapper input[type="file"]::file-selector-button:hover {
+    background: var(--bg-active);
+}
+
+/* ============================================
+   NUMBER INPUT
+   ============================================ */
+input[type="number"] {
+    appearance: textfield;
+    -webkit-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* ============================================
+   RANGE INPUT
+   ============================================ */
+input[type="range"] {
+    width: 100%;
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    cursor: pointer;
+    border: none;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    cursor: pointer;
+    border: none;
+}
+
+[data-theme="dark"] input[type="range"] {
+    background: var(--border-color);
+}
+
+[data-theme="dark"] input[type="range"]::-webkit-slider-thumb {
+    background: var(--text-primary);
+}
+
+[data-theme="dark"] input[type="range"]::-moz-range-thumb {
+    background: var(--text-primary);
+}
+
+/* ============================================
+   COLOR INPUT
+   ============================================ */
+input[type="color"] {
+    padding: 4px;
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+    border-radius: 10px;
+    border: 2px solid var(--border-color);
+    background: var(--bg-input);
+}
+
+input[type="color"]:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] input[type="color"]:focus {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .input-wrapper input,
+    .input-wrapper select,
+    .input-wrapper textarea {
+        padding: 10px 14px;
+        font-size: 0.875rem;
+    }
+    
+    .input-wrapper input[type="password"] {
+        padding-right: 72px;
+    }
+    
+    .password-toggle {
+        width: 28px;
+        height: 28px;
+        font-size: 0.875rem;
+        right: 10px;
+    }
+    
+    .input-wrapper .input-icon {
+        right: 42px;
+    }
+    
+    .date-group {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+    
+    .date-group .form-group {
+        margin-bottom: 14px;
+    }
+    
+    .date-group .form-group:last-child {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .input-wrapper input,
+    .input-wrapper select,
+    .input-wrapper textarea {
+        padding: 8px 12px;
+        font-size: 0.8125rem;
+        border-radius: 8px;
+    }
+    
+    .input-wrapper input[type="password"] {
+        padding-right: 68px;
+    }
+    
+    .password-toggle {
+        width: 24px;
+        height: 24px;
+        font-size: 0.8125rem;
+        right: 8px;
+    }
+    
+    .input-wrapper .input-icon {
+        right: 38px;
+        font-size: 0.875rem;
+    }
+    
+    .search-box input {
+        padding: 8px 10px 8px 32px;
+        font-size: 0.8125rem;
+    }
+    
+    .form-group label {
+        font-size: 0.8125rem;
+    }
+    
+    .checkbox-label {
+        font-size: 0.8125rem;
+    }
+    
+    .radio-label {
+        font-size: 0.8125rem;
+    }
+    
+    .input-help {
+        font-size: 0.6875rem;
+    }
+}
+
+/* ============================================
+   DARK THEME
+   ============================================ */
+[data-theme="dark"] .input-wrapper input,
+[data-theme="dark"] .input-wrapper select,
+[data-theme="dark"] .input-wrapper textarea,
+[data-theme="dark"] .search-box input {
+    background: var(--bg-input);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .input-wrapper input:focus,
+[data-theme="dark"] .input-wrapper select:focus,
+[data-theme="dark"] .input-wrapper textarea:focus,
+[data-theme="dark"] .search-box input:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .input-wrapper input::placeholder,
+[data-theme="dark"] .input-wrapper textarea::placeholder {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .input-wrapper input.success {
+    border-color: var(--color-success);
+}
+
+[data-theme="dark"] .input-wrapper input.error {
+    border-color: var(--color-danger);
+}
+
+[data-theme="dark"] .input-help {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .checkbox-label {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .radio-label {
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   INPUT ICONLAR - TO'G'RI JOYLASHGAN
+   ============================================ */
+
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 12px 48px 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 0.9375rem;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Password input - ko'z tugmasi uchun joy */
+.input-wrapper input[type="password"] {
+    padding-right: 80px;
+}
+
+.input-wrapper input:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .input-wrapper input:focus {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
+}
+
+.input-wrapper input::placeholder {
+    color: var(--text-muted);
+}
+
+/* ============================================
+   VALIDATION ICONLAR (✅ va ⚠️) - O'NG TOMONDA
+   ============================================ */
+.input-wrapper .input-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    display: none !important;
+    pointer-events: none;
+    z-index: 4;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* SUCCESS - faqat success class qo'shilganda */
+.input-wrapper input.success + .input-icon.success {
+    display: block !important;
+    color: var(--color-success);
+}
+
+/* ERROR - faqat error class qo'shilganda */
+.input-wrapper input.error + .input-icon.error {
+    display: block !important;
+    color: var(--color-danger);
+}
+
+.input-wrapper input.success {
+    border-color: var(--color-success);
+}
+
+.input-wrapper input.error {
+    border-color: var(--color-danger);
+}
+
+/* ============================================
+   PASSWORD TOGGLE (👁️) - ENG O'NG TOMONDA
+   ============================================ */
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    font-size: 1rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    z-index: 3;
+}
+
+.password-toggle:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.password-toggle:focus {
+    outline: none;
+}
+
+.password-toggle i {
+    pointer-events: none;
+}

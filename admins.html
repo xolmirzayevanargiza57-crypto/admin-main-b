@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Main - Admin Customerlar</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/inputs.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon"><i class="fas fa-crown"></i></div>
+                <span>Admin Main</span>
+                <span class="brand-version">v1.0</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link" data-nav-label="navDashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                <a href="admins.html" class="nav-link active" data-nav-label="navAdmins"><i class="fas fa-users"></i> Admin Customerlar</a>
+                <a href="admin-add.html" class="nav-link" data-nav-label="navAdd"><i class="fas fa-user-plus"></i> Yangi Admin</a>
+                <a href="settings.html" class="nav-link" data-nav-label="navSettings"><i class="fas fa-cog"></i> Sozlamalar</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Chiqish</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button id="menuToggle" class="menu-toggle"><i class="fas fa-bars"></i></button>
+                    <div>
+                        <h2 data-i18n="navAdmins">Admin Customerlar</h2>
+                        <p class="text-muted">Barcha admin customerlarni boshqaring</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="theme-toggle-small" id="themeToggleSmall"><i class="fas fa-moon"></i></button>
+                    <a href="admin-add.html" class="btn-primary"><i class="fas fa-plus"></i> Yangi Admin</a>
+                </div>
+            </header>
+
+            <div id="notificationPanel" class="notification-panel"></div>
+
+            <section class="toolbar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Admin qidirish..." />
+                </div>
+                <div class="filter-box">
+                    <div class="filter-pills" id="subscriptionFilter">
+                        <button type="button" class="filter-pill active" data-value="all">Barchasi</button>
+                        <button type="button" class="filter-pill" data-value="active">Faol</button>
+                        <button type="button" class="filter-pill" data-value="inactive">Faol emas</button>
+                        <button type="button" class="filter-pill" data-value="none">Obunasi yo'q</button>
+                    </div>
+                    <button id="refreshBtn" class="btn-secondary"><i class="fas fa-sync-alt"></i></button>
+                </div>
+            </section>
+
+            <section class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th><i class="fas fa-user"></i> F.I.SH</th>
+                            <th><i class="fas fa-envelope"></i> Email</th>
+                            <th><i class="fas fa-calendar"></i> Obuna</th>
+                            <th><i class="fas fa-circle"></i> Holati</th>
+                            <th><i class="fas fa-cog"></i> Harakatlar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminsTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                <div class="loading-spinner"></div>
+                                <p>Yuklanmoqda...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="fas fa-moon moon"></i>
+    </button>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/language.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/admins.js"></script>
+</body>
+</html>

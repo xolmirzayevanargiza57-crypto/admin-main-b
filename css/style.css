@@ -1,5 +1,5 @@
 /* ============================================
-   ADMIN MAIN - OQ VA QORA
+   ADMIN MAIN - OQ VA QORA (TUZATILGAN)
    ============================================ */
 
 * {
@@ -130,6 +130,7 @@ body {
     color: var(--bg-primary);
 }
 
+/* ✅ USER AVATAR - TUZATILDI (SUN ICON O'RNIGA AVATAR) */
 .user-avatar {
     width: 40px;
     height: 40px;
@@ -142,9 +143,49 @@ body {
     font-weight: 600;
     font-size: 1rem;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 [data-theme="dark"] .user-avatar {
+    background: var(--text-primary);
+    color: var(--bg-primary);
+}
+
+/* ✅ AVATAR ICHIDAGI MATN (RASM O'RNIGA) */
+.user-avatar .avatar-text {
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* ✅ PROFILE AVATAR - TUZATILDI */
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bg-primary);
+    font-size: 2rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.profile-avatar.large {
+    width: 100px;
+    height: 100px;
+    font-size: 2.5rem;
+}
+
+.profile-avatar .avatar-text {
+    font-size: inherit;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+[data-theme="dark"] .profile-avatar {
     background: var(--text-primary);
     color: var(--bg-primary);
 }
@@ -563,19 +604,18 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 [data-theme="dark"] .theme-toggle .sun { display: block; }
 [data-theme="dark"] .theme-toggle .moon { display: none; }
 
-/* ✅ THEME TOGGLE SMALL - TELEFON UCHUN KO'RINADI */
+/* ✅ THEME TOGGLE SMALL - TELEFON UCHUN */
 .theme-toggle-small {
-    display: none; /* Desktopda yashirin */
+    display: none;
 }
 
-/* ✅ Telefonda ko'rinadi */
 @media (max-width: 768px) {
     .theme-toggle {
-        display: none !important;  /* Telefonda floating theme yashirin */
+        display: none !important;
     }
     
     .theme-toggle-small {
-        display: inline-flex !important;  /* ✅ Telefonda ko'rinadi */
+        display: inline-flex !important;
         align-items: center;
         justify-content: center;
         width: 30px;
@@ -603,7 +643,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     }
 }
 
-/* Desktopda yashirish */
 @media (min-width: 769px) {
     .theme-toggle-small {
         display: none !important;
@@ -933,6 +972,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     flex-shrink: 0;
 }
 
+/* ✅ TELEFON ICONLARINI YASHIRISH */
 .header-right .fa-phone,
 .header-right .fa-phone-alt,
 .header-right .fa-phone-volume,
@@ -940,15 +980,35 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .user-profile .fa-phone,
 .user-profile .fa-phone-alt,
 .user-profile .fa-phone-volume,
-.user-profile [class*="phone"],
-.user-profile i {
+.user-profile [class*="phone"] {
     display: none !important;
 }
 
+/* ✅ USER PROFILE - AVATAR TO'G'RI KO'RINISHI UCHUN */
 .user-profile {
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.user-profile .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bg-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.user-profile .user-avatar .avatar-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
 }
 
 .user-info .user-name {
@@ -1148,6 +1208,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background: var(--bg-active);
 }
 
+/* ✅ RECENT ADMIN AVATAR - TUZATILDI */
 .recent-admin-avatar {
     width: 36px;
     height: 36px;
@@ -1160,6 +1221,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     font-weight: 600;
     font-size: 0.875rem;
     flex-shrink: 0;
+}
+
+.recent-admin-avatar .avatar-text {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
 }
 
 [data-theme="dark"] .recent-admin-avatar {
@@ -1472,7 +1539,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* ============================================
-   PROFILE
+   PROFILE - TUZATILDI
    ============================================ */
 .profile-container {
     padding: 24px 32px;
@@ -1490,6 +1557,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     margin-bottom: 20px;
 }
 
+/* ✅ PROFILE AVATAR - TUZATILDI (RASM KO'RINISHI UCHUN) */
 .profile-avatar {
     width: 80px;
     height: 80px;
@@ -1508,6 +1576,20 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     width: 100px;
     height: 100px;
     font-size: 2.5rem;
+}
+
+.profile-avatar .avatar-text {
+    font-size: inherit;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Avatar rasmi uchun (agar rasm bo'lsa) */
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 [data-theme="dark"] .profile-avatar {
@@ -1598,7 +1680,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     justify-content: space-between;
     align-items: center;
     padding: 12px 16px;
-    background: var(--bg-light);
+    background: var(--bg-hover);
     border-radius: calc(var(--radius) - 2px);
     border: 1px solid var(--border-color);
 }
@@ -1616,11 +1698,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     justify-content: center;
     width: 40px;
     height: 40px;
-    background: var(--color-primary);
-    color: white;
+    background: var(--text-primary);
+    color: var(--bg-primary);
     border-radius: 50%;
     font-weight: 600;
     font-size: 0.875rem;
+}
+
+[data-theme="dark"] .history-number {
+    background: var(--text-primary);
+    color: var(--bg-primary);
 }
 
 .history-details {
@@ -1874,23 +1961,27 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         padding: 16px 24px;
         gap: 12px;
     }
+    
     .charts-grid {
         grid-template-columns: 1fr;
         padding: 0 24px 24px;
         gap: 12px;
     }
+    
     .profile-stats {
         grid-template-columns: repeat(2, 1fr);
     }
+    
     .top-header {
         padding: 14px 24px;
     }
+    
     .header-left h2 {
         font-size: 1.1rem;
     }
 }
 
-/* ✅ Telefon (max 768px) */
+/* ✅ Telefon (max 768px) - PANELLAR KICHRAYMAGAN TUZATILDI */
 @media (max-width: 768px) {
     /* Sidebar */
     .sidebar {
@@ -1918,41 +2009,67 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         display: block !important;
     }
     
-    /* Top header */
+    /* Top header - PANELLAR KICHRAYMAGAN */
     .top-header {
-        padding: 10px 14px;
-        flex-wrap: nowrap;
-        gap: 6px;
-        overflow: hidden;
+        padding: 14px 18px;
+        flex-wrap: wrap;
+        gap: 10px;
+        overflow: visible;
     }
     
     .header-left {
         flex: 1;
         min-width: 0;
-        gap: 6px;
-        overflow: hidden;
+        gap: 10px;
+        overflow: visible;
     }
     
     .header-left h2 {
-        font-size: 0.85rem;
+        font-size: 1rem;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: 120px;
+        max-width: 150px;
     }
     
     .header-left .text-muted {
-        display: none;
+        display: inline-block;
+        font-size: 0.75rem;
     }
     
     .header-right {
-        gap: 4px;
+        gap: 10px;
         flex-shrink: 0;
     }
     
+    /* ✅ USER PROFILE - TELEFONDA HAM KO'RINADI */
+    .user-profile {
+        display: flex !important;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .user-profile .user-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 0.7rem;
+    }
+    
+    .user-profile .user-avatar .avatar-text {
+        font-size: 0.7rem;
+    }
+    
+    .user-info .user-name {
+        font-size: 0.75rem;
+    }
+    
+    .user-info .user-role {
+        display: none;
+    }
+    
     .header-right .btn-primary {
-        padding: 4px 10px;
-        font-size: 0.65rem;
+        padding: 6px 12px;
+        font-size: 0.7rem;
         white-space: nowrap;
         border-radius: 6px;
         min-width: auto;
@@ -1964,26 +2081,367 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         margin-right: 2px;
     }
     
-    .user-profile {
-        display: none !important;
-    }
-    
-    /* Stats */
+    /* Stats - PANELLAR KICHRAYMAGAN */
     .stats-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        padding: 8px 12px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 16px 18px;
     }
     
     .stat-card {
-        padding: 10px 12px;
-        gap: 8px;
+        padding: 16px 18px;
+        gap: 12px;
     }
     
     .stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .stat-info .stat-value {
+        font-size: 1.2rem;
+    }
+    
+    .stat-info .stat-label {
+        font-size: 0.7rem;
+    }
+    
+    /* Charts - PANELLAR KICHRAYMAGAN */
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 0 18px 24px;
+    }
+    
+    .chart-card {
+        height: auto;
+        max-height: 360px;
+        min-height: 280px;
+        padding: 18px;
+    }
+    
+    .chart-card-fixed {
+        flex: none;
+        height: auto;
+        max-height: 360px;
+        min-height: 280px;
+    }
+    
+    .chart-canvas-wrap {
+        min-height: 180px;
+        max-height: 220px;
+    }
+    
+    .chart-card canvas {
+        max-height: 200px;
+        min-height: 160px;
+        width: 100% !important;
+        height: auto !important;
+    }
+    
+    .chart-header h3 {
+        font-size: 0.9rem;
+    }
+    
+    /* Recent admins - PANELLAR KICHRAYMAGAN */
+    .recent-admins.scrollable {
+        max-height: 220px;
+        min-height: 150px;
+    }
+    
+    .recent-admin-item {
+        padding: 10px 14px;
+        gap: 12px;
+    }
+    
+    .recent-admin-avatar {
         width: 32px;
         height: 32px;
+        font-size: 0.8rem;
+    }
+    
+    .recent-admin-name {
+        font-size: 0.8rem;
+    }
+    
+    .recent-admin-email {
+        font-size: 0.7rem;
+    }
+    
+    .badge {
+        font-size: 0.65rem;
+        padding: 2px 8px;
+    }
+    
+    /* Table - PANELLAR KICHRAYMAGAN */
+    .table-container {
+        padding: 0 18px 24px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        display: block;
+    }
+    
+    .data-table {
+        min-width: 700px;
+        font-size: 0.8rem;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 12px 16px;
         font-size: 0.75rem;
+        max-width: 120px;
+    }
+    
+    .data-table th i {
+        display: inline-block;
+    }
+    
+    .data-table td:last-child {
+        min-width: 150px;
+        max-width: 150px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 6px;
+    }
+    
+    .action-buttons .table-action {
+        padding: 4px 8px;
+        font-size: 0.65rem;
+        white-space: nowrap;
+        border-radius: 4px;
+    }
+    
+    .action-buttons .table-action i {
+        font-size: 0.6rem;
+        margin-right: 3px;
+    }
+    
+    /* Toolbar - PANELLAR KICHRAYMAGAN */
+    .toolbar {
+        padding: 12px 18px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .search-box {
+        width: 100%;
+        min-width: unset;
+        flex: 1 1 100%;
+    }
+    
+    .search-box input {
+        padding: 8px 12px 8px 32px;
+        font-size: 0.8rem;
+        width: 100%;
+    }
+    
+    .filter-box {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .filter-pills {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .filter-pill {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+    
+    /* Buttons - PANELLAR KICHRAYMAGAN */
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger,
+    .btn-warning {
+        padding: 10px 16px;
+        font-size: 0.85rem;
+    }
+    
+    /* Forms - PANELLAR KICHRAYMAGAN */
+    .form-container {
+        padding: 12px 18px;
+    }
+    
+    .app-form {
+        padding: 20px;
+    }
+    
+    .app-form .form-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    /* Profile - PANELLAR KICHRAYMAGAN */
+    .profile-container {
+        padding: 12px 18px;
+    }
+    
+    .profile-header {
+        flex-direction: row;
+        text-align: left;
+        padding: 24px;
+        gap: 20px;
+    }
+    
+    .profile-avatar {
+        width: 64px;
+        height: 64px;
+        font-size: 1.5rem;
+    }
+    
+    .profile-avatar.large {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+    }
+    
+    .profile-stats {
+        grid-template-columns: repeat(3, 1fr);
+        padding: 20px 24px;
+        gap: 12px;
+    }
+    
+    .profile-actions {
+        flex-direction: row;
+        gap: 10px;
+    }
+    
+    .profile-actions .btn-primary,
+    .profile-actions .btn-danger,
+    .profile-actions .btn-warning {
+        width: auto;
+        justify-content: center;
+        flex: 1;
+    }
+    
+    /* Settings - PANELLAR KICHRAYMAGAN */
+    .settings-container {
+        padding: 12px 18px;
+        gap: 16px;
+    }
+    
+    .settings-card {
+        padding: 20px 24px;
+    }
+    
+    .settings-actions {
+        flex-direction: row;
+        gap: 10px;
+    }
+    
+    .settings-actions .btn-secondary,
+    .settings-actions .btn-danger {
+        width: auto;
+        justify-content: center;
+        flex: 1;
+    }
+    
+    /* Theme options */
+    .theme-options {
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .theme-option {
+        max-width: 100px;
+        flex-direction: column;
+        justify-content: center;
+        padding: 10px 16px;
+        flex: 1;
+    }
+    
+    .theme-option i {
+        font-size: 1rem;
+    }
+    
+    /* Login */
+    .login-card {
+        padding: 28px 24px;
+    }
+    
+    /* Date */
+    .date-group {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+}
+
+/* ✅ Kichik telefon (max 480px) */
+@media (max-width: 480px) {
+    .top-header {
+        padding: 10px 14px;
+        gap: 8px;
+    }
+    
+    .header-left h2 {
+        font-size: 0.85rem;
+        max-width: 100px;
+    }
+    
+    .header-left .text-muted {
+        display: none;
+    }
+    
+    .user-profile .user-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 0.6rem;
+    }
+    
+    .user-profile .user-avatar .avatar-text {
+        font-size: 0.6rem;
+    }
+    
+    .user-info .user-name {
+        font-size: 0.65rem;
+    }
+    
+    .header-right .btn-primary {
+        padding: 4px 8px;
+        font-size: 0.6rem;
+    }
+    
+    .header-right .btn-primary i {
+        font-size: 0.5rem;
+        margin-right: 2px;
+    }
+    
+    .menu-toggle {
+        font-size: 0.9rem;
+    }
+    
+    .theme-toggle-small {
+        width: 26px;
+        height: 26px;
+        font-size: 0.65rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        padding: 10px 14px;
+    }
+    
+    .stat-card {
+        padding: 12px 14px;
+        gap: 10px;
+    }
+    
+    .stat-icon {
+        width: 34px;
+        height: 34px;
+        font-size: 0.85rem;
     }
     
     .stat-info .stat-value {
@@ -1994,52 +2452,44 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         font-size: 0.6rem;
     }
     
-    /* Charts */
     .charts-grid {
-        grid-template-columns: 1fr;
-        gap: 10px;
-        padding: 0 12px 16px;
+        padding: 0 14px 20px;
+        gap: 12px;
     }
     
     .chart-card {
-        height: auto;
-        max-height: 320px;
+        max-height: 300px;
         min-height: 240px;
-        padding: 12px;
+        padding: 14px;
     }
     
     .chart-card-fixed {
-        flex: none;
-        height: auto;
-        max-height: 320px;
+        max-height: 300px;
         min-height: 240px;
     }
     
     .chart-canvas-wrap {
-        min-height: 150px;
-        max-height: 200px;
+        min-height: 140px;
+        max-height: 180px;
     }
     
     .chart-card canvas {
-        max-height: 170px;
-        min-height: 130px;
-        width: 100% !important;
-        height: auto !important;
+        max-height: 160px;
+        min-height: 120px;
     }
     
     .chart-header h3 {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
     
-    /* Recent admins */
     .recent-admins.scrollable {
         max-height: 180px;
         min-height: 120px;
     }
     
     .recent-admin-item {
-        padding: 6px 10px;
-        gap: 8px;
+        padding: 8px 12px;
+        gap: 10px;
     }
     
     .recent-admin-avatar {
@@ -2056,198 +2506,114 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         font-size: 0.6rem;
     }
     
-    .badge {
-        font-size: 0.55rem;
-        padding: 1px 6px;
-    }
-    
-    /* Table */
     .table-container {
-        padding: 0 12px 16px;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        display: block;
+        padding: 0 14px 20px;
     }
     
     .data-table {
-        min-width: 620px;
+        min-width: 550px;
         font-size: 0.7rem;
     }
     
     .data-table th,
     .data-table td {
-        padding: 8px 10px;
+        padding: 8px 12px;
         font-size: 0.65rem;
-        max-width: 100px;
-    }
-    
-    .data-table th i {
-        display: none;
+        max-width: 90px;
     }
     
     .data-table td:last-child {
-        min-width: 130px;
-        max-width: 130px;
-    }
-    
-    .action-buttons {
-        display: flex;
-        flex-wrap: nowrap;
-        gap: 4px;
+        min-width: 120px;
+        max-width: 120px;
     }
     
     .action-buttons .table-action {
         padding: 3px 6px;
         font-size: 0.55rem;
-        white-space: nowrap;
-        border-radius: 4px;
     }
     
     .action-buttons .table-action i {
         font-size: 0.5rem;
-        margin-right: 2px;
     }
     
-    /* Toolbar */
-    .toolbar {
-        padding: 8px 12px;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
+    .login-card {
+        padding: 24px 20px;
     }
     
-    .search-box {
-        width: 100%;
-        min-width: unset;
+    .login-logo h1 {
+        font-size: 1.3rem;
     }
     
-    .search-box input {
-        padding: 6px 10px 6px 28px;
-        font-size: 0.75rem;
-        width: 100%;
+    .logo-icon {
+        width: 56px;
+        height: 56px;
     }
     
-    .filter-box {
-        justify-content: stretch;
-        flex-wrap: wrap;
+    .logo-icon i {
+        font-size: 24px;
     }
     
-    .filter-pills {
-        flex-wrap: wrap;
-        gap: 4px;
-    }
-    
-    .filter-pill {
-        padding: 4px 8px;
-        font-size: 0.7rem;
-    }
-    
-    /* Buttons */
     .btn-primary,
     .btn-secondary,
     .btn-danger,
     .btn-warning {
+        padding: 8px 14px;
+        font-size: 0.8rem;
+    }
+    
+    .theme-option {
+        max-width: 80px;
         padding: 8px 12px;
-        font-size: 0.75rem;
     }
     
-    /* Forms */
-    .form-container {
-        padding: 8px 12px;
+    .theme-option i {
+        font-size: 0.85rem;
     }
     
-    .app-form {
-        padding: 14px;
-    }
-    
-    .app-form .form-actions {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    /* Profile */
-    .profile-container {
-        padding: 8px 12px;
+    .theme-option span {
+        font-size: 0.65rem;
     }
     
     .profile-header {
         flex-direction: column;
         text-align: center;
-        padding: 16px;
-        gap: 12px;
+        padding: 20px;
+        gap: 16px;
     }
     
     .profile-stats {
         grid-template-columns: 1fr;
-        padding: 12px 16px;
+        padding: 16px 20px;
         gap: 10px;
     }
     
     .profile-actions {
         flex-direction: column;
-        gap: 8px;
     }
     
     .profile-actions .btn-primary,
     .profile-actions .btn-danger,
     .profile-actions .btn-warning {
         width: 100%;
-        justify-content: center;
-    }
-    
-    /* Settings */
-    .settings-container {
-        padding: 8px 12px;
-        gap: 12px;
-    }
-    
-    .settings-card {
-        padding: 14px 16px;
     }
     
     .settings-actions {
         flex-direction: column;
-        gap: 8px;
     }
     
     .settings-actions .btn-secondary,
     .settings-actions .btn-danger {
         width: 100%;
-        justify-content: center;
     }
     
-    /* Theme options */
-    .theme-options {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .theme-option {
-        max-width: 100%;
-        flex-direction: row;
-        justify-content: center;
-        padding: 10px 16px;
-    }
-    
-    .theme-option i {
-        font-size: 1rem;
-    }
-    
-    /* Login */
-    .login-card {
-        padding: 24px 20px;
-    }
-    
-    /* Date */
     .date-group {
         grid-template-columns: 1fr;
         gap: 0;
     }
 }
 
-/* ✅ Kichik telefon (max 480px) */
-@media (max-width: 480px) {
-    /* Top header */
+/* ✅ Juda kichik telefon (max 360px) */
+@media (max-width: 360px) {
     .top-header {
         padding: 6px 10px;
         gap: 4px;
@@ -2255,17 +2621,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     
     .header-left h2 {
         font-size: 0.7rem;
-        max-width: 80px;
+        max-width: 70px;
     }
     
     .header-right .btn-primary {
         padding: 3px 6px;
-        font-size: 0.55rem;
-    }
-    
-    .header-right .btn-primary i {
         font-size: 0.5rem;
-        margin-right: 2px;
     }
     
     .menu-toggle {
@@ -2273,100 +2634,49 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     }
     
     .theme-toggle-small {
-        width: 24px;
-        height: 24px;
-        font-size: 0.6rem;
+        width: 22px;
+        height: 22px;
+        font-size: 0.55rem;
     }
     
-    /* Stats */
     .stats-grid {
         grid-template-columns: 1fr 1fr;
-        gap: 5px;
-        padding: 5px 8px;
+        gap: 6px;
+        padding: 6px 10px;
     }
     
     .stat-card {
-        padding: 6px 8px;
+        padding: 8px 10px;
         gap: 6px;
     }
     
     .stat-icon {
-        width: 26px;
-        height: 26px;
-        font-size: 0.6rem;
+        width: 28px;
+        height: 28px;
+        font-size: 0.65rem;
     }
     
     .stat-info .stat-value {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
     }
     
     .stat-info .stat-label {
         font-size: 0.5rem;
     }
     
-    /* Charts */
-    .charts-grid {
-        padding: 0 8px 12px;
-        gap: 8px;
-    }
-    
     .chart-card {
-        max-height: 280px;
+        max-height: 260px;
         min-height: 200px;
         padding: 10px;
     }
     
-    .chart-card-fixed {
-        max-height: 280px;
-        min-height: 200px;
-    }
-    
     .chart-canvas-wrap {
-        min-height: 120px;
-        max-height: 160px;
-    }
-    
-    .chart-card canvas {
+        min-height: 110px;
         max-height: 140px;
-        min-height: 100px;
-    }
-    
-    .chart-header h3 {
-        font-size: 0.65rem;
-    }
-    
-    /* Recent admins */
-    .recent-admins.scrollable {
-        max-height: 150px;
-        min-height: 100px;
-    }
-    
-    .recent-admin-item {
-        padding: 4px 8px;
-        gap: 6px;
-    }
-    
-    .recent-admin-avatar {
-        width: 22px;
-        height: 22px;
-        font-size: 0.6rem;
-    }
-    
-    .recent-admin-name {
-        font-size: 0.6rem;
-    }
-    
-    .recent-admin-email {
-        font-size: 0.5rem;
-    }
-    
-    /* Table */
-    .table-container {
-        padding: 0 8px 12px;
     }
     
     .data-table {
-        min-width: 480px;
+        min-width: 420px;
         font-size: 0.6rem;
     }
     
@@ -2374,154 +2684,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     .data-table td {
         padding: 5px 8px;
         font-size: 0.55rem;
-        max-width: 70px;
-    }
-    
-    .data-table td:last-child {
-        min-width: 100px;
-        max-width: 100px;
-    }
-    
-    .action-buttons .table-action {
-        padding: 2px 4px;
-        font-size: 0.45rem;
-    }
-    
-    .action-buttons .table-action i {
-        font-size: 0.4rem;
-    }
-    
-    /* Login */
-    .login-card {
-        padding: 20px 16px;
-    }
-    
-    .login-logo h1 {
-        font-size: 1.1rem;
-    }
-    
-    .logo-icon {
-        width: 48px;
-        height: 48px;
-    }
-    
-    .logo-icon i {
-        font-size: 20px;
-    }
-    
-    /* Buttons */
-    .btn-primary,
-    .btn-secondary,
-    .btn-danger,
-    .btn-warning {
-        padding: 8px 12px;
-        font-size: 0.75rem;
-    }
-    
-    /* Theme toggle floating */
-    .theme-toggle {
-        bottom: 12px;
-        right: 12px;
-        width: 38px;
-        height: 38px;
-        font-size: 0.9rem;
-    }
-    
-    /* Theme options */
-    .theme-options {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .theme-option {
-        max-width: 100%;
-        flex-direction: row;
-        justify-content: center;
-        padding: 8px 12px;
-    }
-    
-    .theme-option i {
-        font-size: 0.9rem;
-    }
-    
-    .theme-option span {
-        font-size: 0.7rem;
-    }
-}
-
-/* ✅ Juda kichik telefon (max 360px) */
-@media (max-width: 360px) {
-    .top-header {
-        padding: 4px 6px;
-        gap: 4px;
-    }
-    
-    .header-left h2 {
-        font-size: 0.6rem;
         max-width: 60px;
-    }
-    
-    .header-right .btn-primary {
-        padding: 2px 4px;
-        font-size: 0.5rem;
-    }
-    
-    .menu-toggle {
-        font-size: 0.65rem;
-    }
-    
-    .theme-toggle-small {
-        width: 20px;
-        height: 20px;
-        font-size: 0.5rem;
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 4px;
-        padding: 4px 6px;
-    }
-    
-    .stat-card {
-        padding: 4px 6px;
-        gap: 4px;
-    }
-    
-    .stat-icon {
-        width: 22px;
-        height: 22px;
-        font-size: 0.5rem;
-    }
-    
-    .stat-info .stat-value {
-        font-size: 0.7rem;
-    }
-    
-    .stat-info .stat-label {
-        font-size: 0.45rem;
-    }
-    
-    .chart-card {
-        max-height: 240px;
-        min-height: 170px;
-        padding: 8px;
-    }
-    
-    .chart-canvas-wrap {
-        min-height: 100px;
-        max-height: 130px;
-    }
-    
-    .data-table {
-        min-width: 380px;
-        font-size: 0.5rem;
-    }
-    
-    .data-table th,
-    .data-table td {
-        padding: 3px 5px;
-        font-size: 0.45rem;
-        max-width: 50px;
     }
 }
 

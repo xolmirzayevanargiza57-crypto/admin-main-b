@@ -19,6 +19,7 @@ body {
     color: var(--text-primary);
     min-height: 100vh;
     transition: background 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
 }
 
 /* ============================================
@@ -104,7 +105,6 @@ body {
     color: var(--bg-primary);
 }
 
-/* Brand icon - Sidebar */
 .brand-icon {
     width: 40px;
     height: 40px;
@@ -130,7 +130,6 @@ body {
     color: var(--bg-primary);
 }
 
-/* User Avatar */
 .user-avatar {
     width: 40px;
     height: 40px;
@@ -271,9 +270,6 @@ body {
     border-color: var(--text-muted);
 }
 
-/* ============================================
-   INPUT ICONLAR
-   ============================================ */
 .input-wrapper .input-icon {
     position: absolute;
     right: 16px;
@@ -303,9 +299,6 @@ body {
     border-color: var(--color-danger);
 }
 
-/* ============================================
-   PASSWORD TOGGLE
-   ============================================ */
 .password-toggle {
     position: absolute;
     right: 12px;
@@ -336,7 +329,6 @@ body {
     outline: none;
 }
 
-/* Calendar Input */
 input[type="date"] {
     cursor: pointer;
     appearance: none;
@@ -354,7 +346,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     opacity: 0.6;
 }
 
-/* Textarea */
 .input-wrapper textarea {
     min-height: 80px;
     resize: vertical;
@@ -362,7 +353,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     line-height: 1.5;
 }
 
-/* Select */
 .input-wrapper select {
     appearance: none;
     -webkit-appearance: none;
@@ -377,7 +367,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23636366' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
 }
 
-/* Date Group */
 .date-group {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -541,7 +530,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* ============================================
-   THEME TOGGLE
+   THEME TOGGLE - TO'G'RI
    ============================================ */
 .theme-toggle {
     position: fixed;
@@ -574,11 +563,51 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 [data-theme="dark"] .theme-toggle .sun { display: block; }
 [data-theme="dark"] .theme-toggle .moon { display: none; }
 
-/* ============================================
-   THEME TOGGLE SMALL - TELEFON UCHUN
-   ============================================ */
+/* ✅ THEME TOGGLE SMALL - TELEFON UCHUN KO'RINADI */
 .theme-toggle-small {
-    display: none !important;
+    display: none; /* Desktopda yashirin */
+}
+
+/* ✅ Telefonda ko'rinadi */
+@media (max-width: 768px) {
+    .theme-toggle {
+        display: none !important;  /* Telefonda floating theme yashirin */
+    }
+    
+    .theme-toggle-small {
+        display: inline-flex !important;  /* ✅ Telefonda ko'rinadi */
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-primary);
+        cursor: pointer;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+    
+    .theme-toggle-small:hover {
+        background: var(--bg-hover);
+    }
+}
+
+@media (max-width: 480px) {
+    .theme-toggle-small {
+        width: 24px;
+        height: 24px;
+        font-size: 0.6rem;
+    }
+}
+
+/* Desktopda yashirish */
+@media (min-width: 769px) {
+    .theme-toggle-small {
+        display: none !important;
+    }
 }
 
 /* ============================================
@@ -813,9 +842,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     color: var(--color-danger);
 }
 
-/* ============================================
-   SIDEBAR OVERLAY
-   ============================================ */
 .sidebar-overlay {
     display: none;
     position: fixed;
@@ -841,6 +867,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     position: relative;
 }
 
+/* ============================================
+   TOP HEADER - TUZATILGAN
+   ============================================ */
 .top-header {
     display: flex;
     align-items: center;
@@ -851,12 +880,18 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     position: sticky;
     top: 0;
     z-index: 50;
+    gap: 16px;
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .header-left {
     display: flex;
     align-items: center;
     gap: 16px;
+    flex: 1;
+    min-width: 0;
 }
 
 .menu-toggle {
@@ -873,6 +908,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     font-size: 1.375rem;
     font-weight: 700;
     color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .header-left h2 i {
@@ -883,12 +921,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .header-left .text-muted {
     font-size: 0.8125rem;
     color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .header-right {
     display: flex;
     align-items: center;
     gap: 16px;
+    flex-shrink: 0;
 }
 
 .header-right .fa-phone,
@@ -989,480 +1031,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .stat-change.positive { color: var(--color-success); }
 .stat-change.negative { color: var(--color-danger); }
-
-/* ============================================
-   DASHBOARD - TELEFON UCHUN TUZATISH
-   ============================================ */
-
-/* ✅ Telefon uchun stats kartalar */
-@media (max-width: 768px) {
-    .stats-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        padding: 8px 12px;
-    }
-    
-    .stat-card {
-        padding: 10px 12px;
-        gap: 8px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-    }
-    
-    .stat-icon {
-        width: 32px;
-        height: 32px;
-        font-size: 0.75rem;
-        border-radius: 8px;
-        flex-shrink: 0;
-    }
-    
-    .stat-info {
-        flex: 1;
-        min-width: 0;
-    }
-    
-    .stat-info .stat-value {
-        font-size: 1rem;
-        font-weight: 700;
-    }
-    
-    .stat-info .stat-label {
-        font-size: 0.6rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    
-    .stat-change {
-        font-size: 0.55rem;
-    }
-    
-    /* ✅ Chart va Oxirgi adminlar */
-    .charts-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 10px;
-        padding: 0 12px 16px;
-    }
-    
-    .chart-card {
-        padding: 12px 14px;
-        height: auto;
-        max-height: 320px;
-        min-height: 240px;
-        border-radius: 12px;
-    }
-    
-    .chart-card-fixed {
-        flex: none;
-        height: auto;
-        max-height: 320px;
-        min-height: 240px;
-    }
-    
-    .chart-canvas-wrap {
-        min-height: 150px;
-        max-height: 200px;
-    }
-    
-    .chart-card canvas {
-        max-height: 170px;
-        min-height: 130px;
-        width: 100% !important;
-        height: auto !important;
-    }
-    
-    .chart-header {
-        margin-bottom: 8px;
-    }
-    
-    .chart-header h3 {
-        font-size: 0.8rem;
-    }
-    
-    .chart-header h3 i {
-        font-size: 0.8rem;
-    }
-    
-    /* ✅ Oxirgi adminlar ro'yxati */
-    .recent-admins.scrollable {
-        max-height: 180px;
-        min-height: 120px;
-    }
-    
-    .recent-admin-item {
-        padding: 6px 10px;
-        gap: 8px;
-        border-radius: 8px;
-    }
-    
-    .recent-admin-avatar {
-        width: 28px;
-        height: 28px;
-        font-size: 0.7rem;
-    }
-    
-    .recent-admin-name {
-        font-size: 0.7rem;
-    }
-    
-    .recent-admin-email {
-        font-size: 0.6rem;
-    }
-    
-    .badge {
-        font-size: 0.55rem;
-        padding: 1px 6px;
-    }
-    
-    /* ✅ Theme toggle - telefon */
-    .theme-toggle {
-        display: none !important;
-    }
-    
-    .theme-toggle-small {
-        display: inline-flex !important;
-        width: 28px;
-        height: 28px;
-        font-size: 0.7rem;
-        border-radius: 50%;
-        border: 1px solid var(--border-color);
-        background: var(--bg-card);
-        color: var(--text-primary);
-        cursor: pointer;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-    
-    /* ✅ Top header - telefon */
-    .top-header {
-        padding: 10px 14px;
-        flex-wrap: nowrap;
-        gap: 6px;
-        overflow: hidden;
-    }
-    
-    .header-left {
-        flex: 1;
-        min-width: 0;
-        gap: 6px;
-        overflow: hidden;
-    }
-    
-    .header-left h2 {
-        font-size: 0.85rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 120px;
-    }
-    
-    .header-left .text-muted {
-        display: none;
-    }
-    
-    .header-right {
-        gap: 4px;
-        flex-shrink: 0;
-    }
-    
-    .header-right .btn-primary {
-        padding: 4px 10px;
-        font-size: 0.65rem;
-        white-space: nowrap;
-        border-radius: 6px;
-        min-width: auto;
-        width: auto;
-    }
-    
-    .header-right .btn-primary i {
-        font-size: 0.6rem;
-        margin-right: 2px;
-    }
-    
-    .menu-toggle {
-        display: block !important;
-        font-size: 0.9rem;
-        padding: 2px 4px;
-        flex-shrink: 0;
-    }
-    
-    .user-profile {
-        display: none !important;
-    }
-    
-    /* ✅ Jadval - telefon */
-    .table-container {
-        padding: 0 12px 16px;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        display: block;
-    }
-    
-    .data-table {
-        min-width: 620px;
-        font-size: 0.7rem;
-    }
-    
-    .data-table th,
-    .data-table td {
-        padding: 8px 10px;
-        font-size: 0.65rem;
-        max-width: 100px;
-    }
-    
-    .data-table th i {
-        display: none;
-    }
-    
-    .data-table td:last-child {
-        min-width: 130px;
-        max-width: 130px;
-    }
-    
-    .action-buttons {
-        display: flex;
-        flex-wrap: nowrap;
-        gap: 4px;
-    }
-    
-    .action-buttons .table-action {
-        padding: 3px 6px;
-        font-size: 0.55rem;
-        white-space: nowrap;
-        border-radius: 4px;
-    }
-    
-    .action-buttons .table-action i {
-        font-size: 0.5rem;
-        margin-right: 2px;
-    }
-    
-    /* ✅ Toolbar - telefon */
-    .toolbar {
-        padding: 8px 12px;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-    }
-    
-    .search-box {
-        width: 100%;
-        min-width: unset;
-    }
-    
-    .search-box input {
-        padding: 6px 10px 6px 28px;
-        font-size: 0.75rem;
-        width: 100%;
-    }
-    
-    .filter-box {
-        justify-content: stretch;
-        flex-wrap: wrap;
-    }
-    
-    .filter-pills {
-        flex-wrap: wrap;
-        gap: 4px;
-    }
-    
-    .filter-pill {
-        padding: 4px 8px;
-        font-size: 0.7rem;
-    }
-}
-
-/* ✅ Juda kichik telefonlar */
-@media (max-width: 480px) {
-    .stats-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 5px;
-        padding: 5px 8px;
-    }
-    
-    .stat-card {
-        padding: 6px 8px;
-        gap: 6px;
-        border-radius: 8px;
-    }
-    
-    .stat-icon {
-        width: 26px;
-        height: 26px;
-        font-size: 0.6rem;
-        border-radius: 6px;
-    }
-    
-    .stat-info .stat-value {
-        font-size: 0.8rem;
-    }
-    
-    .stat-info .stat-label {
-        font-size: 0.5rem;
-    }
-    
-    .stat-change {
-        font-size: 0.45rem;
-    }
-    
-    .charts-grid {
-        padding: 0 8px 12px;
-        gap: 8px;
-    }
-    
-    .chart-card {
-        padding: 10px 12px;
-        max-height: 280px;
-        min-height: 200px;
-    }
-    
-    .chart-card-fixed {
-        max-height: 280px;
-        min-height: 200px;
-    }
-    
-    .chart-canvas-wrap {
-        min-height: 120px;
-        max-height: 160px;
-    }
-    
-    .chart-card canvas {
-        max-height: 140px;
-        min-height: 100px;
-    }
-    
-    .chart-header h3 {
-        font-size: 0.65rem;
-    }
-    
-    .recent-admins.scrollable {
-        max-height: 150px;
-        min-height: 100px;
-    }
-    
-    .recent-admin-item {
-        padding: 4px 8px;
-        gap: 6px;
-    }
-    
-    .recent-admin-avatar {
-        width: 22px;
-        height: 22px;
-        font-size: 0.6rem;
-    }
-    
-    .recent-admin-name {
-        font-size: 0.6rem;
-    }
-    
-    .recent-admin-email {
-        font-size: 0.5rem;
-    }
-    
-    .theme-toggle-small {
-        width: 24px;
-        height: 24px;
-        font-size: 0.6rem;
-    }
-    
-    .top-header {
-        padding: 6px 10px;
-        gap: 4px;
-    }
-    
-    .header-left h2 {
-        font-size: 0.7rem;
-        max-width: 80px;
-    }
-    
-    .header-right .btn-primary {
-        padding: 3px 6px;
-        font-size: 0.55rem;
-    }
-    
-    .header-right .btn-primary i {
-        font-size: 0.5rem;
-        margin-right: 2px;
-    }
-    
-    .menu-toggle {
-        font-size: 0.75rem;
-    }
-    
-    .table-container {
-        padding: 0 8px 12px;
-    }
-    
-    .data-table {
-        min-width: 480px;
-        font-size: 0.6rem;
-    }
-    
-    .data-table th,
-    .data-table td {
-        padding: 5px 8px;
-        font-size: 0.55rem;
-        max-width: 70px;
-    }
-    
-    .data-table td:last-child {
-        min-width: 100px;
-        max-width: 100px;
-    }
-    
-    .action-buttons .table-action {
-        padding: 2px 4px;
-        font-size: 0.45rem;
-    }
-    
-    .action-buttons .table-action i {
-        font-size: 0.4rem;
-    }
-}
-
-/* ✅ Kichik telefon (max 360px) */
-@media (max-width: 360px) {
-    .stats-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 4px;
-        padding: 4px 6px;
-    }
-    
-    .stat-card {
-        padding: 4px 6px;
-        gap: 4px;
-    }
-    
-    .stat-icon {
-        width: 22px;
-        height: 22px;
-        font-size: 0.5rem;
-    }
-    
-    .stat-info .stat-value {
-        font-size: 0.7rem;
-    }
-    
-    .stat-info .stat-label {
-        font-size: 0.45rem;
-    }
-    
-    .chart-card {
-        padding: 8px 10px;
-        max-height: 240px;
-        min-height: 170px;
-    }
-    
-    .chart-canvas-wrap {
-        min-height: 100px;
-        max-height: 130px;
-    }
-}
 
 /* ============================================
    CHARTS
@@ -1725,7 +1293,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background: var(--text-secondary);
 }
 
-/* ✅ Scroll indikator - YASHIRISH */
 .table-scroll-indicator {
     display: none !important;
 }
@@ -2297,7 +1864,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* ============================================
-   RESPONSIVE - BOSHQALARI
+   RESPONSIVE - BARCHA QURILMALAR UCHUN
    ============================================ */
 
 /* ✅ Tablet (768px - 1024px) */
@@ -2323,8 +1890,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     }
 }
 
-/* ✅ MOBILE (max 768px) - qo'shimcha */
+/* ✅ Telefon (max 768px) */
 @media (max-width: 768px) {
+    /* Sidebar */
     .sidebar {
         transform: translateX(-100%);
         width: 280px;
@@ -2350,6 +1918,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         display: block !important;
     }
     
+    /* Top header */
     .top-header {
         padding: 10px 14px;
         flex-wrap: nowrap;
@@ -2399,23 +1968,22 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         display: none !important;
     }
     
+    /* Stats */
     .stats-grid {
-        padding: 8px 12px;
         grid-template-columns: 1fr 1fr;
         gap: 8px;
+        padding: 8px 12px;
     }
     
     .stat-card {
         padding: 10px 12px;
         gap: 8px;
-        border-radius: 10px;
     }
     
     .stat-icon {
         width: 32px;
         height: 32px;
         font-size: 0.75rem;
-        border-radius: 8px;
     }
     
     .stat-info .stat-value {
@@ -2426,87 +1994,121 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         font-size: 0.6rem;
     }
     
-    .form-container {
-        padding: 12px 16px;
-    }
-    
-    .app-form {
-        padding: 16px;
-    }
-    
-    .app-form .form-actions {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .profile-container {
-        padding: 12px 16px;
-    }
-    
-    .profile-header {
-        flex-direction: column;
-        text-align: center;
-        padding: 20px;
-        gap: 12px;
-    }
-    
-    .profile-stats {
+    /* Charts */
+    .charts-grid {
         grid-template-columns: 1fr;
-        padding: 16px 20px;
         gap: 10px;
+        padding: 0 12px 16px;
     }
     
-    .profile-actions {
-        flex-direction: column;
+    .chart-card {
+        height: auto;
+        max-height: 320px;
+        min-height: 240px;
+        padding: 12px;
+    }
+    
+    .chart-card-fixed {
+        flex: none;
+        height: auto;
+        max-height: 320px;
+        min-height: 240px;
+    }
+    
+    .chart-canvas-wrap {
+        min-height: 150px;
+        max-height: 200px;
+    }
+    
+    .chart-card canvas {
+        max-height: 170px;
+        min-height: 130px;
+        width: 100% !important;
+        height: auto !important;
+    }
+    
+    .chart-header h3 {
+        font-size: 0.8rem;
+    }
+    
+    /* Recent admins */
+    .recent-admins.scrollable {
+        max-height: 180px;
+        min-height: 120px;
+    }
+    
+    .recent-admin-item {
+        padding: 6px 10px;
         gap: 8px;
     }
     
-    .profile-actions .btn-primary,
-    .profile-actions .btn-danger,
-    .profile-actions .btn-warning {
-        width: 100%;
-        justify-content: center;
+    .recent-admin-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 0.7rem;
     }
     
-    .settings-container {
-        padding: 12px 16px;
-        gap: 12px;
+    .recent-admin-name {
+        font-size: 0.7rem;
     }
     
-    .settings-card {
-        padding: 16px 18px;
+    .recent-admin-email {
+        font-size: 0.6rem;
     }
     
-    .settings-actions {
-        flex-direction: column;
-        gap: 8px;
+    .badge {
+        font-size: 0.55rem;
+        padding: 1px 6px;
     }
     
-    .settings-actions .btn-secondary,
-    .settings-actions .btn-danger {
-        width: 100%;
-        justify-content: center;
+    /* Table */
+    .table-container {
+        padding: 0 12px 16px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        display: block;
     }
     
-    .login-card {
-        padding: 28px 20px;
+    .data-table {
+        min-width: 620px;
+        font-size: 0.7rem;
     }
     
-    .theme-options {
-        flex-wrap: wrap;
+    .data-table th,
+    .data-table td {
+        padding: 8px 10px;
+        font-size: 0.65rem;
+        max-width: 100px;
     }
     
-    .theme-option {
-        flex: 1;
-        min-width: 60px;
-        padding: 10px 14px;
+    .data-table th i {
+        display: none;
     }
     
-    .date-group {
-        grid-template-columns: 1fr;
-        gap: 0;
+    .data-table td:last-child {
+        min-width: 130px;
+        max-width: 130px;
     }
     
+    .action-buttons {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 4px;
+    }
+    
+    .action-buttons .table-action {
+        padding: 3px 6px;
+        font-size: 0.55rem;
+        white-space: nowrap;
+        border-radius: 4px;
+    }
+    
+    .action-buttons .table-action i {
+        font-size: 0.5rem;
+        margin-right: 2px;
+    }
+    
+    /* Toolbar */
     .toolbar {
         padding: 8px 12px;
         flex-direction: column;
@@ -2538,6 +2140,388 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     .filter-pill {
         padding: 4px 8px;
         font-size: 0.7rem;
+    }
+    
+    /* Buttons */
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger,
+    .btn-warning {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+    }
+    
+    /* Forms */
+    .form-container {
+        padding: 8px 12px;
+    }
+    
+    .app-form {
+        padding: 14px;
+    }
+    
+    .app-form .form-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    /* Profile */
+    .profile-container {
+        padding: 8px 12px;
+    }
+    
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 16px;
+        gap: 12px;
+    }
+    
+    .profile-stats {
+        grid-template-columns: 1fr;
+        padding: 12px 16px;
+        gap: 10px;
+    }
+    
+    .profile-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .profile-actions .btn-primary,
+    .profile-actions .btn-danger,
+    .profile-actions .btn-warning {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Settings */
+    .settings-container {
+        padding: 8px 12px;
+        gap: 12px;
+    }
+    
+    .settings-card {
+        padding: 14px 16px;
+    }
+    
+    .settings-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .settings-actions .btn-secondary,
+    .settings-actions .btn-danger {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Theme options */
+    .theme-options {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .theme-option {
+        max-width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        padding: 10px 16px;
+    }
+    
+    .theme-option i {
+        font-size: 1rem;
+    }
+    
+    /* Login */
+    .login-card {
+        padding: 24px 20px;
+    }
+    
+    /* Date */
+    .date-group {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}
+
+/* ✅ Kichik telefon (max 480px) */
+@media (max-width: 480px) {
+    /* Top header */
+    .top-header {
+        padding: 6px 10px;
+        gap: 4px;
+    }
+    
+    .header-left h2 {
+        font-size: 0.7rem;
+        max-width: 80px;
+    }
+    
+    .header-right .btn-primary {
+        padding: 3px 6px;
+        font-size: 0.55rem;
+    }
+    
+    .header-right .btn-primary i {
+        font-size: 0.5rem;
+        margin-right: 2px;
+    }
+    
+    .menu-toggle {
+        font-size: 0.75rem;
+    }
+    
+    .theme-toggle-small {
+        width: 24px;
+        height: 24px;
+        font-size: 0.6rem;
+    }
+    
+    /* Stats */
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 5px;
+        padding: 5px 8px;
+    }
+    
+    .stat-card {
+        padding: 6px 8px;
+        gap: 6px;
+    }
+    
+    .stat-icon {
+        width: 26px;
+        height: 26px;
+        font-size: 0.6rem;
+    }
+    
+    .stat-info .stat-value {
+        font-size: 0.8rem;
+    }
+    
+    .stat-info .stat-label {
+        font-size: 0.5rem;
+    }
+    
+    /* Charts */
+    .charts-grid {
+        padding: 0 8px 12px;
+        gap: 8px;
+    }
+    
+    .chart-card {
+        max-height: 280px;
+        min-height: 200px;
+        padding: 10px;
+    }
+    
+    .chart-card-fixed {
+        max-height: 280px;
+        min-height: 200px;
+    }
+    
+    .chart-canvas-wrap {
+        min-height: 120px;
+        max-height: 160px;
+    }
+    
+    .chart-card canvas {
+        max-height: 140px;
+        min-height: 100px;
+    }
+    
+    .chart-header h3 {
+        font-size: 0.65rem;
+    }
+    
+    /* Recent admins */
+    .recent-admins.scrollable {
+        max-height: 150px;
+        min-height: 100px;
+    }
+    
+    .recent-admin-item {
+        padding: 4px 8px;
+        gap: 6px;
+    }
+    
+    .recent-admin-avatar {
+        width: 22px;
+        height: 22px;
+        font-size: 0.6rem;
+    }
+    
+    .recent-admin-name {
+        font-size: 0.6rem;
+    }
+    
+    .recent-admin-email {
+        font-size: 0.5rem;
+    }
+    
+    /* Table */
+    .table-container {
+        padding: 0 8px 12px;
+    }
+    
+    .data-table {
+        min-width: 480px;
+        font-size: 0.6rem;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 5px 8px;
+        font-size: 0.55rem;
+        max-width: 70px;
+    }
+    
+    .data-table td:last-child {
+        min-width: 100px;
+        max-width: 100px;
+    }
+    
+    .action-buttons .table-action {
+        padding: 2px 4px;
+        font-size: 0.45rem;
+    }
+    
+    .action-buttons .table-action i {
+        font-size: 0.4rem;
+    }
+    
+    /* Login */
+    .login-card {
+        padding: 20px 16px;
+    }
+    
+    .login-logo h1 {
+        font-size: 1.1rem;
+    }
+    
+    .logo-icon {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .logo-icon i {
+        font-size: 20px;
+    }
+    
+    /* Buttons */
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger,
+    .btn-warning {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+    }
+    
+    /* Theme toggle floating */
+    .theme-toggle {
+        bottom: 12px;
+        right: 12px;
+        width: 38px;
+        height: 38px;
+        font-size: 0.9rem;
+    }
+    
+    /* Theme options */
+    .theme-options {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .theme-option {
+        max-width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        padding: 8px 12px;
+    }
+    
+    .theme-option i {
+        font-size: 0.9rem;
+    }
+    
+    .theme-option span {
+        font-size: 0.7rem;
+    }
+}
+
+/* ✅ Juda kichik telefon (max 360px) */
+@media (max-width: 360px) {
+    .top-header {
+        padding: 4px 6px;
+        gap: 4px;
+    }
+    
+    .header-left h2 {
+        font-size: 0.6rem;
+        max-width: 60px;
+    }
+    
+    .header-right .btn-primary {
+        padding: 2px 4px;
+        font-size: 0.5rem;
+    }
+    
+    .menu-toggle {
+        font-size: 0.65rem;
+    }
+    
+    .theme-toggle-small {
+        width: 20px;
+        height: 20px;
+        font-size: 0.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+        padding: 4px 6px;
+    }
+    
+    .stat-card {
+        padding: 4px 6px;
+        gap: 4px;
+    }
+    
+    .stat-icon {
+        width: 22px;
+        height: 22px;
+        font-size: 0.5rem;
+    }
+    
+    .stat-info .stat-value {
+        font-size: 0.7rem;
+    }
+    
+    .stat-info .stat-label {
+        font-size: 0.45rem;
+    }
+    
+    .chart-card {
+        max-height: 240px;
+        min-height: 170px;
+        padding: 8px;
+    }
+    
+    .chart-canvas-wrap {
+        min-height: 100px;
+        max-height: 130px;
+    }
+    
+    .data-table {
+        min-width: 380px;
+        font-size: 0.5rem;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 3px 5px;
+        font-size: 0.45rem;
+        max-width: 50px;
     }
 }
 

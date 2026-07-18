@@ -2160,38 +2160,39 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* ============================================
-   JADVAL ICHIDA GORIZONTAL SCROLL
+   JADVAL GORIZONTAL SCROLL - TO'LIQ
    ============================================ */
 
-/* ✅ Jadval konteyneri - scroll qilish imkoniyati */
+/* ✅ Jadval konteyneri */
 .table-container {
     padding: 0 32px 32px;
     overflow-x: auto;
     overflow-y: visible;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
+    width: 100%;
+    max-width: 100%;
     position: relative;
 }
 
-/* ✅ Jadval o'zi - keng bo'lishi uchun */
+/* ✅ Jadval - container dan keng bo'lishi kerak! */
 .data-table {
     width: 100%;
-    min-width: 800px;
+    min-width: 850px;  /* ✅ Container dan keng */
     background: var(--bg-card);
     border-radius: var(--radius);
     border-collapse: collapse;
     border: 1px solid var(--border-color);
-    overflow: visible;
     table-layout: fixed;
 }
 
 /* ✅ Ustunlar kengligi */
-.data-table th:nth-child(1) { width: 50px; }      /* # */
-.data-table th:nth-child(2) { width: 20%; }       /* F.I.SH */
-.data-table th:nth-child(3) { width: 20%; }       /* Email */
-.data-table th:nth-child(4) { width: 12%; }       /* Obuna */
-.data-table th:nth-child(5) { width: 10%; }       /* Holati */
-.data-table th:nth-child(6) { width: 22%; }       /* Harakatlar */
+.data-table th:nth-child(1) { width: 50px; min-width: 50px; }
+.data-table th:nth-child(2) { width: 18%; min-width: 120px; }
+.data-table th:nth-child(3) { width: 20%; min-width: 140px; }
+.data-table th:nth-child(4) { width: 12%; min-width: 80px; }
+.data-table th:nth-child(5) { width: 10%; min-width: 70px; }
+.data-table th:nth-child(6) { width: 22%; min-width: 160px; }
 
 .data-table th {
     padding: 14px 18px;
@@ -2203,9 +2204,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     color: var(--text-muted);
     border-bottom: 1px solid var(--border-color);
     white-space: nowrap;
+    background: var(--bg-hover);
     position: sticky;
     top: 0;
-    background: var(--bg-hover);
     z-index: 10;
 }
 
@@ -2219,7 +2220,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-bottom: 1px solid var(--border-color);
     color: var(--text-secondary);
     white-space: nowrap;
-    max-width: 180px;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -2250,51 +2250,66 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* ============================================
    MOBIL UCHUN - SCROLL
    ============================================ */
+@media (max-width: 992px) {
+    .table-container {
+        padding: 0 16px 16px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .data-table {
+        min-width: 720px;
+        font-size: 0.8rem;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 10px 14px;
+        font-size: 0.75rem;
+    }
+}
+
 @media (max-width: 768px) {
     .table-container {
         padding: 0 12px 16px;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        margin: 0;
     }
     
     .data-table {
         min-width: 600px;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
     }
     
     .data-table th,
     .data-table td {
-        padding: 8px 12px;
-        font-size: 0.7rem;
-        max-width: 120px;
+        padding: 8px 10px;
+        font-size: 0.65rem;
+        max-width: 100px;
     }
     
     .data-table th i {
         display: none;
     }
     
-    /* ✅ Harakatlar ustuni qisqarmasligi uchun */
     .data-table td:last-child {
-        min-width: 120px;
+        min-width: 110px;
     }
     
     .action-buttons {
         display: flex;
         flex-wrap: nowrap;
-        gap: 4px;
-        align-items: center;
+        gap: 3px;
     }
     
     .action-buttons .table-action {
-        padding: 3px 8px;
-        font-size: 0.6rem;
+        padding: 3px 6px;
+        font-size: 0.55rem;
         white-space: nowrap;
-        border-radius: 4px;
     }
     
     .action-buttons .table-action i {
-        font-size: 0.55rem;
+        font-size: 0.5rem;
         margin-right: 2px;
     }
 }
@@ -2311,22 +2326,22 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     
     .data-table th,
     .data-table td {
-        padding: 4px 8px;
-        font-size: 0.6rem;
-        max-width: 80px;
+        padding: 5px 8px;
+        font-size: 0.55rem;
+        max-width: 70px;
     }
     
     .data-table td:last-child {
-        min-width: 90px;
+        min-width: 85px;
     }
     
     .action-buttons .table-action {
         padding: 2px 4px;
-        font-size: 0.5rem;
+        font-size: 0.45rem;
     }
     
     .action-buttons .table-action i {
-        font-size: 0.45rem;
+        font-size: 0.4rem;
     }
 }
 
@@ -2347,7 +2362,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 @keyframes scrollPulse {
     0%, 100% { transform: translateX(0); opacity: 0.5; }
-    50% { transform: translateX(8px); opacity: 1; }
+    50% { transform: translateX(6px); opacity: 1; }
 }
 
 @media (max-width: 768px) {

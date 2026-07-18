@@ -11,7 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSettings();
     updateThemeUI();
     
-    // Password toggle
+    // ============================================
+    // PASSWORD TOGGLE
+    // ============================================
     document.querySelectorAll('.password-toggle').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -32,7 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // Password change
+    // ============================================
+    // PASSWORD CHANGE
+    // ============================================
     const passwordForm = document.getElementById('passwordForm');
     const oldPasswordInput = document.getElementById('oldPassword');
     const newPasswordInput = document.getElementById('newPassword');
@@ -117,13 +121,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 5000);
     }
     
-    // Profile update
+    // ============================================
+    // PROFILE UPDATE
+    // ============================================
     document.getElementById('profileForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         await updateProfile();
     });
     
-    // Logout
+    // ============================================
+    // LOGOUT
+    // ============================================
     document.getElementById('settingsLogout').addEventListener('click', () => {
         if (confirm('Haqiqatan ham chiqmoqchimisiz?')) {
             Auth.logout();
@@ -131,6 +139,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// ============================================
+// LOAD SETTINGS
+// ============================================
 function loadSettings() {
     const user = Auth.getUser();
     if (!user) return;
@@ -140,6 +151,9 @@ function loadSettings() {
     document.getElementById('settingsPhone').value = user.phone || '';
 }
 
+// ============================================
+// UPDATE THEME UI
+// ============================================
 function updateThemeUI() {
     const currentTheme = localStorage.getItem('theme') || 'system';
     document.querySelectorAll('.theme-option').forEach(btn => {
@@ -150,9 +164,9 @@ function updateThemeUI() {
     if (!statusText) return;
 
     const actualTheme = currentTheme === 'system'
-        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Qorong\'' : 'Yorug\'')
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Qorong\'u' : 'Yorug\'')
         : currentTheme === 'dark'
-            ? 'Qorong\''
+            ? 'Qorong\'u'
             : 'Yorug\'';
 
     if (currentTheme === 'system') {
@@ -162,6 +176,9 @@ function updateThemeUI() {
     }
 }
 
+// ============================================
+// UPDATE PROFILE
+// ============================================
 async function updateProfile() {
     const user = Auth.getUser();
     if (!user) return;

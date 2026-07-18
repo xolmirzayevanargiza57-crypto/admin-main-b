@@ -1,5 +1,5 @@
 // ============================================
-// ADMIN ADD - AVTOMATIK SANA + 6 OYLIK
+// ADMIN ADD - TO'LIQ
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -16,86 +16,107 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageDiv = document.getElementById('formMessage');
     const passwordInput = document.getElementById('password');
     const passwordToggle = document.getElementById('passwordToggle');
-    const subscriptionDisplay = document.getElementById('subscriptionDisplay');
     const subscriptionType = document.getElementById('subscriptionType');
-    const amountInput = document.getElementById('amount');
+    const customGroup = document.getElementById('customDurationGroup');
+    const customDays = document.getElementById('customDays');
+    const customHours = document.getElementById('customHours');
+    const customMinutes = document.getElementById('customMinutes');
+    const customSeconds = document.getElementById('customSeconds');
     const startDate = document.getElementById('startDate');
     const endDate = document.getElementById('endDate');
-    
-    // Modal elementlari
-    const modal = document.getElementById('subscriptionModal');
-    const openModalBtn = document.getElementById('openSubscriptionModal');
-    const closeModalBtn = document.getElementById('closeSubscriptionModal');
-    const cancelModalBtn = document.getElementById('cancelSubscriptionModal');
-    const confirmModalBtn = document.getElementById('confirmSubscriptionModal');
-    const options = document.querySelectorAll('.subscription-option');
-    
-    let selectedOption = null;
-    let selectedValue = 'none';
-    let selectedAmount = 0;
-    let selectedMonths = 0;
+    const amountInput = document.getElementById('amount');
+    const fullNameInput = document.getElementById('fullName');
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phone');
 
     // ============================================
-    // NARXLAR
+    // OBUNA TURI O'ZGARGANDA
     // ============================================
-    const PRICE_LABELS = {
-        monthly: '299,999 so\'m',
-        '6months': '1,899,999 so\'m',
-        yearly: '3,599,999 so\'m',
-        none: '0 so\'m'
-    };
-
-    const TYPE_LABELS = {
-        monthly: 'Oylik (299,999 so\'m)',
-        '6months': '6 oylik (1,899,999 so\'m)',
-        yearly: 'Yillik (3,599,999 so\'m)',
-        none: 'Obuna yo\'q'
-    };
-
-    const MONTHS_MAP = {
-        monthly: 1,
-        '6months': 6,
-        yearly: 12,
-        none: 0
-    };
+    subscriptionType.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            customGroup.style.display = 'block';
+            amountInput.value = '';
+        } else {
+            customGroup.style.display = 'none';
+            const amounts = {
+                'none': 0,
+                'monthly': 299999,
+                '6months': 1899999,
+                'yearly': 3599999
+            };
+            amountInput.value = amounts[this.value] || '';
+        }
+        calculateEndDate();
+    });
 
     // ============================================
-    // AVTOMATIK SANA - BUGUNGI KUN
+    // TUGASH SANASINI HISOBLASH (TO'G'RI)
     // ============================================
-    function setDefaultDate() {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        startDate.value = year + '-' + month + '-' + day;
-    }
-    setDefaultDate();
-
-    // ============================================
-    // TUGASH SANASINI HISOBLASH
-    // ============================================
-    function calculateEndDate(months, start) {
-        if (!start || months === 0) {
+    function calculateEndDate() {
+        const type = subscriptionType.value;
+        const start = startDate.value;
+        
+        if (!start || type === 'none') {
             endDate.value = '';
             return;
         }
         
         const startDateObj = new Date(start);
         const endDateObj = new Date(startDateObj);
-        endDateObj.setMonth(endDateObj.getMonth() + months);
         
+        if (type === 'custom') {
+            const days = parseInt(customDays.value) || 0;
+            const hours = parseInt(customHours.value) || 0;
+            const minutes = parseInt(customMinutes.value) || 0;
+            const seconds = parseInt(customSeconds.value) || 0;
+            
+            endDateObj.setDate(endDateObj.getDate() + days);
+            endDateObj.setHours(endDateObj.getHours() + hours);
+            endDateObj.setMinutes(endDateObj.getMinutes() + minutes);
+            endDateObj.setSeconds(endDateObj.getSeconds() + seconds);
+        } else {
+            const durationMap = {
+                'monthly': 30,
+                '6months': 180,
+                'yearly': 365
+            };
+            const days = durationMap[type] || 0;
+            endDateObj.setDate(endDateObj.getDate() + days);
+        }
+        
+        // ✅ Mahalliy vaqt formatida (datetime-local uchun)
         const year = endDateObj.getFullYear();
         const month = String(endDateObj.getMonth() + 1).padStart(2, '0');
         const day = String(endDateObj.getDate()).padStart(2, '0');
-        endDate.value = year + '-' + month + '-' + day;
+        const hours = String(endDateObj.getHours()).padStart(2, '0');
+        const minutes = String(endDateObj.getMinutes()).padStart(2, '0');
+        
+        endDate.value = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
     }
 
-    // Boshlanish sanasi o'zgarganda
-    startDate.addEventListener('change', function() {
-        const type = subscriptionType.value;
-        const months = MONTHS_MAP[type] || 0;
-        calculateEndDate(months, this.value);
-    });
+    // ============================================
+    // O'ZGARISHLARDA HISOBLASH
+    // ============================================
+    startDate.addEventListener('change', calculateEndDate);
+    customDays.addEventListener('input', calculateEndDate);
+    customHours.addEventListener('input', calculateEndDate);
+    customMinutes.addEventListener('input', calculateEndDate);
+    customSeconds.addEventListener('input', calculateEndDate);
+
+    // ============================================
+    // DEFAULT DATE - HOZIRGI VAQT
+    // ============================================
+    function setDefaultDate() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        startDate.value = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+        calculateEndDate();
+    }
+    setDefaultDate();
 
     // ============================================
     // PASSWORD TOGGLE
@@ -116,96 +137,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ============================================
-    // MODAL
-    // ============================================
-    openModalBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    });
-
-    function closeModal() {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-
-    closeModalBtn.addEventListener('click', closeModal);
-    cancelModalBtn.addEventListener('click', closeModal);
-
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal.classList.contains('active')) {
-            closeModal();
-        }
-    });
-
-    // ============================================
-    // OBUNA OPTION TANLASH
-    // ============================================
-    options.forEach(function(option) {
-        option.addEventListener('click', function() {
-            options.forEach(function(opt) {
-                opt.classList.remove('selected');
-            });
-            this.classList.add('selected');
-            selectedOption = this;
-            selectedValue = this.dataset.value;
-            selectedAmount = parseInt(this.dataset.amount);
-            selectedMonths = parseInt(this.dataset.months);
-        });
-    });
-
-    // ============================================
-    // MODAL CONFIRM
-    // ============================================
-    confirmModalBtn.addEventListener('click', function() {
-        if (!selectedOption) {
-            alert('Iltimos, obuna turini tanlang!');
-            return;
-        }
-
-        const label = TYPE_LABELS[selectedValue] || 'Obuna yo\'q';
-        subscriptionDisplay.value = label;
-        subscriptionType.value = selectedValue;
-        
-        if (selectedAmount > 0) {
-            amountInput.value = selectedAmount.toLocaleString() + ' so\'m';
-            // Kalendarni faollashtirish
-            startDate.disabled = false;
-            startDate.readOnly = false;
-            // Bugungi sanani qo'yish
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            startDate.value = year + '-' + month + '-' + day;
-            // Tugash sanasini hisoblash
-            calculateEndDate(selectedMonths, startDate.value);
-        } else {
-            amountInput.value = '0 so\'m';
-            startDate.disabled = true;
-            startDate.readOnly = true;
-            startDate.value = '';
-            endDate.value = '';
-            // Bugungi sanani qayta qo'yish
-            setDefaultDate();
-        }
-
-        closeModal();
-    });
-
-    // ============================================
     // REAL-TIME VALIDATION
     // ============================================
-    const fullNameInput = document.getElementById('fullName');
-    const emailInput = document.getElementById('email');
-
     function validateField(input, condition) {
         input.addEventListener('blur', function() {
             const value = this.value.trim();
@@ -229,11 +162,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const fullName = fullNameInput.value.trim();
         const email = emailInput.value.trim();
-        const phone = document.getElementById('phone').value.trim();
+        const phone = phoneInput.value.trim();
         const password = passwordInput.value;
-        const subscriptionTypeValue = subscriptionType.value;
-        const startDateValue = startDate.value;
-
+        const type = subscriptionType.value;
+        const start = startDate.value;
+        const end = endDate.value;
+        const amount = amountInput.value.trim();
+        
         let isValid = true;
 
         if (!fullName || fullName.length === 0) {
@@ -263,9 +198,20 @@ document.addEventListener('DOMContentLoaded', function() {
             passwordInput.classList.remove('error');
         }
 
-        if (subscriptionTypeValue !== 'none' && !startDateValue) {
+        if (type !== 'none' && !start) {
             showMessage('Boshlanish sanasini tanlang!', 'error');
             return;
+        }
+
+        if (type === 'custom') {
+            const days = parseInt(customDays.value) || 0;
+            const hours = parseInt(customHours.value) || 0;
+            const minutes = parseInt(customMinutes.value) || 0;
+            const seconds = parseInt(customSeconds.value) || 0;
+            if (days === 0 && hours === 0 && minutes === 0 && seconds === 0) {
+                showMessage('Custom vaqt uchun vaqt belgilang!', 'error');
+                return;
+            }
         }
 
         if (!isValid) {
@@ -279,27 +225,39 @@ document.addEventListener('DOMContentLoaded', function() {
         messageDiv.style.display = 'none';
 
         try {
-            const data = await API.post('/admins', {
+            let customDuration = null;
+            if (type === 'custom') {
+                customDuration = {
+                    days: parseInt(customDays.value) || 0,
+                    hours: parseInt(customHours.value) || 0,
+                    minutes: parseInt(customMinutes.value) || 0,
+                    seconds: parseInt(customSeconds.value) || 0
+                };
+            }
+
+            const data = {
                 fullName: fullName,
                 email: email,
                 phone: phone,
                 password: password,
-                subscriptionType: subscriptionTypeValue,
-                startDate: startDateValue,
-                endDate: endDate.value
-            });
+                subscriptionType: type,
+                startDate: start || null,
+                endDate: end || null,
+                customDuration: customDuration,
+                amount: amount ? parseInt(amount) : 0
+            };
 
-            if (data.success) {
+            console.log('📤 Yuborilayotgan ma\'lumotlar:', data);
+
+            const response = await API.post('/admins', data);
+
+            if (response.success) {
                 showMessage('✅ Admin Customer muvaffaqiyatli yaratildi!', 'success');
                 form.reset();
                 passwordInput.value = '';
-                subscriptionDisplay.value = '';
                 subscriptionType.value = 'none';
-                amountInput.value = '0 so\'m';
-                startDate.value = '';
-                endDate.value = '';
-                startDate.disabled = true;
-                startDate.readOnly = true;
+                amountInput.value = '';
+                customGroup.style.display = 'none';
                 setDefaultDate();
                 fullNameInput.classList.remove('success', 'error');
                 emailInput.classList.remove('success', 'error');
@@ -308,9 +266,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.location.href = 'admins.html';
                 }, 2000);
             } else {
-                showMessage(data.message || 'Xatolik yuz berdi!', 'error');
+                showMessage(response.message || 'Xatolik yuz berdi!', 'error');
             }
         } catch (error) {
+            console.error('❌ Xatolik:', error);
             showMessage(error.message || 'Server xatosi! Qayta urinib ko\'ring.', 'error');
         } finally {
             submitBtn.disabled = false;

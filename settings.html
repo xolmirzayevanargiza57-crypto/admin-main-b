@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="uz" data-theme="light">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,9 +7,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
     <link rel="stylesheet" href="css/style.css" />
@@ -18,7 +15,6 @@
     <link rel="stylesheet" href="css/theme.css" />
     <link rel="stylesheet" href="css/responsive.css" />
 </head>
-
 <body>
     <div class="app-container">
         <aside class="sidebar" id="sidebar">
@@ -28,14 +24,10 @@
                 <span class="brand-version">v1.0</span>
             </div>
             <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-link" data-nav-label="navDashboard"><i class="fas fa-chart-pie"></i>
-                    Dashboard</a>
-                <a href="admins.html" class="nav-link" data-nav-label="navAdmins"><i class="fas fa-users"></i> Admin
-                    Customerlar</a>
-                <a href="admin-add.html" class="nav-link" data-nav-label="navAdd"><i class="fas fa-user-plus"></i> Yangi
-                    Admin</a>
-                <a href="settings.html" class="nav-link active" data-nav-label="navSettings"><i class="fas fa-cog"></i>
-                    Sozlamalar</a>
+                <a href="dashboard.html" class="nav-link" data-nav-label="navDashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                <a href="admins.html" class="nav-link" data-nav-label="navAdmins"><i class="fas fa-users"></i> Admin Customerlar</a>
+                <a href="admin-add.html" class="nav-link" data-nav-label="navAdd"><i class="fas fa-user-plus"></i> Yangi Admin</a>
+                <a href="settings.html" class="nav-link active" data-nav-label="navSettings"><i class="fas fa-cog"></i> Sozlamalar</a>
             </nav>
             <div class="sidebar-footer">
                 <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Chiqish</button>
@@ -130,54 +122,41 @@
                     <div id="passwordMessage" class="form-message"></div>
                 </div>
 
-    </div>
-
-    <!-- LANGUAGE PANEL REMOVED -->
-
-    <!-- ============================================
-                THEME SOZLAMALARI - TO'LIQ
+                <!-- ============================================
+                THEME SOZLAMALARI - TO'LIQ VA TUZATILGAN
                 ============================================ -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-palette"></i> <span data-i18n="themeTitle">Tashqi ko'rinish</span></h3>
+                    <div class="theme-options">
+                        <button class="theme-option active" data-theme="light" id="themeLight">
+                            <i class="fas fa-sun"></i>
+                            <span>Yorug'</span>
+                        </button>
+                        <button class="theme-option" data-theme="dark" id="themeDark">
+                            <i class="fas fa-moon"></i>
+                            <span>Qorong'u</span>
+                        </button>
+                        <button class="theme-option" data-theme="system" id="themeSystem">
+                            <i class="fas fa-desktop"></i>
+                            <span>Avtomatik</span>
+                        </button>
+                    </div>
+                    <p class="text-muted" style="margin-top: 12px; font-size: 0.8125rem;">
+                        <i class="fas fa-info-circle"></i> 
+                        <span id="themeStatus">Hozirgi holat: Yorug'</span>
+                    </p>
+                </div>
 
-    <!-- ============================================
-                THEME SOZLAMALARI - TO'LIQ
-                ============================================ -->
-    <!-- THEME SOZLAMALARI - TO'LIQ VA TUZATILGAN -->
-   <!-- ============================================
-THEME SOZLAMALARI - TUZATILGAN
-============================================ -->
-<div class="settings-card">
-    <h3><i class="fas fa-palette"></i> Tashqi ko'rinish</h3>
-    <div class="theme-options">
-        <button class="theme-option active" data-theme="light" id="themeLight">
-            <i class="fas fa-sun"></i>
-            <span>Yorug'</span>
-        </button>
-        <button class="theme-option" data-theme="dark" id="themeDark">
-            <i class="fas fa-moon"></i>
-            <span>Qorong'u</span>
-        </button>
-        <button class="theme-option" data-theme="system" id="themeSystem">
-            <i class="fas fa-desktop"></i>
-            <span>Avtomatik</span>
-        </button>
-    </div>
-    <p class="text-muted" style="margin-top: 12px; font-size: 0.8125rem;">
-        <i class="fas fa-info-circle"></i> 
-        <span id="themeStatus">Hozirgi holat: Yorug'</span>
-    </p>
-</div>
-
-
-    <!-- Danger Zone -->
-    <div class="settings-card danger">
-        <h3><i class="fas fa-exclamation-triangle"></i> Xavfli zona</h3>
-        <p>Tizimdan chiqish yoki hisobni o'chirish</p>
-        <div class="settings-actions">
-            <button id="settingsLogout" class="btn-secondary"><i class="fas fa-sign-out-alt"></i> Chiqish</button>
-        </div>
-    </div>
-    </section>
-    </main>
+                <!-- Danger Zone -->
+                <div class="settings-card danger">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Xavfli zona</h3>
+                    <p>Tizimdan chiqish yoki hisobni o'chirish</p>
+                    <div class="settings-actions">
+                        <button id="settingsLogout" class="btn-secondary"><i class="fas fa-sign-out-alt"></i> Chiqish</button>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
 
     <!-- Theme Toggle -->
@@ -193,5 +172,4 @@ THEME SOZLAMALARI - TUZATILGAN
     <script src="js/notifications.js"></script>
     <script src="js/settings.js"></script>
 </body>
-
 </html>

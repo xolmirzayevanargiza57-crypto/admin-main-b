@@ -1,5 +1,5 @@
 // ============================================
-// THEME - LIGHT / DARK / SYSTEM (TUZATILGAN)
+// THEME - LIGHT / DARK / SYSTEM (TO'LIQ)
 // ============================================
 
 const Theme = {
@@ -89,9 +89,7 @@ const Theme = {
         }
     },
 
-    // ✅ Chart.js ni yangilash
     updateCharts() {
-        // Chart.js global config
         if (typeof Chart !== 'undefined') {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             Chart.defaults.color = isDark ? '#ffffff' : '#1c1c1e';
@@ -107,7 +105,7 @@ const Theme = {
             });
         }
         
-        // Theme options (Settings sahifasi)
+        // ✅ Theme options (Settings sahifasi)
         document.querySelectorAll('.theme-option').forEach(btn => {
             btn.addEventListener('click', () => {
                 const theme = btn.dataset.theme;

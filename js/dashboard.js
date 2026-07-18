@@ -1,5 +1,5 @@
 // ============================================
-// DASHBOARD - SUBSCRIPTION STATS
+// DASHBOARD - TO'LIQ
 // ============================================
 
 let subscriptionChart = null;
@@ -12,20 +12,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     
-    await loadStatistics();
-    await loadRecentAdmins();
-    await checkSubscriptionStatus(); // Check subscription on load
+    // ✅ Parallel yuklash (tezroq)
+    await Promise.all([
+        loadStatistics(),
+        loadRecentAdmins()
+    ]);
     
-    // Refresh statistics every 30 seconds for real-time updates
+    // ✅ Subscription statusni tekshirish
+    checkSubscriptionStatus();
+    
+    // ✅ Refresh interval (30 soniya)
     refreshInterval = setInterval(() => {
         loadStatistics();
         loadRecentAdmins();
     }, 30000);
-    
-    // Check subscription every 3 seconds for countdown
-    subscriptionCheckInterval = setInterval(() => {
-        checkSubscriptionStatus();
-    }, 3000);
 });
 
 // Cleanup intervals on page unload
@@ -34,12 +34,20 @@ window.addEventListener('beforeunload', () => {
     if (subscriptionCheckInterval) clearInterval(subscriptionCheckInterval);
 });
 
+// ============================================
+// STATISTIKA YUKLASH
+// ============================================
 async function loadStatistics() {
     try {
+        console.log('📊 Statistika yuklanmoqda...');
+        
         const data = await API.get('/statistics');
+        console.log('📊 Statistika javobi:', data);
+        
         if (data.success) {
             const stats = { ...data.data.counts, chart: data.data.chart };
             
+            // ✅ Statistikani yangilash
             document.getElementById('totalCount').textContent = formatNumber(stats.total || 0);
             document.getElementById('monthlyCount').textContent = formatNumber(stats.monthly || 0);
             document.getElementById('yearlyCount').textContent = formatNumber(stats.yearly || 0);
@@ -54,48 +62,104 @@ async function loadStatistics() {
                 newThisWeek.className = 'stat-change';
             }
             
-            // Subscription chart
+            // ✅ Subscription chart
             createSubscriptionChart(stats);
+        } else {
+            console.error('❌ Statistika xatosi:', data);
+            showStatsError('Statistika yuklanmadi');
         }
     } catch (error) {
-        console.error('Statistika yuklash xatosi:', error);
+        console.error('❌ Statistika yuklash xatosi:', error);
+        showStatsError('Statistika yuklanmadi: ' + error.message);
     }
 }
 
+// ============================================
+// OXIRGI ADMINLAR - HAMMASI + SCROLL
+// ============================================
 async function loadRecentAdmins() {
     try {
-        const data = await API.get('/admins?limit=5&status=active');
+        console.log('👥 Oxirgi adminlar yuklanmoqda...');
+        
+        // ✅ Barcha adminlarni olish (limit yo'q)
+        const data = await API.get('/admins?limit=100');
+        console.log('👥 Adminlar javobi:', data);
+        
         if (data.success) {
             const container = document.getElementById('recentAdminsList');
             const admins = data.data || [];
             
-            if (admins.length === 0) {
+            // ✅ Admin Main ni filtrlaymiz (faqat admin_customer)
+            const filteredAdmins = admins.filter(admin => admin.role === 'admin_customer');
+            
+            // ✅ Jami sonini ko'rsatish
+            const countBadge = document.getElementById('recentCount');
+            if (countBadge) {
+                countBadge.textContent = filteredAdmins.length;
+            }
+            
+            if (filteredAdmins.length === 0) {
                 container.innerHTML = '<p class="text-muted">Hali adminlar yo\'q</p>';
                 return;
             }
             
-            container.innerHTML = admins.map(admin => `
-                <div class="recent-admin-item">
-                    <div class="recent-admin-avatar">
-                        ${(admin.fullName || 'A').charAt(0).toUpperCase()}
+            // ✅ Barcha adminlarni ko'rsatamiz (scroll bilan)
+            container.innerHTML = filteredAdmins.map(admin => {
+                const subType = admin.subscription?.type || 'none';
+                const subStatus = admin.subscription?.status || 'inactive';
+                
+                let subLabel = 'Obunasi yo\'q';
+                let subClass = 'inactive';
+                if (subType === 'none') {
+                    subLabel = 'Obunasi yo\'q';
+                    subClass = 'inactive';
+                } else if (subStatus === 'active') {
+                    if (subType === 'monthly') { subLabel = 'Oylik'; subClass = 'active'; }
+                    else if (subType === '6months') { subLabel = '6 oylik'; subClass = 'active'; }
+                    else if (subType === 'yearly') { subLabel = 'Yillik'; subClass = 'active'; }
+                    else if (subType === 'custom') { subLabel = 'Custom'; subClass = 'active'; }
+                    else { subLabel = 'Faol'; subClass = 'active'; }
+                } else {
+                    subLabel = 'Faol emas';
+                    subClass = 'inactive';
+                }
+                
+                return `
+                    <div class="recent-admin-item">
+                        <div class="recent-admin-avatar">
+                            ${(admin.fullName || 'A').charAt(0).toUpperCase()}
+                        </div>
+                        <div class="recent-admin-info">
+                            <p class="recent-admin-name">${admin.fullName || '-'}</p>
+                            <p class="recent-admin-email">${admin.email || '-'}</p>
+                        </div>
+                        <span class="status-badge ${subClass}">${subLabel}</span>
                     </div>
-                    <div class="recent-admin-info">
-                        <p class="recent-admin-name">${admin.fullName || '-'}</p>
-                        <p class="recent-admin-email">${admin.email || '-'}</p>
-                    </div>
-                    <span class="status-badge ${admin.subscription?.status === 'active' ? 'active' : 'inactive'}">
-                        ${admin.subscription?.type === 'monthly' ? 'Oylik' : 
-                          admin.subscription?.type === 'yearly' ? 'Yillik' : 
-                          admin.subscription?.status === 'active' ? 'Faol' : 'Obunasi yo\'q'}
-                    </span>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+            
+            // ✅ Scrollbar holatini yangilash
+            container.classList.add('scrollable');
+            
+        } else {
+            console.error('❌ Adminlar xatosi:', data);
+            const container = document.getElementById('recentAdminsList');
+            if (container) {
+                container.innerHTML = '<p class="text-muted">Adminlar yuklanmadi</p>';
+            }
         }
     } catch (error) {
-        console.error('Adminlar yuklash xatosi:', error);
+        console.error('❌ Adminlar yuklash xatosi:', error);
+        const container = document.getElementById('recentAdminsList');
+        if (container) {
+            container.innerHTML = '<p class="text-muted">Xatolik: ' + error.message + '</p>';
+        }
     }
 }
 
+// ============================================
+// CHART YARATISH
+// ============================================
 function createSubscriptionChart(stats) {
     const ctx = document.getElementById('subscriptionChart');
     if (!ctx) return;
@@ -104,17 +168,15 @@ function createSubscriptionChart(stats) {
         subscriptionChart.destroy();
     }
 
-    // Alohida hisoblar:
-    // "Faol emas" = status='inactive' va subscription.type != 'none' (pul to'lamagan lekin tamimlangan)
-    // "Obunasi yo'q" = subscription.type = 'none' (tamimlangan)
-    const inactiveCount = stats.inactive || 0;              // Faol emas
-    const noSubscriptionCount = stats.noSubscription || 0;  // Obunasi yo'q
+    const inactiveCount = stats.inactive || 0;
+    const noSubscriptionCount = stats.noSubscription || 0;
 
-    const labels = ['Oylik', '6 oylik', 'Yillik', 'Faol', 'Faol emas', 'Obunasi yo\'q'];
+    const labels = ['Oylik', '6 oylik', 'Yillik', 'Custom', 'Faol', 'Faol emas', 'Obunasi yo\'q'];
     const values = [
         stats.monthly || 0,
         stats.sixMonths || 0,
         stats.yearly || 0,
+        stats.custom || 0,
         stats.activeOther || 0,
         inactiveCount,
         noSubscriptionCount
@@ -130,6 +192,7 @@ function createSubscriptionChart(stats) {
                     'rgba(52, 199, 89, 0.8)',
                     'rgba(255, 149, 0, 0.8)',
                     'rgba(0, 122, 255, 0.8)',
+                    'rgba(124, 58, 237, 0.8)',
                     'rgba(31, 120, 180, 0.8)',
                     'rgba(255, 59, 48, 0.8)',
                     'rgba(142, 142, 147, 0.8)'
@@ -138,6 +201,7 @@ function createSubscriptionChart(stats) {
                     'rgba(52, 199, 89, 1)',
                     'rgba(255, 149, 0, 1)',
                     'rgba(0, 122, 255, 1)',
+                    'rgba(124, 58, 237, 1)',
                     'rgba(31, 120, 180, 1)',
                     'rgba(255, 59, 48, 1)',
                     'rgba(108, 117, 125, 1)'
@@ -163,7 +227,233 @@ function createSubscriptionChart(stats) {
 }
 
 // ============================================
-// CHECK SUBSCRIPTION STATUS
+// XATOLIK KO'RSATISH
+// ============================================
+function showStatsError(message) {
+    const container = document.querySelector('.stats-grid');
+    if (container) {
+        container.innerHTML = `
+            <div class="stat-card" style="grid-column: 1 / -1; text-align: center; padding: 20px;">
+                <p style="color: var(--color-danger);">
+                    <i class="fas fa-exclamation-circle"></i> ${message}
+                </p>
+                <button onclick="location.reload()" class="btn-secondary" style="margin-top: 8px;">
+                    <i class="fas fa-sync-alt"></i> Qayta yuklash
+                </button>
+            </div>
+        `;
+    }
+}
+
+// ============================================
+// SUBSCRIPTION STATUS
+// ============================================
+async function checkSubscriptionStatus() {
+    try {
+        const response = await API.get('/auth/subscription-status');
+        if (response.success) {
+            const alertContainer = document.getElementById('subscriptionAlert');
+            if (alertContainer) {
+                alertContainer.innerHTML = '';
+            }
+        }
+    } catch (error) {
+        console.error('Subscription status check error:', error);
+    }
+}
+
+// ============================================
+// FORMAT FUNKSIYALARI
+// ============================================
+function formatNumber(num) {
+    return num?.toLocaleString() || '0';
+}
+
+// Chart.js global config
+Chart.defaults.font.family = 'Inter, -apple-system, BlinkMacSystemFont, sans-serif';// ============================================
+// STATISTIKA YUKLASH
+// ============================================
+async function loadStatistics() {
+    try {
+        console.log('📊 Statistika yuklanmoqda...');
+        
+        const data = await API.get('/statistics');
+        console.log('📊 Statistika javobi:', data);
+        
+        if (data.success) {
+            const stats = { ...data.data.counts, chart: data.data.chart };
+            
+            // ✅ Statistikani yangilash
+            document.getElementById('totalCount').textContent = formatNumber(stats.total || 0);
+            document.getElementById('monthlyCount').textContent = formatNumber(stats.monthly || 0);
+            document.getElementById('yearlyCount').textContent = formatNumber(stats.yearly || 0);
+            document.getElementById('inactiveCount').textContent = formatNumber(stats.noSubscription || 0);
+            
+            const newThisWeek = document.getElementById('newThisWeek');
+            if (stats.newThisWeek > 0) {
+                newThisWeek.textContent = `+${stats.newThisWeek} bu hafta`;
+                newThisWeek.className = 'stat-change positive';
+            } else {
+                newThisWeek.textContent = '0 bu hafta';
+                newThisWeek.className = 'stat-change';
+            }
+            
+            // ✅ Subscription chart
+            createSubscriptionChart(stats);
+        } else {
+            console.error('❌ Statistika xatosi:', data);
+            showStatsError('Statistika yuklanmadi');
+        }
+    } catch (error) {
+        console.error('❌ Statistika yuklash xatosi:', error);
+        showStatsError('Statistika yuklanmadi: ' + error.message);
+    }
+}
+
+// ============================================
+// OXIRGI ADMINLAR - HAMMASINI KO'RSATISH
+// ============================================
+async function loadRecentAdmins() {
+    try {
+        console.log('👥 Oxirgi adminlar yuklanmoqda...');
+        
+        // ✅ Limitni oshiramiz (12 ta)
+        const data = await API.get('/admins?limit=12');
+        console.log('👥 Adminlar javobi:', data);
+        
+        if (data.success) {
+            const container = document.getElementById('recentAdminsList');
+            const admins = data.data || [];
+            
+            // ✅ Admin Main ni filtrlaymiz (faqat admin_customer)
+            const filteredAdmins = admins.filter(admin => admin.role === 'admin_customer');
+            
+            if (filteredAdmins.length === 0) {
+                container.innerHTML = '<p class="text-muted">Hali adminlar yo\'q</p>';
+                return;
+            }
+            
+            // ✅ Barcha adminlarni ko'rsatamiz (12 tagacha)
+            container.innerHTML = filteredAdmins.map(admin => `
+                <div class="recent-admin-item">
+                    <div class="recent-admin-avatar">
+                        ${(admin.fullName || 'A').charAt(0).toUpperCase()}
+                    </div>
+                    <div class="recent-admin-info">
+                        <p class="recent-admin-name">${admin.fullName || '-'}</p>
+                        <p class="recent-admin-email">${admin.email || '-'}</p>
+                    </div>
+                    <span class="status-badge ${admin.subscription?.status === 'active' ? 'active' : 'inactive'}">
+                        ${admin.subscription?.type === 'monthly' ? 'Oylik' : 
+                          admin.subscription?.type === '6months' ? '6 oylik' :
+                          admin.subscription?.type === 'yearly' ? 'Yillik' : 
+                          admin.subscription?.status === 'active' ? 'Faol' : 'Obunasi yo\'q'}
+                    </span>
+                </div>
+            `).join('');
+        } else {
+            console.error('❌ Adminlar xatosi:', data);
+            container.innerHTML = '<p class="text-muted">Adminlar yuklanmadi</p>';
+        }
+    } catch (error) {
+        console.error('❌ Adminlar yuklash xatosi:', error);
+        const container = document.getElementById('recentAdminsList');
+        if (container) {
+            container.innerHTML = '<p class="text-muted">Xatolik: ' + error.message + '</p>';
+        }
+    }
+}
+
+// ============================================
+// CHART YARATISH
+// ============================================
+function createSubscriptionChart(stats) {
+    const ctx = document.getElementById('subscriptionChart');
+    if (!ctx) return;
+    
+    if (subscriptionChart) {
+        subscriptionChart.destroy();
+    }
+
+    const inactiveCount = stats.inactive || 0;
+    const noSubscriptionCount = stats.noSubscription || 0;
+
+    const labels = ['Oylik', '6 oylik', 'Yillik', 'Custom', 'Faol', 'Faol emas', 'Obunasi yo\'q'];
+    const values = [
+        stats.monthly || 0,
+        stats.sixMonths || 0,
+        stats.yearly || 0,
+        stats.custom || 0,
+        stats.activeOther || 0,
+        inactiveCount,
+        noSubscriptionCount
+    ];
+    
+    subscriptionChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels,
+            datasets: [{
+                data: values,
+                backgroundColor: [
+                    'rgba(52, 199, 89, 0.8)',
+                    'rgba(255, 149, 0, 0.8)',
+                    'rgba(0, 122, 255, 0.8)',
+                    'rgba(124, 58, 237, 0.8)',
+                    'rgba(31, 120, 180, 0.8)',
+                    'rgba(255, 59, 48, 0.8)',
+                    'rgba(142, 142, 147, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(52, 199, 89, 1)',
+                    'rgba(255, 149, 0, 1)',
+                    'rgba(0, 122, 255, 1)',
+                    'rgba(124, 58, 237, 1)',
+                    'rgba(31, 120, 180, 1)',
+                    'rgba(255, 59, 48, 1)',
+                    'rgba(108, 117, 125, 1)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 16,
+                        font: { size: 12, weight: '500' }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ============================================
+// XATOLIK KO'RSATISH
+// ============================================
+function showStatsError(message) {
+    const container = document.querySelector('.stats-grid');
+    if (container) {
+        container.innerHTML = `
+            <div class="stat-card" style="grid-column: 1 / -1; text-align: center; padding: 20px;">
+                <p style="color: var(--color-danger);">
+                    <i class="fas fa-exclamation-circle"></i> ${message}
+                </p>
+                <button onclick="location.reload()" class="btn-secondary" style="margin-top: 8px;">
+                    <i class="fas fa-sync-alt"></i> Qayta yuklash
+                </button>
+            </div>
+        `;
+    }
+}
+
+// ============================================
+// SUBSCRIPTION STATUS
 // ============================================
 async function checkSubscriptionStatus() {
     try {

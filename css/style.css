@@ -4177,3 +4177,150 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         margin-right: 2px;
     }
 }
+
+/* ============================================
+   ADMIN CUSTOMERLAR - TELEFON UCHUN
+   ============================================ */
+
+/* ✅ Jadvalni telefon uchun to'g'irlash */
+@media (max-width: 768px) {
+    .table-container {
+        padding: 0 8px 12px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .data-table {
+        font-size: 0.7rem;
+        min-width: 480px;
+        width: 100%;
+        display: table;
+        border-collapse: collapse;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 6px 8px;
+        font-size: 0.7rem;
+        white-space: nowrap;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .data-table th i {
+        display: none;
+    }
+    
+    /* ✅ Harakatlar ustuni */
+    .data-table td:last-child {
+        min-width: 100px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 3px;
+        align-items: center;
+    }
+    
+    .action-buttons .table-action {
+        padding: 3px 6px;
+        font-size: 0.55rem;
+        white-space: nowrap;
+        border-radius: 4px;
+    }
+    
+    .action-buttons .table-action i {
+        font-size: 0.5rem;
+        margin-right: 2px;
+    }
+    
+    /* ✅ Filter pilllar */
+    .filter-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    
+    .filter-pill {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+        border-radius: 6px;
+    }
+    
+    /* ✅ Toolbar */
+    .toolbar {
+        padding: 8px 12px;
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
+    
+    .search-box {
+        width: 100%;
+        min-width: unset;
+    }
+    
+    .search-box input {
+        padding: 6px 10px 6px 28px;
+        font-size: 0.75rem;
+        width: 100%;
+    }
+    
+    .filter-box {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: flex-start;
+    }
+    
+    .filter-box .btn-secondary {
+        padding: 4px 8px;
+        font-size: 0.65rem;
+    }
+}
+
+/* ✅ Juda kichik telefonlar */
+@media (max-width: 480px) {
+    .table-container {
+        padding: 0 4px 10px;
+    }
+    
+    .data-table {
+        font-size: 0.6rem;
+        min-width: 380px;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 4px 6px;
+        font-size: 0.6rem;
+        max-width: 80px;
+    }
+    
+    .data-table th:nth-child(2),
+    .data-table td:nth-child(2) {
+        max-width: 80px;
+    }
+    
+    .data-table th:nth-child(3),
+    .data-table td:nth-child(3) {
+        max-width: 100px;
+    }
+    
+    .action-buttons .table-action {
+        padding: 2px 4px;
+        font-size: 0.5rem;
+    }
+    
+    .action-buttons .table-action i {
+        font-size: 0.45rem;
+    }
+    
+    .filter-pill {
+        padding: 3px 6px;
+        font-size: 0.6rem;
+    }
+}

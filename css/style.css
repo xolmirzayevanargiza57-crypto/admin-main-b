@@ -4324,3 +4324,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         font-size: 0.6rem;
     }
 }
+
+.header-right .btn-primary,
+.header-right a.btn-primary {
+    width: auto;
+    white-space: nowrap;
+}

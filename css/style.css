@@ -2158,3 +2158,200 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         box-shadow: none !important;
     }
 }
+
+/* ============================================
+   JADVAL ICHIDA GORIZONTAL SCROLL
+   ============================================ */
+
+/* ✅ Jadval konteyneri - scroll qilish imkoniyati */
+.table-container {
+    padding: 0 32px 32px;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    position: relative;
+}
+
+/* ✅ Jadval o'zi - keng bo'lishi uchun */
+.data-table {
+    width: 100%;
+    min-width: 800px;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border-collapse: collapse;
+    border: 1px solid var(--border-color);
+    overflow: visible;
+    table-layout: fixed;
+}
+
+/* ✅ Ustunlar kengligi */
+.data-table th:nth-child(1) { width: 50px; }      /* # */
+.data-table th:nth-child(2) { width: 20%; }       /* F.I.SH */
+.data-table th:nth-child(3) { width: 20%; }       /* Email */
+.data-table th:nth-child(4) { width: 12%; }       /* Obuna */
+.data-table th:nth-child(5) { width: 10%; }       /* Holati */
+.data-table th:nth-child(6) { width: 22%; }       /* Harakatlar */
+
+.data-table th {
+    padding: 14px 18px;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    background: var(--bg-hover);
+    z-index: 10;
+}
+
+.data-table th i {
+    margin-right: 6px;
+}
+
+.data-table td {
+    padding: 14px 18px;
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.data-table tbody tr:hover {
+    background: var(--bg-hover);
+}
+
+/* ✅ Scrollbar uslubi */
+.table-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: var(--bg-hover);
+    border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* ============================================
+   MOBIL UCHUN - SCROLL
+   ============================================ */
+@media (max-width: 768px) {
+    .table-container {
+        padding: 0 12px 16px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0;
+    }
+    
+    .data-table {
+        min-width: 600px;
+        font-size: 0.75rem;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 8px 12px;
+        font-size: 0.7rem;
+        max-width: 120px;
+    }
+    
+    .data-table th i {
+        display: none;
+    }
+    
+    /* ✅ Harakatlar ustuni qisqarmasligi uchun */
+    .data-table td:last-child {
+        min-width: 120px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 4px;
+        align-items: center;
+    }
+    
+    .action-buttons .table-action {
+        padding: 3px 8px;
+        font-size: 0.6rem;
+        white-space: nowrap;
+        border-radius: 4px;
+    }
+    
+    .action-buttons .table-action i {
+        font-size: 0.55rem;
+        margin-right: 2px;
+    }
+}
+
+@media (max-width: 480px) {
+    .table-container {
+        padding: 0 8px 12px;
+    }
+    
+    .data-table {
+        min-width: 480px;
+        font-size: 0.6rem;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 4px 8px;
+        font-size: 0.6rem;
+        max-width: 80px;
+    }
+    
+    .data-table td:last-child {
+        min-width: 90px;
+    }
+    
+    .action-buttons .table-action {
+        padding: 2px 4px;
+        font-size: 0.5rem;
+    }
+    
+    .action-buttons .table-action i {
+        font-size: 0.45rem;
+    }
+}
+
+/* ============================================
+   SCROLL INDIKATOR (ixtiyoriy)
+   ============================================ */
+.table-scroll-indicator {
+    display: none;
+    text-align: center;
+    padding: 4px 0 8px;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.table-scroll-indicator i {
+    animation: scrollPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+    0%, 100% { transform: translateX(0); opacity: 0.5; }
+    50% { transform: translateX(8px); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .table-scroll-indicator {
+        display: block;
+    }
+}

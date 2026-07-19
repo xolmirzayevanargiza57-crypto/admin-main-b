@@ -4047,3 +4047,39 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         font-size: 0.7rem;
     }
 }
+
+/* ============================================
+   TO'LOV QO'SHISH TUGMASI
+   ============================================ */
+
+.btn-success {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: #34c759;
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-success:hover {
+    opacity: 0.85;
+    transform: scale(0.98);
+}
+
+.btn-success:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-success i {
+    color: #ffffff;
+}

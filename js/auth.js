@@ -1,5 +1,5 @@
 // ============================================
-// AUTH - TO'LIQ (TUZATILGAN)
+// AUTH - Admin Main (TO'LIQ TUZATILGAN)
 // ============================================
 
 const Auth = {
@@ -12,16 +12,8 @@ const Auth = {
                 localStorage.setItem('adminUser', JSON.stringify(data.user));
                 sessionStorage.setItem('adminToken', data.token);
                 sessionStorage.setItem('adminUser', JSON.stringify(data.user));
-                
-                // ✅ Obuna holatini tekshirish
-                const subscriptionStatus = await this.checkSubscriptionStatus();
-                if (!subscriptionStatus.isActive && data.user.role !== 'admin_main') {
-                    this.logout();
-                    return { 
-                        success: false, 
-                        error: subscriptionStatus.message || 'Obunangiz muddati tugagan yoki mavjud emas!' 
-                    };
-                }
+                // ✅ Oxirgi muvaffaqiyatli auth vaqtini saqlaymiz
+                localStorage.setItem('adminLastAuth', Date.now().toString());
                 
                 return { success: true };
             }
@@ -31,21 +23,10 @@ const Auth = {
         }
     },
     
-    async checkSubscriptionStatus() {
-        try {
-            const response = await API.get('/auth/subscription-status');
-            if (response.success) {
-                return response.data;
-            }
-            return { isActive: false, message: 'Obuna holatini tekshirib bo\'lmadi' };
-        } catch (error) {
-            return { isActive: false, message: error.message };
-        }
-    },
-    
     logout() {
         localStorage.removeItem('adminToken');
         localStorage.removeItem('adminUser');
+        localStorage.removeItem('adminLastAuth');
         sessionStorage.removeItem('adminToken');
         sessionStorage.removeItem('adminUser');
         localStorage.removeItem('authMessage');
@@ -71,80 +52,103 @@ const Auth = {
         const name = this.getUserName();
         return name.charAt(0).toUpperCase();
     },
+
+    // ⭐ Oxirgi muvaffaqiyatli auth qancha vaqt oldin bo'lgani
+    getLastAuthAge() {
+        const last = localStorage.getItem('adminLastAuth');
+        if (!last) return Infinity;
+        return Date.now() - parseInt(last);
+    },
     
-    // ⭐ CHECK AUTH - TUZATILGAN (CHEKSIZ LOOP YO'Q)
+    // ⭐ CHECK AUTH — faqat haqiqiy 401/403 da logout qiladi
     async checkAuth() {
         const token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
         if (!token) return false;
-        
-        try {
-            const data = await API.get('/auth/profile');
-            
-            // ⭐ TARMOQ XATOSI (status 0) - LOGOUT QILMA
-            if (data.status === 0) {
-                console.warn('⚠️ Tarmoq xatosi, lekin logout qilinmadi');
-                return true; // Sahifada qolish
-            }
-            
-            if (data.success) {
-                const user = data.user;
-                localStorage.setItem('adminUser', JSON.stringify(user));
-                sessionStorage.setItem('adminUser', JSON.stringify(user));
-                
-                // ✅ Admin Main bo'lmasa obuna tekshir
-                if (user.role !== 'admin_main') {
-                    const subscriptionStatus = await this.checkSubscriptionStatus();
-                    if (!subscriptionStatus.isActive) {
-                        localStorage.setItem('authMessage', subscriptionStatus.message || 'Obunangiz muddati tugagan!');
-                        this.logout();
-                        return false;
-                    }
-                }
-                
-                return true;
-            }
 
-            // ⭐ FAQAT 401 YOKI 403 BO'LSA LOGOUT
-            if (data.status === 401 || data.status === 403) {
-                localStorage.setItem('authMessage', data.message || 'Sizning hisobingizga kirish taqiqlangan.');
+        // ⭐ Agar oxirgi muvaffaqiyatli auth 5 daqiqadan kam bo'lsa —
+        // qayta tekshirmasdan sahifada qolishga ruxsat beramiz
+        // (mobilda har sahifada API chaqirilmaydi → logout yo'q)
+        const AGE_LIMIT = 5 * 60 * 1000; // 5 daqiqa
+        if (this.getLastAuthAge() < AGE_LIMIT) {
+            console.log('✅ Auth cache — qayta tekshirilmadi');
+            return true;
+        }
+
+        try {
+            // ⭐ fetch to'g'ridan-to'g'ri — status kodini o'zimiz olamiz
+            const apiBase = window.__API_BASE_URL__ || API.baseURL || '';
+            const response = await fetch(`${apiBase}/api/auth/profile`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                // ⭐ Mobilda 8 soniya kutamiz, keyin timeout
+                signal: AbortSignal.timeout(8000)
+            });
+
+            // ⭐ Tarmoq javob bermasa (timeout, offline) — logout qilmaymiz
+            const status = response.status;
+
+            // ⭐ FAQAT 401 — token yaroqsiz → logout
+            if (status === 401) {
+                console.warn('⚠️ Token yaroqsiz (401) → logout');
+                localStorage.setItem('authMessage', 'Sessiya muddati tugagan. Qayta kiring.');
                 this.logout();
                 return false;
             }
-            
-            // ⭐ BOSHQA XATOLIKLAR - LOGOUT QILMA
-            console.warn('⚠️ Auth xatosi:', data.message);
-            return true; // Sahifada qolish
-            
+
+            // ⭐ 403 — bloklangan yoki ruxsat yo'q → logout
+            if (status === 403) {
+                const data = await response.json().catch(() => ({}));
+                console.warn('⚠️ Ruxsat yo\'q (403) → logout');
+                localStorage.setItem('authMessage', data.message || 'Kirishga ruxsat yo\'q.');
+                this.logout();
+                return false;
+            }
+
+            // ⭐ 200 — muvaffaqiyatli
+            if (status === 200) {
+                const data = await response.json().catch(() => ({}));
+                if (data.success && data.user) {
+                    localStorage.setItem('adminUser', JSON.stringify(data.user));
+                    sessionStorage.setItem('adminUser', JSON.stringify(data.user));
+                    // ✅ Muvaffaqiyatli auth vaqtini yangilaymiz
+                    localStorage.setItem('adminLastAuth', Date.now().toString());
+                }
+                return true;
+            }
+
+            // ⭐ 500, 502, 503 yoki boshqa server xatolari — logout QILMAYMIZ
+            console.warn(`⚠️ Server xatosi (${status}) — sahifada qolindi`);
+            return true;
+
         } catch (error) {
-            console.error('❌ Auth check error:', error);
-            // ⭐ TARMOQ XATOSI - LOGOUT QILMA
-            return true; // Sahifada qolish
+            // ⭐ Timeout, offline, CORS — logout QILMAYMIZ
+            console.warn('⚠️ Tarmoq xatosi (checkAuth):', error.message, '— sahifada qolindi');
+            return true;
         }
     }
 };
 
 // ============================================================
-// AUTO-REDIRECT - TUZATILGAN (CHEKSIZ LOOP YO'Q)
+// SAHIFA YUKLANGANDA AUTH TEKSHIRISH
 // ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
-    const isLoginPage = window.location.pathname.includes('index.html') || 
-                         window.location.pathname === '/' ||
-                         window.location.pathname.endsWith('/');
+    const path = window.location.pathname;
+    const isLoginPage = path.includes('index.html') ||
+                        path === '/' ||
+                        path.endsWith('/');
     
-    if (!isLoginPage) {
-        // ⭐ AUTH TEKSHIRISH
-        if (!Auth.isAuthenticated()) {
-            window.location.href = 'index.html';
-            return;
-        }
-        
-        // ⭐ CHECK AUTH - XATOLIK BO'LSA HAM LOGOUT QILMAYDI
-        const isValid = await Auth.checkAuth();
-        if (!isValid) {
-            // ⭐ FAQAT TOKEN YO'Q BO'LSA YO'NALTIR
-            if (!Auth.isAuthenticated()) {
-                window.location.href = 'index.html';
-            }
-        }
+    if (isLoginPage) return; // Login sahifasida tekshirish shart emas
+
+    // Token yo'q → login sahifasiga
+    if (!Auth.isAuthenticated()) {
+        window.location.href = 'index.html';
+        return;
     }
+
+    // ⭐ checkAuth — faqat haqiqiy 401/403 da logout bo'ladi
+    // Tarmoq xatosi, timeout, server xatosi → sahifada qoladi
+    await Auth.checkAuth();
 });

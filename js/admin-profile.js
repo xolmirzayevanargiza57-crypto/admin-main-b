@@ -686,37 +686,28 @@ async function sendNotification() {
     showNotificationResult('⏳ Xabar yuborilmoqda...', 'info');
     
     try {
-        const token = localStorage.getItem('adminToken');
-        const API_URL = 'https://admin-customerr.onrender.com/api/notifications';
-        
-        console.log('📨 API so\'rov yuborilmoqda...');
-        console.log('📨 Manzil:', API_URL);
+        // ✅ API.post ishlatiladi — Admin Main backendiga yuboradi
+        // Token avtomatik qo'shiladi (api.js ichida)
+        // Endpoint: Admin Main backend → /api/notifications (authAdminMain)
+        console.log('📨 API so\'rov yuborilmoqda... (Admin Main backend)');
         console.log('📨 Ma\'lumot:', { title, message, recipientId: adminId });
-        
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                title: title,
-                message: message,
-                type: 'info',
-                recipientId: adminId,
-                recipientRole: 'admin_customer',
-                expiresInDays: 30
-            })
+
+        const data = await API.post('/notifications', {
+            title: title,
+            message: message,
+            type: 'info',
+            recipientId: adminId,         // Admin Customer ID
+            recipientRole: 'admin_customer',
+            expiresInDays: 30
         });
-        
-        const data = await response.json();
+
         console.log('📨 API javobi:', data);
-        
-        if (response.ok && data.success) {
+
+        if (data.success) {
             showNotificationResult('✅ Xabar muvaffaqiyatli yuborildi!', 'success');
             if (titleInput) titleInput.value = '';
             if (messageInput) messageInput.value = '';
-            
+
             setTimeout(() => {
                 const modal = document.getElementById('notificationModal');
                 if (modal) {

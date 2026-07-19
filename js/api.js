@@ -1,12 +1,12 @@
 // ============================================
-// API - TO'LIQ
+// API - TO'LIQ (TUZATILGAN)
 // ============================================
 
 const API = {
     baseURL: 'https://admin-main-backend.onrender.com/api',
     
     getToken() {
-        return localStorage.getItem('adminToken');
+        return localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
     },
     
     getHeaders() {
@@ -26,7 +26,6 @@ const API = {
         try {
             const url = `${this.baseURL}${endpoint}`;
             console.log('📡 API so\'rov:', url);
-            console.log('📦 Headers:', this.getHeaders());
             
             const res = await fetch(url, {
                 ...options,
@@ -37,7 +36,13 @@ const API = {
             return this.handleResponse(res);
         } catch (error) {
             console.error('❌ API xatosi:', error);
-            throw new Error('Tarmoq xatosi! Serverga ulanib bo\'lmadi. Qayta urinib ko\'ring.');
+            // ⭐ TARMOQ XATOSI - LOGOUT QILMA, FAQAT XATOLIK QAYTAR
+            return { 
+                success: false, 
+                status: 0, 
+                message: 'Tarmoq xatosi! Internet ulanishini tekshiring.',
+                error: error.message
+            };
         }
     },
     
@@ -77,24 +82,26 @@ const API = {
         }
 
         if (res.status === 404) {
-            throw new Error('🔍 API topilmadi! Manzilni tekshiring.');
+            return { success: false, status: 404, message: '🔍 API topilmadi! Manzilni tekshiring.' };
         }
 
         if (res.status === 500) {
-            throw new Error('🔧 Server xatosi! Iltimos, keyinroq urinib ko\'ring.');
+            return { success: false, status: 500, message: '🔧 Server xatosi! Iltimos, keyinroq urinib ko\'ring.' };
         }
 
-        if ((res.status === 401 || res.status === 403) && !res.url.includes('/auth/login')) {
-            localStorage.removeItem('adminToken');
-            localStorage.removeItem('adminUser');
-            localStorage.setItem('authMessage', data?.message || 'Sizning hisobingizga kirish taqiqlangan.');
-            window.location.replace('index.html');
-            throw new Error('⛔ Kirish taqiqlangan! Qayta kiring.');
+        // ⭐ 401/403 - TOKEN XATOSI, LEKIN BU YERDA LOGOUT QILMAYMIZ
+        // ⭐ AUTH.JS DAGI checkAuth() LOGOUT QILADI
+        if (res.status === 401 || res.status === 403) {
+            return { 
+                success: false, 
+                status: res.status,
+                message: data?.message || 'Ruxsat yo\'q! Qayta kiring.'
+            };
         }
 
         if (!res.ok) {
             const message = data?.message || rawText || `Xatolik kodi: ${res.status}`;
-            throw new Error(`❌ ${message}`);
+            return { success: false, status: res.status, message: message };
         }
 
         return data || { success: true };

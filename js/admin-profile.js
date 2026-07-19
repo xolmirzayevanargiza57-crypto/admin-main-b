@@ -1,6 +1,6 @@
-// ============================================
-// ADMIN PROFILE - TO'LIQ
-// ============================================
+// ============================================================
+// ADMIN PROFILE - Admin-Main uchun (TO'LIQ TUZATILGAN)
+// ============================================================
 
 let adminId = null;
 let currentAdmin = null;
@@ -69,9 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// ============================================
+// ============================================================
 // PROFILNI YUKLASH
-// ============================================
+// ============================================================
 async function loadProfile() {
     try {
         console.log('🔄 Profil yuklanmoqda... ID:', adminId);
@@ -92,9 +92,9 @@ async function loadProfile() {
     }
 }
 
-// ============================================
+// ============================================================
 // PROFILNI RENDER QILISH
-// ============================================
+// ============================================================
 function renderProfile(admin) {
     console.log('🎨 Profil render qilinmoqda:', admin);
     
@@ -215,9 +215,9 @@ function renderProfile(admin) {
     renderSubscriptionHistory(history);
 }
 
-// ============================================
+// ============================================================
 // SUBSCRIPTION TARIXI
-// ============================================
+// ============================================================
 function renderSubscriptionHistory(history) {
     const historyList = document.getElementById('historyList');
     if (!historyList) return;
@@ -277,9 +277,9 @@ function renderSubscriptionHistory(history) {
     }).join('');
 }
 
-// ============================================
+// ============================================================
 // TAHRIRLASH MODAL
-// ============================================
+// ============================================================
 function initEditModal() {
     const editModal = document.getElementById('editModal');
     const editBtn = document.getElementById('editBtn');
@@ -333,9 +333,9 @@ function initEditModal() {
     }
 }
 
-// ============================================
+// ============================================================
 // TAHRIRLASH MODAL OCHISH
-// ============================================
+// ============================================================
 function openEditModal() {
     if (!currentAdmin) return;
     
@@ -358,9 +358,9 @@ function openEditModal() {
     document.body.style.overflow = 'hidden';
 }
 
-// ============================================
+// ============================================================
 // TAHRIRLASHNI SAQLASH
-// ============================================
+// ============================================================
 async function saveEdit() {
     const fullName = document.getElementById('editFullName').value.trim();
     const email = document.getElementById('editEmail').value.trim();
@@ -417,9 +417,9 @@ async function saveEdit() {
     }
 }
 
-// ============================================
+// ============================================================
 // TO'LOV QO'SHISH MODAL
-// ============================================
+// ============================================================
 function initPaymentModal() {
     const modal = document.getElementById('paymentModal');
     const addBtn = document.getElementById('addPaymentBtn');
@@ -573,9 +573,9 @@ async function savePayment() {
     }
 }
 
-// ============================================
-// XABAR YUBORISH MODAL - TO'LIQ
-// ============================================
+// ============================================================
+// ⭐ XABAR YUBORISH MODAL - TO'LIQ TUZATILGAN
+// ============================================================
 function initNotificationModal() {
     const modal = document.getElementById('notificationModal');
     const sendBtn = document.getElementById('sendNotificationBtn');
@@ -671,7 +671,7 @@ function initNotificationModal() {
         });
     }
     
-    // ASOSIY YUBORISH TUGMASI
+    // ⭐ ASOSIY YUBORISH TUGMASI
     if (sendBtn) {
         sendBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -680,16 +680,16 @@ function initNotificationModal() {
         });
     }
     
-    // ============================================
-    // XABAR YUBORISH FUNKSIYASI
-    // ============================================
+    // ============================================================
+    // ⭐ XABAR YUBORISH FUNKSIYASI - TUZATILGAN
+    // ============================================================
     async function sendNotification() {
         const title = titleInput ? titleInput.value.trim() : '';
         const message = messageInput ? messageInput.value.trim() : '';
         
-        console.log('🔍 1. Title:', title);
-        console.log('🔍 2. Message:', message);
-        console.log('🔍 3. Admin ID:', adminId);
+        console.log('🔍 Title:', title);
+        console.log('🔍 Message:', message);
+        console.log('🔍 Admin ID:', adminId);
         
         if (!title) {
             showNotificationResult('❌ Iltimos, sarlavhani kiriting!', 'error');
@@ -710,7 +710,7 @@ function initNotificationModal() {
         showNotificationResult('⏳ Xabar yuborilmoqda...', 'info');
         
         try {
-            console.log('📨 4. API so\'rov yuborilmoqda...');
+            console.log('📨 API so\'rov yuborilmoqda...');
             
             const response = await API.post('/notifications', {
                 title: title,
@@ -721,7 +721,7 @@ function initNotificationModal() {
                 expiresInDays: 30
             });
             
-            console.log('📨 5. API javobi:', response);
+            console.log('📨 API javobi:', response);
             
             if (response.success) {
                 showNotificationResult('✅ Xabar muvaffaqiyatli yuborildi!', 'success');
@@ -746,7 +746,7 @@ function initNotificationModal() {
                 }
             }
         } catch (error) {
-            console.error('❌ 6. Xabar yuborish xatosi:', error);
+            console.error('❌ Xabar yuborish xatosi:', error);
             showNotificationResult('❌ Xabar yuborishda xatolik: ' + (error.message || 'Server xatosi!'), 'error');
             if (sendBtn) {
                 sendBtn.disabled = false;
@@ -769,40 +769,64 @@ function initNotificationModal() {
     }
 }
 
-// ============================================
+// ============================================================
+// ⭐ BLOKLASH FUNKSIYASI - BAN SABABI BILAN (TUZATILGAN)
+// ============================================================
+async function banAdmin(id) {
+    const reason = prompt('Bloklash sababini yozing:');
+    if (reason === null) return;
+
+    try {
+        const result = await API.post(`/admins/${id}/ban`, { 
+            reason: reason?.trim() || 'Admin panelda cheklov' 
+        });
+        if (result.success) {
+            alert('✅ Admin Customer bloklandi!\n📌 Sabab: ' + (reason || 'Admin panelda cheklov'));
+            loadProfile();
+        }
+    } catch (error) {
+        alert('❌ Xatolik: ' + error.message);
+    }
+}
+
+// ============================================================
+// ⭐ BLOKDAN CHIQARISH FUNKSIYASI
+// ============================================================
+async function unbanAdmin(id) {
+    if (!confirm('Haqiqatan ham bu Admin Customerni blokdan chiqarmoqchimisiz?')) {
+        return;
+    }
+
+    try {
+        const result = await API.post(`/admins/${id}/unban`);
+        if (result.success) {
+            alert('✅ Admin Customer blokdan chiqarildi!');
+            loadProfile();
+        }
+    } catch (error) {
+        alert('❌ Xatolik: ' + error.message);
+    }
+}
+
+// ============================================================
 // TUGMALAR
-// ============================================
+// ============================================================
 function initButtons() {
-    const subscriptionBtn = document.getElementById('subscriptionBtn');
-    if (subscriptionBtn) {
-        subscriptionBtn.addEventListener('click', () => {
-            const type = prompt(
-                'Obuna turini tanlang:\n' +
-                '1. Oylik (30 kun) -> monthly\n' +
-                '2. 6 oylik (180 kun) -> 6months\n' +
-                '3. Yillik (365 kun) -> yearly\n' +
-                '4. Custom (qo\'lda vaqt) -> custom\n' +
-                '5. Bekor qilish -> none',
-                'monthly'
-            );
-            
-            if (type === 'custom') {
-                const days = parseInt(prompt('Kun:', '0')) || 0;
-                const hours = parseInt(prompt('Soat:', '0')) || 0;
-                const minutes = parseInt(prompt('Daqiqa:', '0')) || 0;
-                const seconds = parseInt(prompt('Sekund:', '0')) || 0;
-                
-                if (days === 0 && hours === 0 && minutes === 0 && seconds === 0) {
-                    alert('Hech qanday vaqt belgilanmadi!');
-                    return;
-                }
-                
-                updateSubscription('custom', { days, hours, minutes, seconds });
-            } else if (type === 'monthly' || type === '6months' || type === 'yearly') {
-                updateSubscription(type);
-            } else if (type === 'none') {
-                updateSubscription('none');
-            }
+    // ⭐ Bloklash tugmasi - sabab bilan
+    const banBtn = document.getElementById('banBtn');
+    if (banBtn) {
+        banBtn.addEventListener('click', () => {
+            if (!adminId) return;
+            banAdmin(adminId);
+        });
+    }
+    
+    // ⭐ Blokdan chiqarish tugmasi
+    const unbanBtn = document.getElementById('unbanBtn');
+    if (unbanBtn) {
+        unbanBtn.addEventListener('click', () => {
+            if (!adminId) return;
+            unbanAdmin(adminId);
         });
     }
     
@@ -823,28 +847,6 @@ function initButtons() {
                 alert('❌ Xatolik: ' + error.message);
             }
         });
-    }
-}
-
-async function updateSubscription(type, customDuration = null) {
-    try {
-        const data = { subscriptionType: type };
-        if (customDuration) {
-            data.customDuration = customDuration;
-        }
-        
-        const response = await API.put(`/admins/${adminId}/subscription`, data);
-        if (response.success) {
-            const msg = type === 'monthly' ? 'Oylik' : 
-                       type === '6months' ? '6 oylik' :
-                       type === 'yearly' ? 'Yillik' : 
-                       type === 'custom' ? 'Custom' : 
-                       'Bekor qilindi';
-            alert('✅ Obuna muvaffaqiyatli ' + msg + '!');
-            loadProfile();
-        }
-    } catch (error) {
-        alert('❌ Xatolik: ' + error.message);
     }
 }
 

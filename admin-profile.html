@@ -94,14 +94,16 @@
                     <button id="editBtn" class="btn-primary"><i class="fas fa-edit"></i> Tahrirlash</button>
                     <button id="subscriptionBtn" class="btn-warning"><i class="fas fa-calendar-plus"></i> Obuna sotish</button>
                     
-                    <!-- ⭐ TO'LOV QO'SHISH TUGMASI -->
+                    <!-- TO'LOV QO'SHISH TUGMASI -->
                     <button id="addPaymentBtn" class="btn-success">
                         <i class="fas fa-money-bill-wave"></i> To'lov qo'shish
                     </button>
                     
-                    <button id="sendNotificationBtn" class="btn-primary" style="background: #007aff; color: white; border: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                    <!-- ⭐ ID o'zgartirildi: openNotificationBtn -->
+                    <button id="openNotificationBtn" class="btn-primary" style="background: #007aff; color: white; border: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
                         <i class="fas fa-bell"></i> Xabar yuborish
                     </button>
+
                     <button id="banBtn" class="btn-danger" style="background: #ff3b30; color: white; border: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
                         <i class="fas fa-ban"></i> Bloklash
                     </button>
@@ -294,7 +296,8 @@
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" id="cancelNotificationModal">Bekor qilish</button>
-                <button class="btn-primary" id="sendNotificationBtn" style="background: #007aff; color: white;">
+                <!-- ⭐ ID o'zgartirildi: submitNotificationBtn -->
+                <button class="btn-primary" id="submitNotificationBtn" style="background: #007aff; color: white;">
                     <i class="fas fa-paper-plane"></i> Yuborish
                 </button>
             </div>

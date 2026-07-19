@@ -1,18 +1,28 @@
 // ============================================
-// AUTH - Admin Main (TO'LIQ TUZATILGAN)
+// AUTH - TO'LIQ (TUZATILGAN)
 // ============================================
 
 const Auth = {
     async login(email, password) {
         try {
             const data = await API.post('/auth/login', { email, password });
-
+            
             if (data.success && data.token) {
                 localStorage.setItem('adminToken', data.token);
                 localStorage.setItem('adminUser', JSON.stringify(data.user));
                 sessionStorage.setItem('adminToken', data.token);
                 sessionStorage.setItem('adminUser', JSON.stringify(data.user));
-                localStorage.setItem('adminLastAuth', Date.now().toString());
+                
+                // ✅ Obuna holatini tekshirish
+                const subscriptionStatus = await this.checkSubscriptionStatus();
+                if (!subscriptionStatus.isActive && data.user.role !== 'admin_main') {
+                    this.logout();
+                    return { 
+                        success: false, 
+                        error: subscriptionStatus.message || 'Obunangiz muddati tugagan yoki mavjud emas!' 
+                    };
+                }
+                
                 return { success: true };
             }
             return { success: false, error: data.message || 'Login xatosi' };
@@ -20,121 +30,121 @@ const Auth = {
             return { success: false, error: error.message };
         }
     },
-
+    
+    async checkSubscriptionStatus() {
+        try {
+            const response = await API.get('/auth/subscription-status');
+            if (response.success) {
+                return response.data;
+            }
+            return { isActive: false, message: 'Obuna holatini tekshirib bo\'lmadi' };
+        } catch (error) {
+            return { isActive: false, message: error.message };
+        }
+    },
+    
     logout() {
         localStorage.removeItem('adminToken');
         localStorage.removeItem('adminUser');
-        localStorage.removeItem('adminLastAuth');
-        localStorage.removeItem('authMessage');
         sessionStorage.removeItem('adminToken');
         sessionStorage.removeItem('adminUser');
+        localStorage.removeItem('authMessage');
         window.location.href = 'index.html';
     },
-
+    
     isAuthenticated() {
-        return !!(localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken'));
+        const token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
+        return !!token;
     },
-
+    
     getUser() {
-        const u = localStorage.getItem('adminUser') || sessionStorage.getItem('adminUser');
-        return u ? JSON.parse(u) : null;
+        const user = localStorage.getItem('adminUser') || sessionStorage.getItem('adminUser');
+        return user ? JSON.parse(user) : null;
     },
-
+    
     getUserName() {
         const user = this.getUser();
         return user ? user.fullName || 'Admin' : 'Admin';
     },
-
+    
     getUserInitial() {
-        return this.getUserName().charAt(0).toUpperCase();
+        const name = this.getUserName();
+        return name.charAt(0).toUpperCase();
     },
-
-    getLastAuthAge() {
-        const last = localStorage.getItem('adminLastAuth');
-        return last ? Date.now() - parseInt(last) : Infinity;
-    },
-
-    // ⭐ CHECK AUTH - TO'LIQ TUZATILGAN (HEMISHE TRUE QAYTARADI)
+    
+    // ⭐ CHECK AUTH - TUZATILGAN (CHEKSIZ LOOP YO'Q)
     async checkAuth() {
         const token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
         if (!token) return false;
-
-        // ⭐ 30 daqiqa cache
-        const CACHE = 30 * 60 * 1000;
-        if (this.getLastAuthAge() < CACHE) {
-            console.log('✅ Auth cache — server chaqirilmadi');
-            return true;
-        }
-
+        
         try {
             const data = await API.get('/auth/profile');
-
-            // ⭐ Timeout yoki tarmoq xatosi — sahifada qolish
+            
+            // ⭐ TARMOQ XATOSI (status 0) - LOGOUT QILMA
             if (data.status === 0) {
-                console.warn('⚠️ Server javob bermadi — sahifada qolindi');
+                console.warn('⚠️ Tarmoq xatosi, lekin logout qilinmadi');
+                return true; // Sahifada qolish
+            }
+            
+            if (data.success) {
+                const user = data.user;
+                localStorage.setItem('adminUser', JSON.stringify(user));
+                sessionStorage.setItem('adminUser', JSON.stringify(user));
+                
+                // ✅ Admin Main bo'lmasa obuna tekshir
+                if (user.role !== 'admin_main') {
+                    const subscriptionStatus = await this.checkSubscriptionStatus();
+                    if (!subscriptionStatus.isActive) {
+                        localStorage.setItem('authMessage', subscriptionStatus.message || 'Obunangiz muddati tugagan!');
+                        this.logout();
+                        return false;
+                    }
+                }
+                
                 return true;
             }
 
-            // ⭐ 401 - Token yaroqsiz, LOGOUT
-            if (data.status === 401) {
-                console.warn('⚠️ Token yaroqsiz → logout');
-                localStorage.setItem('authMessage', data.message || 'Sessiya tugagan. Qayta kiring.');
+            // ⭐ FAQAT 401 YOKI 403 BO'LSA LOGOUT
+            if (data.status === 401 || data.status === 403) {
+                localStorage.setItem('authMessage', data.message || 'Sizning hisobingizga kirish taqiqlangan.');
                 this.logout();
                 return false;
             }
-
-            // ⭐ 403 - Bloklangan
-            if (data.status === 403) {
-                console.warn('⚠️ Bloklangan (403) → logout');
-                localStorage.setItem('authMessage', data.message || 'Kirishga ruxsat yo\'q.');
-                this.logout();
-                return false;
-            }
-
-            // ⭐ Muvaffaqiyatli
-            if (data.success && data.user) {
-                localStorage.setItem('adminUser', JSON.stringify(data.user));
-                sessionStorage.setItem('adminUser', JSON.stringify(data.user));
-                localStorage.setItem('adminLastAuth', Date.now().toString());
-                return true;
-            }
-
-            // ⭐ Boshqa xatoliklar — sahifada qolish
+            
+            // ⭐ BOSHQA XATOLIKLAR - LOGOUT QILMA
             console.warn('⚠️ Auth xatosi:', data.message);
-            return true;
-
+            return true; // Sahifada qolish
+            
         } catch (error) {
-            console.warn('⚠️ checkAuth exception:', error.message, '— sahifada qolindi');
-            return true;
+            console.error('❌ Auth check error:', error);
+            // ⭐ TARMOQ XATOSI - LOGOUT QILMA
+            return true; // Sahifada qolish
         }
     }
 };
 
 // ============================================================
-// ⭐ SAHIFA YUKLANGANDA - CHEKSIZ LOOP YO'Q
+// AUTO-REDIRECT - TUZATILGAN (CHEKSIZ LOOP YO'Q)
 // ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
-    const path = window.location.pathname;
-    const isLoginPage = path.includes('index.html') ||
-                        path === '/' ||
-                        path.endsWith('/');
-
-    if (isLoginPage) return;
-
-    // ⭐ Token yo'q → login
-    if (!Auth.isAuthenticated()) {
-        window.location.href = 'index.html';
-        return;
-    }
-
-    // ⭐ checkAuth — xato bo'lsa ham sahifada qolish
-    try {
-        const isValid = await Auth.checkAuth();
-        // ⭐ FAQAT TOKEN YO'Q BO'LSA YO'NALTIR
-        if (!isValid && !Auth.isAuthenticated()) {
+    const isLoginPage = window.location.pathname.includes('index.html') || 
+                         window.location.pathname === '/' ||
+                         window.location.pathname.endsWith('/');
+    
+    if (!isLoginPage) {
+        // ⭐ AUTH TEKSHIRISH
+        if (!Auth.isAuthenticated()) {
             window.location.href = 'index.html';
+            return;
         }
-    } catch (e) {
-        console.warn('⚠️ Auth error:', e.message);
+        
+        // ⭐ CHECK AUTH - XATOLIK BO'LSA HAM LOGOUT QILMAYDI
+        const isValid = await Auth.checkAuth();
+        if (!isValid) {
+            // ⭐ FAQAT TOKEN YO'Q BO'LSA YO'NALTIR
+            if (!Auth.isAuthenticated()) {
+                window.location.href = 'index.html';
+            }
+        }
     }
 });

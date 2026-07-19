@@ -1,107 +1,114 @@
 // ============================================
-// API - TO'LIQ (TUZATILGAN)
+// API - Admin Main (MOBIL + RENDER COLD START UCHUN TUZATILGAN)
 // ============================================
-
 const API = {
     baseURL: 'https://admin-main-backend.onrender.com/api',
-    
+
+    // ⭐ Render cold start uchun 30 soniya timeout
+    TIMEOUT_MS: 30000,
+
     getToken() {
         return localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
     },
-    
+
     getHeaders() {
         const token = this.getToken();
-        const headers = {
-            'Content-Type': 'application/json'
-        };
-        
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
-        
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
         return headers;
+    },
+
+    // ⭐ Timeout bilan fetch — mobilda ham, Render cold start da ham ishlaydi
+    async fetchWithTimeout(url, options = {}) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), this.TIMEOUT_MS);
+
+        try {
+            const res = await fetch(url, {
+                ...options,
+                signal: controller.signal
+            });
+            return res;
+        } finally {
+            clearTimeout(timeoutId);
+        }
     },
 
     async request(endpoint, options = {}) {
         try {
             const url = `${this.baseURL}${endpoint}`;
             console.log('📡 API so\'rov:', url);
-            
-            const res = await fetch(url, {
+
+            const res = await this.fetchWithTimeout(url, {
                 ...options,
                 headers: this.getHeaders()
             });
-            
+
             console.log('📥 Javob status:', res.status);
             return this.handleResponse(res);
+
         } catch (error) {
-            console.error('❌ API xatosi:', error);
-            // ⭐ TARMOQ XATOSI - LOGOUT QILMA, FAQAT XATOLIK QAYTAR
-            return { 
-                success: false, 
-                status: 0, 
+            // ⭐ AbortError = timeout (Render uyg'onmadi yoki mobil sekin)
+            if (error.name === 'AbortError') {
+                console.warn('⏱️ API timeout (30s) — server uyg\'onmoqda yoki internet sekin');
+                return {
+                    success: false,
+                    status: 0,
+                    message: 'Server javob bermadi. Iltimos, sahifani yangilang.',
+                    isTimeout: true
+                };
+            }
+
+            console.error('❌ API tarmoq xatosi:', error.message);
+            return {
+                success: false,
+                status: 0,
                 message: 'Tarmoq xatosi! Internet ulanishini tekshiring.',
                 error: error.message
             };
         }
     },
-    
-    async get(endpoint) {
-        return this.request(endpoint, { method: 'GET' });
-    },
-    
-    async post(endpoint, data) {
-        return this.request(endpoint, {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
-    },
-    
-    async put(endpoint, data) {
-        return this.request(endpoint, {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
-    },
-    
-    async delete(endpoint) {
-        return this.request(endpoint, { method: 'DELETE' });
-    },
-    
+
+    async get(endpoint)         { return this.request(endpoint, { method: 'GET' }); },
+    async post(endpoint, data)  { return this.request(endpoint, { method: 'POST',   body: JSON.stringify(data) }); },
+    async put(endpoint, data)   { return this.request(endpoint, { method: 'PUT',    body: JSON.stringify(data) }); },
+    async delete(endpoint)      { return this.request(endpoint, { method: 'DELETE' }); },
+
     async handleResponse(res) {
         let data = null;
         let rawText = '';
 
         try {
             rawText = await res.text();
-            console.log('📄 Raw javob:', rawText);
             data = rawText ? JSON.parse(rawText) : null;
-        } catch (error) {
-            console.warn('⚠️ JSON parse xatosi:', error);
+        } catch (e) {
+            console.warn('⚠️ JSON parse xatosi:', e);
             data = null;
         }
 
-        if (res.status === 404) {
-            return { success: false, status: 404, message: '🔍 API topilmadi! Manzilni tekshiring.' };
-        }
-
-        if (res.status === 500) {
-            return { success: false, status: 500, message: '🔧 Server xatosi! Iltimos, keyinroq urinib ko\'ring.' };
-        }
-
-        // ⭐ 401/403 - TOKEN XATOSI, LEKIN BU YERDA LOGOUT QILMAYMIZ
-        // ⭐ AUTH.JS DAGI checkAuth() LOGOUT QILADI
+        // ⭐ 401 / 403 — auth.js hal qiladi, bu yerda logout YO'Q
         if (res.status === 401 || res.status === 403) {
-            return { 
-                success: false, 
+            return {
+                success: false,
                 status: res.status,
                 message: data?.message || 'Ruxsat yo\'q! Qayta kiring.'
             };
         }
 
+        if (res.status === 404) {
+            return { success: false, status: 404, message: 'API topilmadi!' };
+        }
+
+        if (res.status === 500) {
+            return { success: false, status: 500, message: 'Server xatosi! Keyinroq urinib ko\'ring.' };
+        }
+
         if (!res.ok) {
-            const message = data?.message || rawText || `Xatolik kodi: ${res.status}`;
-            return { success: false, status: res.status, message: message };
+            return {
+                success: false,
+                status: res.status,
+                message: data?.message || rawText || `Xatolik: ${res.status}`
+            };
         }
 
         return data || { success: true };

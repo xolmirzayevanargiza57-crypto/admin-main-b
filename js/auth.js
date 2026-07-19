@@ -1,5 +1,5 @@
 // ============================================
-// AUTH - Admin Main (TO'LIQ TUZATILGAN)
+// AUTH - Admin Main (MOBIL UCHUN TUZATILGAN)
 // ============================================
 
 const Auth = {
@@ -12,9 +12,7 @@ const Auth = {
                 localStorage.setItem('adminUser', JSON.stringify(data.user));
                 sessionStorage.setItem('adminToken', data.token);
                 sessionStorage.setItem('adminUser', JSON.stringify(data.user));
-                // ✅ Oxirgi muvaffaqiyatli auth vaqtini saqlaymiz
                 localStorage.setItem('adminLastAuth', Date.now().toString());
-                
                 return { success: true };
             }
             return { success: false, error: data.message || 'Login xatosi' };
@@ -53,79 +51,114 @@ const Auth = {
         return name.charAt(0).toUpperCase();
     },
 
-    // ⭐ Oxirgi muvaffaqiyatli auth qancha vaqt oldin bo'lgani
     getLastAuthAge() {
         const last = localStorage.getItem('adminLastAuth');
         if (!last) return Infinity;
         return Date.now() - parseInt(last);
     },
     
-    // ⭐ CHECK AUTH — faqat haqiqiy 401/403 da logout qiladi
     async checkAuth() {
         const token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
         if (!token) return false;
 
-        // ⭐ Agar oxirgi muvaffaqiyatli auth 5 daqiqadan kam bo'lsa —
-        // qayta tekshirmasdan sahifada qolishga ruxsat beramiz
-        // (mobilda har sahifada API chaqirilmaydi → logout yo'q)
-        const AGE_LIMIT = 5 * 60 * 1000; // 5 daqiqa
+        // ⭐ 15 daqiqa ichida kirgan bo'lsa — API ga umuman murojaat qilmaymiz
+        // Mobilda bu eng muhim qism — har sahifada request ketmaydi
+        const AGE_LIMIT = 15 * 60 * 1000; // 15 daqiqa
         if (this.getLastAuthAge() < AGE_LIMIT) {
-            console.log('✅ Auth cache — qayta tekshirilmadi');
+            console.log('✅ Auth cache ishlatildi — API chaqirilmadi');
             return true;
         }
 
         try {
-            // ⭐ fetch to'g'ridan-to'g'ri — status kodini o'zimiz olamiz
-            const apiBase = window.__API_BASE_URL__ || API.baseURL || '';
-            const response = await fetch(`${apiBase}/api/auth/profile`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                // ⭐ Mobilda 8 soniya kutamiz, keyin timeout
-                signal: AbortSignal.timeout(8000)
-            });
+            // ⭐ AbortController — mobilda ham ishlaydi (AbortSignal.timeout emas)
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                controller.abort();
+            }, 10000); // 10 soniya
 
-            // ⭐ Tarmoq javob bermasa (timeout, offline) — logout qilmaymiz
+            const apiBase = (typeof API !== 'undefined' && API.baseURL)
+                ? API.baseURL.replace(/\/api$/, '')   // /api qo'shimchasini olib tashlaymiz
+                : (window.__API_BASE_URL__ || '');
+
+            let response;
+            try {
+                response = await fetch(`${apiBase}/api/auth/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    signal: controller.signal
+                });
+            } finally {
+                clearTimeout(timeoutId);
+            }
+
             const status = response.status;
+            console.log('🔐 Auth status:', status);
 
-            // ⭐ FAQAT 401 — token yaroqsiz → logout
+            // ⭐ FAQAT 401 → logout (token yaroqsiz)
             if (status === 401) {
-                console.warn('⚠️ Token yaroqsiz (401) → logout');
-                localStorage.setItem('authMessage', 'Sessiya muddati tugagan. Qayta kiring.');
-                this.logout();
-                return false;
-            }
-
-            // ⭐ 403 — bloklangan yoki ruxsat yo'q → logout
-            if (status === 403) {
-                const data = await response.json().catch(() => ({}));
-                console.warn('⚠️ Ruxsat yo\'q (403) → logout');
-                localStorage.setItem('authMessage', data.message || 'Kirishga ruxsat yo\'q.');
-                this.logout();
-                return false;
-            }
-
-            // ⭐ 200 — muvaffaqiyatli
-            if (status === 200) {
-                const data = await response.json().catch(() => ({}));
-                if (data.success && data.user) {
-                    localStorage.setItem('adminUser', JSON.stringify(data.user));
-                    sessionStorage.setItem('adminUser', JSON.stringify(data.user));
-                    // ✅ Muvaffaqiyatli auth vaqtini yangilaymiz
-                    localStorage.setItem('adminLastAuth', Date.now().toString());
-                }
+                // ⭐ Qo'shimcha tekshiruv: JSON da ham success:false bo'lsa
+                try {
+                    const data = await response.json();
+                    // Ba'zi serverlar 401 qaytarsa ham boshqa sabab bo'lishi mumkin
+                    // Faqat aniq "token" xatosi bo'lsa logout qilamiz
+                    const msg = (data.message || '').toLowerCase();
+                    const isRealTokenError = 
+                        msg.includes('token') || 
+                        msg.includes('unauthorized') ||
+                        msg.includes('auth');
+                    
+                    if (isRealTokenError) {
+                        console.warn('⚠️ Token yaroqsiz → logout');
+                        localStorage.setItem('authMessage', data.message || 'Sessiya tugagan. Qayta kiring.');
+                        this.logout();
+                        return false;
+                    }
+                } catch(e) { /* JSON parse xatosi — logout qilmaymiz */ }
+                
+                // Aniq token xatosi emas — sahifada qolish
                 return true;
             }
 
-            // ⭐ 500, 502, 503 yoki boshqa server xatolari — logout QILMAYMIZ
-            console.warn(`⚠️ Server xatosi (${status}) — sahifada qolindi`);
+            // ⭐ 403 → logout (bloklangan)
+            if (status === 403) {
+                try {
+                    const data = await response.json();
+                    console.warn('⚠️ Bloklangan (403) → logout');
+                    localStorage.setItem('authMessage', data.message || 'Kirishga ruxsat yo\'q.');
+                    this.logout();
+                    return false;
+                } catch(e) {
+                    return true; // JSON parse xatosi — logout qilmaymiz
+                }
+            }
+
+            // ⭐ 200 → muvaffaqiyatli
+            if (status === 200) {
+                try {
+                    const data = await response.json();
+                    if (data.success && data.user) {
+                        localStorage.setItem('adminUser', JSON.stringify(data.user));
+                        sessionStorage.setItem('adminUser', JSON.stringify(data.user));
+                    }
+                } catch(e) { /* parse xatosi — lekin auth muvaffaqiyatli */ }
+                localStorage.setItem('adminLastAuth', Date.now().toString());
+                return true;
+            }
+
+            // ⭐ Boshqa barcha statuslar (500, 502, 503...) → sahifada qolish
+            console.warn(`⚠️ Server ${status} — logout qilinmadi`);
             return true;
 
         } catch (error) {
-            // ⭐ Timeout, offline, CORS — logout QILMAYMIZ
-            console.warn('⚠️ Tarmoq xatosi (checkAuth):', error.message, '— sahifada qolindi');
+            // ⭐ Timeout (AbortError), offline, CORS — logout QILMAYMIZ
+            if (error.name === 'AbortError') {
+                console.warn('⚠️ Auth timeout (10s) — mobil tarmoq sekin, sahifada qolindi');
+            } else {
+                console.warn('⚠️ Auth tarmoq xatosi:', error.message, '— sahifada qolindi');
+            }
             return true;
         }
     }
@@ -140,15 +173,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                         path === '/' ||
                         path.endsWith('/');
     
-    if (isLoginPage) return; // Login sahifasida tekshirish shart emas
+    if (isLoginPage) return;
 
-    // Token yo'q → login sahifasiga
+    // Token yo'q → login
     if (!Auth.isAuthenticated()) {
         window.location.href = 'index.html';
         return;
     }
 
-    // ⭐ checkAuth — faqat haqiqiy 401/403 da logout bo'ladi
-    // Tarmoq xatosi, timeout, server xatosi → sahifada qoladi
-    await Auth.checkAuth();
+    // ⭐ checkAuth — xato bo'lsa ham logout bo'lmaydi
+    try {
+        await Auth.checkAuth();
+    } catch(e) {
+        // Hech qanday holatda bu yerdan logout bo'lmasin
+        console.warn('⚠️ checkAuth umumiy xato:', e.message);
+    }
 });

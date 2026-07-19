@@ -49,18 +49,17 @@ const Auth = {
         return this.getUserName().charAt(0).toUpperCase();
     },
 
-    // ⭐ Oxirgi auth vaqti
     getLastAuthAge() {
         const last = localStorage.getItem('adminLastAuth');
         return last ? Date.now() - parseInt(last) : Infinity;
     },
 
-    // ⭐ CHECK AUTH - TO'LIQ TUZATILGAN
+    // ⭐ CHECK AUTH - TO'LIQ TUZATILGAN (HEMISHE TRUE QAYTARADI)
     async checkAuth() {
         const token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
         if (!token) return false;
 
-        // ⭐ 30 daqiqa ichida auth bo'lgan bo'lsa - serverga bormaymiz
+        // ⭐ 30 daqiqa cache
         const CACHE = 30 * 60 * 1000;
         if (this.getLastAuthAge() < CACHE) {
             console.log('✅ Auth cache — server chaqirilmadi');
@@ -70,7 +69,7 @@ const Auth = {
         try {
             const data = await API.get('/auth/profile');
 
-            // ⭐ Timeout yoki tarmoq xatosi — LOGOUT QILMAYMIZ
+            // ⭐ Timeout yoki tarmoq xatosi — sahifada qolish
             if (data.status === 0) {
                 console.warn('⚠️ Server javob bermadi — sahifada qolindi');
                 return true;
@@ -105,7 +104,6 @@ const Auth = {
             return true;
 
         } catch (error) {
-            // ⭐ Hech qanday exception logout qilmasin
             console.warn('⚠️ checkAuth exception:', error.message, '— sahifada qolindi');
             return true;
         }
@@ -113,7 +111,7 @@ const Auth = {
 };
 
 // ============================================================
-// SAHIFA YUKLANGANDA
+// ⭐ SAHIFA YUKLANGANDA - CHEKSIZ LOOP YO'Q
 // ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
     const path = window.location.pathname;
@@ -131,7 +129,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ⭐ checkAuth — xato bo'lsa ham sahifada qolish
     try {
-        await Auth.checkAuth();
+        const isValid = await Auth.checkAuth();
+        // ⭐ FAQAT TOKEN YO'Q BO'LSA YO'NALTIR
+        if (!isValid && !Auth.isAuthenticated()) {
+            window.location.href = 'index.html';
+        }
     } catch (e) {
         console.warn('⚠️ Auth error:', e.message);
     }

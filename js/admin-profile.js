@@ -701,7 +701,12 @@ async function sendNotification() {
     showNotificationResult('⏳ Xabar yuborilmoqda...', 'info');
     
     try {
+        // ⭐ TO'G'RI API MANZILI - Admin Customer Backend
+        const token = localStorage.getItem('adminToken');
+        const API_URL = 'https://admin-customerr.onrender.com/api/notifications';
+        
         console.log('📨 API so\'rov yuborilmoqda...');
+        console.log('📨 Manzil:', API_URL);
         console.log('📨 Ma\'lumot:', {
             title: title,
             message: message,
@@ -711,18 +716,26 @@ async function sendNotification() {
             expiresInDays: 30
         });
         
-        const response = await API.post('/notifications', {
-            title: title,
-            message: message,
-            type: 'info',
-            recipientId: adminId,
-            recipientRole: 'admin_customer',
-            expiresInDays: 30
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                title: title,
+                message: message,
+                type: 'info',
+                recipientId: adminId,
+                recipientRole: 'admin_customer',
+                expiresInDays: 30
+            })
         });
         
-        console.log('📨 API javobi:', response);
+        const data = await response.json();
+        console.log('📨 API javobi:', data);
         
-        if (response.success) {
+        if (response.ok && data.success) {
             showNotificationResult('✅ Xabar muvaffaqiyatli yuborildi!', 'success');
             if (titleInput) titleInput.value = '';
             if (messageInput) messageInput.value = '';
@@ -739,9 +752,9 @@ async function sendNotification() {
                 }
             }, 2000);
         } else {
-            const errorMsg = response.message || response.error || 'Noma\'lum xatolik';
+            const errorMsg = data.message || data.error || 'Noma\'lum xatolik';
             showNotificationResult('❌ Xabar yuborishda xatolik: ' + errorMsg, 'error');
-            console.error('❌ API xatolik:', response);
+            console.error('❌ API xatolik:', data);
             if (sendBtn) {
                 sendBtn.disabled = false;
                 sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
@@ -749,7 +762,7 @@ async function sendNotification() {
         }
     } catch (error) {
         console.error('❌ Xabar yuborish xatosi:', error);
-        const errorMsg = error.message || error.response?.data?.message || 'Server xatosi!';
+        const errorMsg = error.message || 'Server xatosi!';
         showNotificationResult('❌ Xabar yuborishda xatolik: ' + errorMsg, 'error');
         if (sendBtn) {
             sendBtn.disabled = false;

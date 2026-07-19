@@ -557,90 +557,74 @@ async function savePayment() {
 }
 
 // ============================================================
-// ⭐ XABAR YUBORISH MODAL - TO'LIQ TUZATILGAN
+// ⭐ XABAR YUBORISH MODAL - TUZATILGAN
+// ID ajratildi:
+//   openNotificationBtn  → sahifadagi "Xabar yuborish" tugmasi (modalni ochadi)
+//   submitNotificationBtn → modal ichidagi "Yuborish" tugmasi (xabar yuboradi)
 // ============================================================
 function initNotificationModal() {
     const modal = document.getElementById('notificationModal');
-    const sendBtn = document.getElementById('sendNotificationBtn');
+    const openBtn = document.getElementById('openNotificationBtn');     // Modalni ochadi
+    const submitBtn = document.getElementById('submitNotificationBtn'); // Xabar yuboradi
     const closeBtn = document.getElementById('closeNotificationModal');
     const cancelBtn = document.getElementById('cancelNotificationModal');
     const titleInput = document.getElementById('notificationTitle');
     const messageInput = document.getElementById('notificationMessage');
     const resultDiv = document.getElementById('notificationResult');
     
-    if (!modal || !sendBtn) return;
-    
-    const profileSendBtn = document.getElementById('sendNotificationBtn');
-    if (profileSendBtn) {
-        profileSendBtn.addEventListener('click', function(e) {
+    if (!modal) return;
+
+    // ── Modal OCHISH ──
+    if (openBtn) {
+        openBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
+            // Inputlarni tozalash
             if (titleInput) titleInput.value = '';
             if (messageInput) messageInput.value = '';
             if (resultDiv) {
                 resultDiv.style.display = 'none';
                 resultDiv.className = 'form-message';
             }
-            
-            if (sendBtn) {
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
             }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
             
             if (titleInput) titleInput.focus();
         });
     }
-    
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function() {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            if (sendBtn) {
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
-            }
-        });
+
+    // ── Modal YOPISH ──
+    function closeModal() {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+        }
     }
-    
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', function() {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            if (sendBtn) {
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
-            }
-        });
-    }
-    
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
     if (modal) {
         modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-                document.body.style.overflow = '';
-                if (sendBtn) {
-                    sendBtn.disabled = false;
-                    sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
-                }
-            }
+            if (e.target === modal) closeModal();
         });
     }
-    
+
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            if (sendBtn) {
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
-            }
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
         }
     });
-    
+
+    // ── Ctrl+Enter bilan yuborish ──
     if (messageInput) {
         messageInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && e.ctrlKey) {
@@ -649,9 +633,10 @@ function initNotificationModal() {
             }
         });
     }
-    
-    if (sendBtn) {
-        sendBtn.addEventListener('click', function(e) {
+
+    // ── XABAR YUBORISH tugmasi ──
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             sendNotification();
@@ -660,12 +645,12 @@ function initNotificationModal() {
 }
 
 // ============================================================
-// ⭐ XABAR YUBORISH FUNKSIYASI - TO'LIQ TUZATILGAN
+// ⭐ XABAR YUBORISH FUNKSIYASI
 // ============================================================
 async function sendNotification() {
     const titleInput = document.getElementById('notificationTitle');
     const messageInput = document.getElementById('notificationMessage');
-    const sendBtn = document.getElementById('sendNotificationBtn');
+    const submitBtn = document.getElementById('submitNotificationBtn');
     const resultDiv = document.getElementById('notificationResult');
     
     const title = titleInput ? titleInput.value.trim() : '';
@@ -694,27 +679,19 @@ async function sendNotification() {
     }
     
     // Tugmani o'chirish
-    if (sendBtn) {
-        sendBtn.disabled = true;
-        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...';
     }
     showNotificationResult('⏳ Xabar yuborilmoqda...', 'info');
     
     try {
-        // ⭐ TO'G'RI API MANZILI - Admin Customer Backend
         const token = localStorage.getItem('adminToken');
         const API_URL = 'https://admin-customerr.onrender.com/api/notifications';
         
         console.log('📨 API so\'rov yuborilmoqda...');
         console.log('📨 Manzil:', API_URL);
-        console.log('📨 Ma\'lumot:', {
-            title: title,
-            message: message,
-            type: 'info',
-            recipientId: adminId,
-            recipientRole: 'admin_customer',
-            expiresInDays: 30
-        });
+        console.log('📨 Ma\'lumot:', { title, message, recipientId: adminId });
         
         const response = await fetch(API_URL, {
             method: 'POST',
@@ -746,27 +723,27 @@ async function sendNotification() {
                     modal.classList.remove('active');
                     document.body.style.overflow = '';
                 }
-                if (sendBtn) {
-                    sendBtn.disabled = false;
-                    sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
                 }
             }, 2000);
         } else {
             const errorMsg = data.message || data.error || 'Noma\'lum xatolik';
             showNotificationResult('❌ Xabar yuborishda xatolik: ' + errorMsg, 'error');
             console.error('❌ API xatolik:', data);
-            if (sendBtn) {
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
             }
         }
     } catch (error) {
         console.error('❌ Xabar yuborish xatosi:', error);
         const errorMsg = error.message || 'Server xatosi!';
         showNotificationResult('❌ Xabar yuborishda xatolik: ' + errorMsg, 'error');
-        if (sendBtn) {
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
         }
     }
 }

@@ -675,6 +675,7 @@ async function sendNotification() {
     console.log('🔍 Message:', message);
     console.log('🔍 Admin ID:', adminId);
     
+    // Validatsiya
     if (!title) {
         showNotificationResult('❌ Iltimos, sarlavhani kiriting!', 'error');
         if (titleInput) titleInput.focus();
@@ -692,6 +693,7 @@ async function sendNotification() {
         return;
     }
     
+    // Tugmani o'chirish
     if (sendBtn) {
         sendBtn.disabled = true;
         sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...';
@@ -737,7 +739,9 @@ async function sendNotification() {
                 }
             }, 2000);
         } else {
-            showNotificationResult('❌ Xabar yuborishda xatolik: ' + (response.message || 'Noma\'lum xatolik'), 'error');
+            const errorMsg = response.message || response.error || 'Noma\'lum xatolik';
+            showNotificationResult('❌ Xabar yuborishda xatolik: ' + errorMsg, 'error');
+            console.error('❌ API xatolik:', response);
             if (sendBtn) {
                 sendBtn.disabled = false;
                 sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
@@ -745,7 +749,8 @@ async function sendNotification() {
         }
     } catch (error) {
         console.error('❌ Xabar yuborish xatosi:', error);
-        showNotificationResult('❌ Xabar yuborishda xatolik: ' + (error.message || 'Server xatosi!'), 'error');
+        const errorMsg = error.message || error.response?.data?.message || 'Server xatosi!';
+        showNotificationResult('❌ Xabar yuborishda xatolik: ' + errorMsg, 'error');
         if (sendBtn) {
             sendBtn.disabled = false;
             sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';

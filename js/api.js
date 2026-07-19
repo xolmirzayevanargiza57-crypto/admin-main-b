@@ -1,10 +1,11 @@
 // ============================================
-// API - Admin Main (MOBIL + RENDER COLD START UCHUN TUZATILGAN)
+// API - Admin Main (TO'LIQ TUZATILGAN)
 // ============================================
+
 const API = {
     baseURL: 'https://admin-main-backend.onrender.com/api',
 
-    // ⭐ Render cold start uchun 30 soniya timeout
+    // ⭐ 30 soniya timeout - Render cold start uchun
     TIMEOUT_MS: 30000,
 
     getToken() {
@@ -18,7 +19,7 @@ const API = {
         return headers;
     },
 
-    // ⭐ Timeout bilan fetch — mobilda ham, Render cold start da ham ishlaydi
+    // ⭐ Timeout bilan fetch
     async fetchWithTimeout(url, options = {}) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), this.TIMEOUT_MS);
@@ -48,13 +49,13 @@ const API = {
             return this.handleResponse(res);
 
         } catch (error) {
-            // ⭐ AbortError = timeout (Render uyg'onmadi yoki mobil sekin)
+            // ⭐ Timeout - logout QILMAYMIZ
             if (error.name === 'AbortError') {
-                console.warn('⏱️ API timeout (30s) — server uyg\'onmoqda yoki internet sekin');
+                console.warn('⏱️ API timeout (30s) — server uyg\'onmoqda');
                 return {
                     success: false,
                     status: 0,
-                    message: 'Server javob bermadi. Iltimos, sahifani yangilang.',
+                    message: 'Server javob bermadi. Sahifani yangilang.',
                     isTimeout: true
                 };
             }
@@ -86,7 +87,7 @@ const API = {
             data = null;
         }
 
-        // ⭐ 401 / 403 — auth.js hal qiladi, bu yerda logout YO'Q
+        // ⭐ 401/403 - LOGOUT QILMAYMIZ, FAQAT STATUS QAYTARAMIZ
         if (res.status === 401 || res.status === 403) {
             return {
                 success: false,

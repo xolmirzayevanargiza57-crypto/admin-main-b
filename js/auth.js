@@ -1,5 +1,5 @@
 // ============================================
-// AUTH - TO'LIQ TEKSHIRISH
+// AUTH - TO'LIQ (TUZATILGAN)
 // ============================================
 
 const Auth = {
@@ -10,6 +10,8 @@ const Auth = {
             if (data.success && data.token) {
                 localStorage.setItem('adminToken', data.token);
                 localStorage.setItem('adminUser', JSON.stringify(data.user));
+                sessionStorage.setItem('adminToken', data.token);
+                sessionStorage.setItem('adminUser', JSON.stringify(data.user));
                 
                 // ✅ Obuna holatini tekshirish
                 const subscriptionStatus = await this.checkSubscriptionStatus();
@@ -44,17 +46,19 @@ const Auth = {
     logout() {
         localStorage.removeItem('adminToken');
         localStorage.removeItem('adminUser');
+        sessionStorage.removeItem('adminToken');
+        sessionStorage.removeItem('adminUser');
         localStorage.removeItem('authMessage');
         window.location.href = 'index.html';
     },
     
     isAuthenticated() {
-        const token = localStorage.getItem('adminToken');
+        const token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
         return !!token;
     },
     
     getUser() {
-        const user = localStorage.getItem('adminUser');
+        const user = localStorage.getItem('adminUser') || sessionStorage.getItem('adminUser');
         return user ? JSON.parse(user) : null;
     },
     
@@ -68,15 +72,24 @@ const Auth = {
         return name.charAt(0).toUpperCase();
     },
     
+    // ⭐ CHECK AUTH - TUZATILGAN (CHEKSIZ LOOP YO'Q)
     async checkAuth() {
-        const token = localStorage.getItem('adminToken');
+        const token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
         if (!token) return false;
         
         try {
             const data = await API.get('/auth/profile');
+            
+            // ⭐ TARMOQ XATOSI (status 0) - LOGOUT QILMA
+            if (data.status === 0) {
+                console.warn('⚠️ Tarmoq xatosi, lekin logout qilinmadi');
+                return true; // Sahifada qolish
+            }
+            
             if (data.success) {
                 const user = data.user;
                 localStorage.setItem('adminUser', JSON.stringify(user));
+                sessionStorage.setItem('adminUser', JSON.stringify(user));
                 
                 // ✅ Admin Main bo'lmasa obuna tekshir
                 if (user.role !== 'admin_main') {
@@ -91,29 +104,45 @@ const Auth = {
                 return true;
             }
 
-            localStorage.setItem('authMessage', data.message || 'Sizning hisobingizga kirish taqiqlangan.');
-            this.logout();
-            return false;
+            // ⭐ FAQAT 401 YOKI 403 BO'LSA LOGOUT
+            if (data.status === 401 || data.status === 403) {
+                localStorage.setItem('authMessage', data.message || 'Sizning hisobingizga kirish taqiqlangan.');
+                this.logout();
+                return false;
+            }
+            
+            // ⭐ BOSHQA XATOLIKLAR - LOGOUT QILMA
+            console.warn('⚠️ Auth xatosi:', data.message);
+            return true; // Sahifada qolish
+            
         } catch (error) {
-            localStorage.setItem('authMessage', error.message || 'Auth xatosi');
-            this.logout();
-            return false;
+            console.error('❌ Auth check error:', error);
+            // ⭐ TARMOQ XATOSI - LOGOUT QILMA
+            return true; // Sahifada qolish
         }
     }
 };
 
-// Sahifa yuklanganda avtomatik login tekshirish
+// ============================================================
+// AUTO-REDIRECT - TUZATILGAN (CHEKSIZ LOOP YO'Q)
+// ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
     const isLoginPage = window.location.pathname.includes('index.html') || 
                          window.location.pathname === '/' ||
                          window.location.pathname.endsWith('/');
     
     if (!isLoginPage) {
+        // ⭐ AUTH TEKSHIRISH
         if (!Auth.isAuthenticated()) {
             window.location.href = 'index.html';
-        } else {
-            const isValid = await Auth.checkAuth();
-            if (!isValid) {
+            return;
+        }
+        
+        // ⭐ CHECK AUTH - XATOLIK BO'LSA HAM LOGOUT QILMAYDI
+        const isValid = await Auth.checkAuth();
+        if (!isValid) {
+            // ⭐ FAQAT TOKEN YO'Q BO'LSA YO'NALTIR
+            if (!Auth.isAuthenticated()) {
                 window.location.href = 'index.html';
             }
         }

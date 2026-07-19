@@ -5,7 +5,7 @@
 const API = {
     baseURL: 'https://admin-main-backend.onrender.com/api',
 
-    // ⭐ 30 soniya timeout - Render cold start uchun
+    // ⭐ 30 soniya timeout
     TIMEOUT_MS: 30000,
 
     getToken() {
@@ -19,7 +19,6 @@ const API = {
         return headers;
     },
 
-    // ⭐ Timeout bilan fetch
     async fetchWithTimeout(url, options = {}) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), this.TIMEOUT_MS);
@@ -49,9 +48,8 @@ const API = {
             return this.handleResponse(res);
 
         } catch (error) {
-            // ⭐ Timeout - logout QILMAYMIZ
             if (error.name === 'AbortError') {
-                console.warn('⏱️ API timeout (30s) — server uyg\'onmoqda');
+                console.warn('⏱️ API timeout (30s)');
                 return {
                     success: false,
                     status: 0,
@@ -64,8 +62,7 @@ const API = {
             return {
                 success: false,
                 status: 0,
-                message: 'Tarmoq xatosi! Internet ulanishini tekshiring.',
-                error: error.message
+                message: 'Tarmoq xatosi! Internet ulanishini tekshiring.'
             };
         }
     },

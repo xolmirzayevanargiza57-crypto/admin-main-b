@@ -101,16 +101,16 @@
                 <div class="profile-actions">
                     <button id="editBtn" class="btn-primary"><i class="fas fa-edit"></i> Tahrirlash</button>
                     <button id="subscriptionBtn" class="btn-warning"><i class="fas fa-calendar-plus"></i> Obuna sotish</button>
-                    <button id="addPaymentBtn" class="btn-success" style="background: #34c759; color: white; border: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                    <button id="addPaymentBtn" class="btn-success" style="background:#34c759;color:white;border:none;padding:14px 28px;border-radius:10px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
                         <i class="fas fa-money-bill-wave"></i> To'lov qo'shish
                     </button>
-                    <button id="sendNotificationBtn" class="btn-primary" style="background: #007aff; color: white; border: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                    <button id="sendNotificationBtn" class="btn-primary" style="background:#007aff;color:white;border:none;padding:14px 28px;border-radius:10px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
                         <i class="fas fa-bell"></i> Xabar yuborish
                     </button>
-                    <button id="banBtn" class="btn-danger" style="background: #ff3b30; color: white; border: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                    <button id="banBtn" class="btn-danger" style="background:#ff3b30;color:white;border:none;padding:14px 28px;border-radius:10px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
                         <i class="fas fa-ban"></i> Bloklash
                     </button>
-                    <button id="unbanBtn" class="btn-warning" style="background: #ff9500; color: white; border: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                    <button id="unbanBtn" class="btn-warning" style="background:#ff9500;color:white;border:none;padding:14px 28px;border-radius:10px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
                         <i class="fas fa-unlock"></i> Blokdan chiqarish
                     </button>
                     <button id="deleteBtn" class="btn-danger"><i class="fas fa-trash"></i> O'chirish</button>
@@ -146,20 +146,18 @@
                             <input type="text" id="editPhone" placeholder="+998 90 123 45 67" />
                         </div>
                     </div>
-                    
                     <div class="form-group">
                         <label for="currentPasswordDisplay"><i class="fas fa-key"></i> Joriy parol</label>
                         <div class="input-wrapper">
-                            <input type="password" id="currentPasswordDisplay" readonly 
-                                   style="background: var(--bg-hover); cursor: not-allowed; font-size: 1.2rem; letter-spacing: 2px;" 
+                            <input type="password" id="currentPasswordDisplay" readonly
+                                   style="background:var(--bg-hover);cursor:not-allowed;font-size:1.2rem;letter-spacing:2px;"
                                    value="••••••••••" />
-                            <button type="button" class="password-toggle" id="currentPasswordToggle" style="right: 12px;">
+                            <button type="button" class="password-toggle" id="currentPasswordToggle" style="right:12px;">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
                         <small class="text-muted">💡 Parol xavfsizlik uchun yashirilgan.</small>
                     </div>
-
                     <div class="form-group">
                         <label for="editPassword"><i class="fas fa-lock"></i> Yangi parol (ixtiyoriy)</label>
                         <div class="input-wrapper">
@@ -170,7 +168,6 @@
                         </div>
                         <small class="text-muted">💡 Bo'sh qoldirilsa, eski parol saqlanadi</small>
                     </div>
-
                     <div class="form-group">
                         <label for="editStatus"><i class="fas fa-circle"></i> Holati</label>
                         <div class="input-wrapper">
@@ -191,15 +188,17 @@
         </div>
     </div>
 
-    <!-- TO'LOV QO'SHISH MODAL -->
+    <!-- ⭐ TO'LOV QO'SHISH MODAL - startDate INPUT QO'SHILDI -->
     <div class="modal-overlay" id="paymentModal">
-        <div class="modal" style="max-width: 560px;">
+        <div class="modal" style="max-width:560px;">
             <div class="modal-header">
                 <h3><i class="fas fa-money-bill-wave"></i> To'lov qo'shish</h3>
                 <button class="modal-close" id="closePaymentModal">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="paymentForm">
+
+                    <!-- OBUNA TURI -->
                     <div class="form-group">
                         <label><i class="fas fa-tag"></i> Obuna turi</label>
                         <div class="input-wrapper">
@@ -212,6 +211,7 @@
                         </div>
                     </div>
 
+                    <!-- TO'LOV MIQDORI -->
                     <div class="form-group">
                         <label><i class="fas fa-money-bill"></i> To'lov miqdori (so'm)</label>
                         <div class="input-wrapper">
@@ -219,10 +219,25 @@
                         </div>
                     </div>
 
-                    <div id="customDurationGroup" style="display: none;">
+                    <!-- ⭐ BOSHLANISH SANASI - BU YO'Q EDI -->
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-day"></i> Boshlanish vaqti <span style="color:var(--text-muted);font-size:0.8rem;">(qachondan boshlanadi)</span></label>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                            <div class="input-wrapper">
+                                <input type="date" id="paymentStartDate" />
+                            </div>
+                            <div class="input-wrapper">
+                                <input type="time" id="paymentStartTime" step="1" />
+                            </div>
+                        </div>
+                        <small class="text-muted">💡 Bo'sh qoldirilsa, hozirgi vaqtdan boshlanadi</small>
+                    </div>
+
+                    <!-- CUSTOM DAVOMIYLIK -->
+                    <div id="customDurationGroup" style="display:none;">
                         <div class="form-group">
                             <label><i class="fas fa-clock"></i> Vaqtni belgilang</label>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;">
                                 <div class="input-wrapper">
                                     <input type="number" id="customDays" placeholder="Kun" min="0" value="0" />
                                 </div>
@@ -240,9 +255,10 @@
                         </div>
                     </div>
 
+                    <!-- TUGASH SANASI (IXTIYORIY) -->
                     <div class="form-group">
-                        <label><i class="fas fa-calendar-day"></i> Tugash vaqti (ixtiyoriy)</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <label><i class="fas fa-calendar-times"></i> Tugash vaqti (ixtiyoriy)</label>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                             <div class="input-wrapper">
                                 <input type="date" id="paymentEndDate" />
                             </div>
@@ -250,9 +266,10 @@
                                 <input type="time" id="paymentEndTime" step="1" />
                             </div>
                         </div>
-                        <small class="text-muted">💡 Bo'sh qoldirilsa, hozirgi vaqtdan boshlab hisoblanadi</small>
+                        <small class="text-muted">💡 Bo'sh qoldirilsa, boshlanish + obuna muddatidan hisoblanadi</small>
                     </div>
 
+                    <!-- IZOH -->
                     <div class="form-group">
                         <label><i class="fas fa-sticky-note"></i> Izoh (ixtiyoriy)</label>
                         <div class="input-wrapper">
@@ -263,7 +280,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" id="cancelPaymentModal">Bekor qilish</button>
-                <button class="btn-primary" id="savePaymentModal" style="background: #34c759; color: white;">
+                <button class="btn-primary" id="savePaymentModal" style="background:#34c759;color:white;">
                     <i class="fas fa-save"></i> To'lovni qo'shish
                 </button>
             </div>
@@ -272,7 +289,7 @@
 
     <!-- XABAR YUBORISH MODAL -->
     <div class="modal-overlay" id="notificationModal">
-        <div class="modal" style="max-width: 500px;">
+        <div class="modal" style="max-width:500px;">
             <div class="modal-header">
                 <h3><i class="fas fa-bell"></i> Xabar yuborish</h3>
                 <button class="modal-close" id="closeNotificationModal">&times;</button>
@@ -295,11 +312,11 @@
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" id="cancelNotificationModal">Bekor qilish</button>
-                <button class="btn-primary" id="sendNotificationBtn" style="background: #007aff; color: white;">
+                <button class="btn-primary" id="saveNotificationBtn" style="background:#007aff;color:white;">
                     <i class="fas fa-paper-plane"></i> Yuborish
                 </button>
             </div>
-            <div id="notificationResult" class="form-message" style="display: none; margin: 0 24px 16px 24px;"></div>
+            <div id="notificationResult" class="form-message" style="display:none;margin:0 24px 16px 24px;"></div>
         </div>
     </div>
 

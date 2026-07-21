@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/inputs.css" />
     <link rel="stylesheet" href="css/modal.css" />
-    <link rel="stylesheet" href="css/theme.css" />
     <link rel="stylesheet" href="css/responsive.css" />
 </head>
 <body>
@@ -36,6 +35,7 @@
         </aside>
 
         <main class="main-content">
+            <!-- Header - FIKSLANGAN -->
             <header class="top-header">
                 <div class="header-left">
                     <button id="menuToggle" class="menu-toggle"><i class="fas fa-bars"></i></button>
@@ -50,119 +50,123 @@
                 </div>
             </header>
 
-            <div id="notificationPanel" class="notification-panel"></div>
-
-            <section class="form-container">
-                <form id="addAdminForm" class="app-form">
-                    <!-- F.I.SH -->
-                    <div class="form-group">
-                        <label for="fullName"><i class="fas fa-user"></i> F.I.SH</label>
-                        <div class="input-wrapper">
-                            <input type="text" id="fullName" placeholder="Aliyev Alisher Anvarovich" required />
-                        </div>
-                    </div>
-
-                    <!-- Email -->
-                    <div class="form-group">
-                        <label for="email"><i class="fas fa-envelope"></i> Email</label>
-                        <div class="input-wrapper">
-                            <input type="email" id="email" placeholder="admin@example.com" required autocomplete="email" />
-                        </div>
-                    </div>
-
-                    <!-- Telefon -->
-                    <div class="form-group">
-                        <label for="phone"><i class="fas fa-phone"></i> Telefon</label>
-                        <div class="input-wrapper">
-                            <input type="text" id="phone" placeholder="+998 90 123 45 67" />
-                        </div>
-                    </div>
-
-                    <!-- Parol -->
-                    <div class="form-group">
-                        <label for="password"><i class="fas fa-lock"></i> Parol</label>
-                        <div class="input-wrapper">
-                            <input type="password" id="password" placeholder="••••••••" required minlength="6" autocomplete="new-password" />
-                            <button type="button" class="password-toggle" id="passwordToggle">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- ============================================
-                    OBUNA TURI - TO'G'RIDAN-TO'G'RI SELECT
-                    ============================================ -->
-                    <div class="form-group">
-                        <label for="subscriptionType"><i class="fas fa-calendar"></i> Obuna turi</label>
-                        <div class="input-wrapper">
-                            <select id="subscriptionType" required>
-                                <option value="none">Obuna yo'q</option>
-                                <option value="monthly">Oylik (30 kun) - 299,999 so'm</option>
-                                <option value="6months">6 oylik (180 kun) - 1,899,999 so'm</option>
-                                <option value="yearly">Yillik (365 kun) - 3,599,999 so'm</option>
-                                <option value="custom">Custom (qo'lda vaqt)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- ============================================
-                    CUSTOM VAQT (KUN/SOAT/DAQIQA/SEKUND)
-                    ============================================ -->
-                    <div id="customDurationGroup" style="display: none;">
+            <!-- Form Container - SCROLL QILINADI -->
+            <section class="form-container-scroll">
+                <div class="form-wrapper">
+                    <form id="addAdminForm" class="app-form">
+                        <!-- F.I.SH -->
                         <div class="form-group">
-                            <label><i class="fas fa-clock"></i> Vaqtni belgilang</label>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
-                                <div class="input-wrapper">
-                                    <input type="number" id="customDays" placeholder="Kun" min="0" value="0" />
-                                </div>
-                                <div class="input-wrapper">
-                                    <input type="number" id="customHours" placeholder="Soat" min="0" value="0" />
-                                </div>
-                                <div class="input-wrapper">
-                                    <input type="number" id="customMinutes" placeholder="Daqiqa" min="0" value="0" />
-                                </div>
-                                <div class="input-wrapper">
-                                    <input type="number" id="customSeconds" placeholder="Sekund" min="0" value="0" />
-                                </div>
+                            <label for="fullName"><i class="fas fa-user"></i> F.I.SH</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="fullName" placeholder="Aliyev Alisher Anvarovich" required />
+                                <i class="fas fa-check-circle input-icon success"></i>
+                                <i class="fas fa-exclamation-circle input-icon error"></i>
                             </div>
-                            <small class="text-muted">💡 Misol: 2 daqiqa = 0 kun, 0 soat, 2 daqiqa, 0 sekund</small>
                         </div>
-                    </div>
 
-                    <!-- Boshlanish sanasi -->
-                    <div class="form-group">
-                        <label for="startDate"><i class="fas fa-calendar-day"></i> Boshlanish sanasi</label>
-                        <div class="input-wrapper">
-                            <input type="datetime-local" id="startDate" />
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                            <div class="input-wrapper">
+                                <input type="email" id="email" placeholder="admin@example.com" required autocomplete="email" />
+                                <i class="fas fa-check-circle input-icon success"></i>
+                                <i class="fas fa-exclamation-circle input-icon error"></i>
+                            </div>
                         </div>
-                        <small class="text-muted">💡 Bo'sh qoldirilsa, hozirgi vaqt olinadi</small>
-                    </div>
 
-                    <!-- Tugash sanasi -->
-                    <div class="form-group">
-                        <label for="endDate"><i class="fas fa-calendar-day"></i> Tugash sanasi</label>
-                        <div class="input-wrapper">
-                            <input type="datetime-local" id="endDate" />
+                        <!-- Telefon -->
+                        <div class="form-group">
+                            <label for="phone"><i class="fas fa-phone"></i> Telefon</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="phone" placeholder="+998 90 123 45 67" />
+                                <i class="fas fa-check-circle input-icon success"></i>
+                            </div>
                         </div>
-                        <small class="text-muted">💡 Bo'sh qoldirilsa, avtomatik hisoblanadi</small>
-                    </div>
 
-                    <!-- To'lov miqdori -->
-                    <div class="form-group">
-                        <label for="amount"><i class="fas fa-money-bill"></i> To'lov miqdori (so'm)</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="amount" placeholder="Masalan: 299999" />
+                        <!-- Parol -->
+                        <div class="form-group">
+                            <label for="password"><i class="fas fa-lock"></i> Parol</label>
+                            <div class="input-wrapper">
+                                <input type="password" id="password" placeholder="••••••••" required minlength="6" autocomplete="new-password" />
+                                <button type="button" class="password-toggle" id="passwordToggle">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <i class="fas fa-check-circle input-icon success"></i>
+                                <i class="fas fa-exclamation-circle input-icon error"></i>
+                            </div>
                         </div>
-                        <small class="text-muted">💡 Bo'sh qoldirilsa, avtomatik narx qo'yiladi</small>
-                    </div>
 
-                    <div class="form-actions">
-                        <button type="submit" id="submitBtn" class="btn-primary"><i class="fas fa-save"></i> Saqlash</button>
-                        <a href="admins.html" class="btn-secondary">Bekor qilish</a>
-                    </div>
-                </form>
+                        <!-- OBUNA TURI -->
+                        <div class="form-group">
+                            <label for="subscriptionType"><i class="fas fa-calendar"></i> Obuna turi</label>
+                            <div class="input-wrapper">
+                                <select id="subscriptionType" required>
+                                    <option value="none">Obuna yo'q</option>
+                                    <option value="monthly">Oylik (30 kun) - 299,999 so'm</option>
+                                    <option value="6months">6 oylik (180 kun) - 1,899,999 so'm</option>
+                                    <option value="yearly">Yillik (365 kun) - 3,599,999 so'm</option>
+                                    <option value="custom">Custom (qo'lda vaqt)</option>
+                                </select>
+                            </div>
+                        </div>
 
-                <div id="formMessage" class="form-message"></div>
+                        <!-- CUSTOM VAQT -->
+                        <div id="customDurationGroup" style="display: none;">
+                            <div class="form-group">
+                                <label><i class="fas fa-clock"></i> Vaqtni belgilang</label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+                                    <div class="input-wrapper">
+                                        <input type="number" id="customDays" placeholder="Kun" min="0" value="0" />
+                                    </div>
+                                    <div class="input-wrapper">
+                                        <input type="number" id="customHours" placeholder="Soat" min="0" value="0" />
+                                    </div>
+                                    <div class="input-wrapper">
+                                        <input type="number" id="customMinutes" placeholder="Daqiqa" min="0" value="0" />
+                                    </div>
+                                    <div class="input-wrapper">
+                                        <input type="number" id="customSeconds" placeholder="Sekund" min="0" value="0" />
+                                    </div>
+                                </div>
+                                <small class="text-muted">💡 Misol: 2 daqiqa = 0 kun, 0 soat, 2 daqiqa, 0 sekund</small>
+                            </div>
+                        </div>
+
+                        <!-- Boshlanish sanasi -->
+                        <div class="form-group">
+                            <label for="startDate"><i class="fas fa-calendar-day"></i> Boshlanish sanasi</label>
+                            <div class="input-wrapper">
+                                <input type="datetime-local" id="startDate" />
+                            </div>
+                            <small class="text-muted">💡 Bo'sh qoldirilsa, hozirgi vaqt olinadi</small>
+                        </div>
+
+                        <!-- Tugash sanasi -->
+                        <div class="form-group">
+                            <label for="endDate"><i class="fas fa-calendar-day"></i> Tugash sanasi</label>
+                            <div class="input-wrapper">
+                                <input type="datetime-local" id="endDate" />
+                            </div>
+                            <small class="text-muted">💡 Bo'sh qoldirilsa, avtomatik hisoblanadi</small>
+                        </div>
+
+                        <!-- To'lov miqdori -->
+                        <div class="form-group">
+                            <label for="amount"><i class="fas fa-money-bill"></i> To'lov miqdori (so'm)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="amount" placeholder="Masalan: 299999" />
+                            </div>
+                            <small class="text-muted">💡 Bo'sh qoldirilsa, avtomatik narx qo'yiladi</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" id="submitBtn" class="btn-primary"><i class="fas fa-save"></i> Saqlash</button>
+                            <a href="admins.html" class="btn-secondary">Bekor qilish</a>
+                        </div>
+                    </form>
+
+                    <div id="formMessage" class="form-message"></div>
+                </div>
             </section>
         </main>
     </div>
@@ -171,6 +175,302 @@
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
         <i class="fas fa-moon moon"></i>
     </button>
+
+    <style>
+        /* ============================================
+           FORM CONTAINER - SCROLL QILISH UCHUN
+           ============================================ */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .top-header {
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 32px;
+        }
+
+        .form-container-scroll {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px 32px 32px 32px;
+        }
+
+        .form-container-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .form-container-scroll::-webkit-scrollbar-track {
+            background: var(--bg-hover);
+            border-radius: 10px;
+        }
+
+        .form-container-scroll::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 10px;
+        }
+
+        .form-container-scroll::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        .form-wrapper {
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        .app-form {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 32px;
+            border: 1px solid var(--border-color);
+        }
+
+        .app-form .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .app-form .form-actions .btn-primary,
+        .app-form .form-actions .btn-secondary {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .form-message {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .form-message.success {
+            display: block;
+            background: #e8f5e9;
+            color: var(--color-success);
+            border: 1px solid #a5d6a7;
+        }
+
+        .form-message.error {
+            display: block;
+            background: #fef2f2;
+            color: var(--color-danger);
+            border: 1px solid #fecaca;
+        }
+
+        [data-theme="dark"] .form-message.success {
+            background: #1a3a2a;
+            color: #4ac759;
+            border-color: #4ac759;
+        }
+
+        [data-theme="dark"] .form-message.error {
+            background: #3a1a1a;
+            color: #ff3b30;
+            border-color: #ff3b30;
+        }
+
+        /* ============================================
+           MOBIL RESPONSIVE
+           ============================================ */
+        @media (max-width: 768px) {
+            .top-header {
+                padding: 12px 16px;
+            }
+
+            .form-container-scroll {
+                padding: 12px 16px 16px 16px;
+            }
+
+            .app-form {
+                padding: 16px;
+            }
+
+            .app-form .form-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .form-group {
+                margin-bottom: 14px;
+            }
+
+            .input-wrapper input,
+            .input-wrapper select,
+            .input-wrapper textarea {
+                padding: 10px 14px;
+                font-size: 0.875rem;
+            }
+
+            .input-wrapper input[type="password"] {
+                padding-right: 72px;
+            }
+
+            .password-toggle {
+                width: 28px;
+                height: 28px;
+                font-size: 0.875rem;
+                right: 10px;
+            }
+
+            .input-wrapper .input-icon {
+                right: 42px;
+            }
+
+            .date-group {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .date-group .form-group {
+                margin-bottom: 14px;
+            }
+
+            .date-group .form-group:last-child {
+                margin-bottom: 0;
+            }
+
+            .btn-primary,
+            .btn-secondary,
+            .btn-danger,
+            .btn-warning {
+                padding: 10px 16px;
+                font-size: 0.875rem;
+                border-radius: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .top-header {
+                padding: 8px 12px;
+            }
+
+            .top-header h2 {
+                font-size: 0.9rem;
+            }
+
+            .top-header .text-muted {
+                font-size: 0.7rem;
+            }
+
+            .form-container-scroll {
+                padding: 8px 12px 12px 12px;
+            }
+
+            .app-form {
+                padding: 12px;
+                border-radius: 12px;
+            }
+
+            .input-wrapper input,
+            .input-wrapper select,
+            .input-wrapper textarea {
+                padding: 8px 12px;
+                font-size: 0.8125rem;
+                border-radius: 8px;
+            }
+
+            .input-wrapper input[type="password"] {
+                padding-right: 68px;
+            }
+
+            .password-toggle {
+                width: 24px;
+                height: 24px;
+                font-size: 0.8125rem;
+                right: 8px;
+            }
+
+            .input-wrapper .input-icon {
+                right: 38px;
+                font-size: 0.875rem;
+            }
+
+            .form-group label {
+                font-size: 0.8125rem;
+            }
+
+            .form-group {
+                margin-bottom: 12px;
+            }
+
+            .btn-primary,
+            .btn-secondary,
+            .btn-danger,
+            .btn-warning {
+                padding: 8px 14px;
+                font-size: 0.8rem;
+                border-radius: 8px;
+            }
+
+            .app-form .form-actions {
+                gap: 6px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .top-header {
+                padding: 6px 10px;
+            }
+
+            .top-header h2 {
+                font-size: 0.75rem;
+            }
+
+            .form-container-scroll {
+                padding: 6px 8px 8px 8px;
+            }
+
+            .app-form {
+                padding: 10px;
+            }
+
+            .input-wrapper input,
+            .input-wrapper select,
+            .input-wrapper textarea {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
+
+            .form-group label {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* ============================================
+           DARK THEME
+           ============================================ */
+        [data-theme="dark"] .app-form {
+            background: var(--bg-card);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .form-container-scroll::-webkit-scrollbar-track {
+            background: var(--bg-hover);
+        }
+
+        [data-theme="dark"] .form-container-scroll::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+        }
+
+        [data-theme="dark"] .form-container-scroll::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        [data-theme="dark"] .top-header {
+            background: var(--bg-header);
+            border-bottom-color: var(--border-color);
+        }
+    </style>
 
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>

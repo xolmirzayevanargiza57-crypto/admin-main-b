@@ -4,6 +4,7 @@
 
 let adminId = null;
 let currentAdmin = null;
+let countdownInterval = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!Auth.isAuthenticated()) {
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🔍 Admin ID:', adminId);
     
     loadProfile();
+    loadNotifications();
     initEditModal();
     initPaymentModal();
     initNotificationModal();
@@ -75,6 +77,8 @@ async function loadProfile() {
         if (data.success && data.data) {
             currentAdmin = data.data;
             renderProfile(currentAdmin);
+            // ⭐ COUNTDOWN START
+            startCountdown();
         } else {
             showError('Ma\'lumotlar topilmadi');
         }
@@ -82,6 +86,136 @@ async function loadProfile() {
         console.error('❌ Profil yuklash xatosi:', error);
         showError('Profil ma\'lumotlarini yuklashda xatolik: ' + error.message);
     }
+}
+
+// ============================================================
+// ⭐ COUNTDOWN - REAL TIME (HAR SONIYADA)
+// ============================================================
+function startCountdown() {
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    
+    countdownInterval = setInterval(() => {
+        updateCountdown();
+    }, 1000);
+}
+
+function updateCountdown() {
+    const subEndEl = document.getElementById('profileSubEnd');
+    if (!subEndEl || !currentAdmin) return;
+    
+    const sub = currentAdmin.subscription || {};
+    if (!sub.endDate || sub.status !== 'active') {
+        subEndEl.textContent = '-';
+        return;
+    }
+    
+    const endDate = new Date(sub.endDate);
+    const now = new Date();
+    const diff = endDate - now;
+    
+    if (diff <= 0) {
+        subEndEl.textContent = '⚠️ Vaqt tugagan!';
+        return;
+    }
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    // ⭐ TO'G'RI FORMAT: 2026-yil 21-iyul 09:09:00 (177 kun 4s 47m 48s qoldi)
+    const formattedDate = formatDate(endDate);
+    subEndEl.textContent = `${formattedDate} (${days} kun ${hours}s ${minutes}m ${seconds}s qoldi)`;
+}
+
+// ============================================================
+// ⭐ DATE FORMAT FUNKSIYASI
+// ============================================================
+function formatDate(date) {
+    if (!date) return 'Noma\'lum vaqt';
+    try {
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return 'Noma\'lum vaqt';
+        const year = d.getFullYear();
+        const monthNames = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
+        const month = monthNames[d.getMonth()];
+        const day = d.getDate();
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        const seconds = String(d.getSeconds()).padStart(2, '0');
+        return `${year}-yil ${day}-${month} ${hours}:${minutes}:${seconds}`;
+    } catch (error) {
+        return 'Noma\'lum vaqt';
+    }
+}
+
+// ============================================================
+// XABARLARNI YUKLASH
+// ============================================================
+async function loadNotifications() {
+    try {
+        console.log('📨 Xabarlar yuklanmoqda...');
+        const data = await API.get('/notifications');
+        console.log('📨 Xabarlar javobi:', data);
+        if (data.success && data.data) {
+            renderNotifications(data.data);
+        }
+    } catch (error) {
+        console.error('❌ Xabarlarni yuklash xatosi:', error);
+    }
+}
+
+function renderNotifications(notifications) {
+    const container = document.getElementById('notificationsList');
+    if (!container) return;
+    
+    const adminNotifications = notifications.filter(n => 
+        n.recipientId === adminId || n.recipientRole === 'admin_customer'
+    );
+    
+    if (!adminNotifications || adminNotifications.length === 0) {
+        container.innerHTML = '<p class="text-muted">Xabarlar yo\'q</p>';
+        return;
+    }
+    
+    container.innerHTML = adminNotifications.map((item, index) => {
+        const date = new Date(item.createdAt);
+        const formattedDate = date.toLocaleString('uz-UZ', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+        });
+        const isRead = item.isRead ? '✅ O\'qilgan' : '🟡 O\'qilmagan';
+        return `
+            <div class="history-item" style="${!item.isRead ? 'border-left: 3px solid #007aff;' : ''}">
+                <div class="history-left">
+                    <span class="history-number">#${index + 1}</span>
+                    <div class="history-details">
+                        <p class="history-type"><strong>${item.title || 'Xabar'}</strong> <span style="font-size: 0.7rem; color: var(--text-muted);">${isRead}</span></p>
+                        <p class="history-dates">${item.message || ''}</p>
+                        <p class="history-dates"><i class="fas fa-calendar"></i> ${formattedDate} ${item.sentByName ? '• ' + item.sentByName : ''}</p>
+                    </div>
+                </div>
+                ${!item.isRead ? `
+                    <button class="mark-read-btn" data-id="${item._id}" style="background: none; border: 1px solid #007aff; color: #007aff; font-size: 0.65rem; cursor: pointer; padding: 3px 10px; border-radius: 6px;">O'qildi</button>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+    
+    document.querySelectorAll('.mark-read-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const id = this.dataset.id;
+            try {
+                await API.post(`/notifications/${id}/read`);
+                loadNotifications();
+            } catch (error) {
+                console.error('❌ Xatolik:', error);
+            }
+        });
+    });
 }
 
 // ============================================================
@@ -103,6 +237,7 @@ function renderProfile(admin) {
         initialEl.textContent = initial;
     }
     
+    // STATUS
     const statusEl = document.getElementById('profileStatus');
     if (statusEl) {
         if (admin.status === 'active') {
@@ -117,6 +252,7 @@ function renderProfile(admin) {
         }
     }
     
+    // SUBSCRIPTION
     const sub = admin.subscription || {};
     const subType = sub.type || 'none';
     const subStatus = sub.status || 'inactive';
@@ -124,28 +260,21 @@ function renderProfile(admin) {
     const subLabelEl = document.getElementById('profileSubscription');
     if (subLabelEl) {
         if (admin.status === 'active' && subType !== 'none' && subStatus === 'active') {
-            if (subType === 'monthly') {
-                subLabelEl.textContent = '✅ Oylik (299,999 so\'m)';
-                subLabelEl.className = 'subscription-badge monthly';
-            } else if (subType === '6months') {
-                subLabelEl.textContent = '✅ 6 oylik (1,899,999 so\'m)';
-                subLabelEl.className = 'subscription-badge yearly';
-            } else if (subType === 'yearly') {
-                subLabelEl.textContent = '✅ Yillik (3,599,999 so\'m)';
-                subLabelEl.className = 'subscription-badge yearly';
-            } else if (subType === 'custom') {
-                subLabelEl.textContent = '✅ Custom obuna';
-                subLabelEl.className = 'subscription-badge monthly';
-            } else {
-                subLabelEl.textContent = '✅ Faol';
-                subLabelEl.className = 'subscription-badge monthly';
-            }
+            const typeMap = {
+                'monthly': 'Oylik (299,999 so\'m)',
+                '6months': '6 oylik (1,899,999 so\'m)',
+                'yearly': 'Yillik (3,599,999 so\'m)',
+                'custom': 'Custom obuna'
+            };
+            subLabelEl.textContent = '✅ ' + (typeMap[subType] || 'Faol');
+            subLabelEl.className = 'subscription-badge monthly';
         } else {
             subLabelEl.textContent = '❌ Obunasi yo\'q';
             subLabelEl.className = 'subscription-badge inactive';
         }
     }
     
+    // Obuna turi
     const subTypeEl = document.getElementById('profileSubType');
     if (subTypeEl) {
         const typeMap = {
@@ -158,19 +287,11 @@ function renderProfile(admin) {
         subTypeEl.textContent = typeMap[subType] || 'Yo\'q';
     }
     
+    // Obuna muddati - COUNTDOWN BILAN
     const subEndEl = document.getElementById('profileSubEnd');
     if (subEndEl) {
         if (sub.endDate && subStatus === 'active') {
             const endDate = new Date(sub.endDate);
-            let text = endDate.toLocaleString('uz-UZ', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-            });
             const now = new Date();
             const diff = endDate - now;
             if (diff > 0) {
@@ -178,29 +299,28 @@ function renderProfile(admin) {
                 const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-                text += ` (${days}k ${hours}s ${minutes}m ${seconds}s qoldi)`;
+                const formattedDate = formatDate(endDate);
+                subEndEl.textContent = `${formattedDate} (${days} kun ${hours}s ${minutes}m ${seconds}s qoldi)`;
             } else {
-                text += ' ⚠️ Vaqt tugagan!';
+                subEndEl.textContent = '⚠️ Vaqt tugagan!';
             }
-            subEndEl.textContent = text;
         } else {
             subEndEl.textContent = '-';
         }
     }
     
+    // To'lov
     const amountEl = document.getElementById('profileSubAmount');
     if (amountEl) {
         const amount = sub.amount || 0;
         amountEl.textContent = amount.toLocaleString() + ' so\'m';
     }
     
+    // To'lov tarixi
     const history = admin.paymentHistory || admin.subscriptionHistory || [];
     renderSubscriptionHistory(history);
 }
 
-// ============================================================
-// SUBSCRIPTION TARIXI
-// ============================================================
 function renderSubscriptionHistory(history) {
     const historyList = document.getElementById('historyList');
     if (!historyList) return;
@@ -208,16 +328,16 @@ function renderSubscriptionHistory(history) {
         historyList.innerHTML = '<p class="text-muted">To\'lov tarixi yo\'q</p>';
         return;
     }
-    historyList.innerHTML = history.map((item, index) => {
-        const startDate = item.startDate ? new Date(item.startDate).toLocaleString('uz-UZ', {
-            year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-        }) : '-';
-        const endDate = item.endDate ? new Date(item.endDate).toLocaleString('uz-UZ', {
-            year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-        }) : '-';
-        const typeLabel = { 'monthly': 'Oylik', '6months': '6 oylik', 'yearly': 'Yillik', 'custom': 'Custom', 'none': 'Bekor qilindi' }[item.type] || item.type;
+    historyList.innerHTML = history.slice(-10).reverse().map((item, index) => {
+        const startDate = item.startDate ? formatDate(new Date(item.startDate)) : '-';
+        const endDate = item.endDate ? formatDate(new Date(item.endDate)) : '-';
+        const typeLabel = {
+            'monthly': 'Oylik',
+            '6months': '6 oylik',
+            'yearly': 'Yillik',
+            'custom': 'Custom',
+            'none': 'Bekor qilindi'
+        }[item.type] || item.type;
         const statusClass = item.status === 'active' ? 'active' : 'inactive';
         const statusText = item.status === 'active' ? '✅ Faol' : '❌ Tugagan';
         const amount = item.amount || 0;
@@ -225,7 +345,7 @@ function renderSubscriptionHistory(history) {
         return `
             <div class="history-item">
                 <div class="history-left">
-                    <span class="history-number">#${history.length - index}</span>
+                    <span class="history-number">#${index + 1}</span>
                     <div class="history-details">
                         <p class="history-type">${typeLabel} - ${amount.toLocaleString()} so'm</p>
                         <p class="history-dates"><i class="fas fa-calendar"></i> ${startDate} → ${endDate}</p>
@@ -331,7 +451,7 @@ async function saveEdit() {
 }
 
 // ============================================================
-// TO'LOV QO'SHISH MODAL
+// ⭐ TO'LOV QO'SHISH MODAL
 // ============================================================
 function initPaymentModal() {
     const modal = document.getElementById('paymentModal');
@@ -397,13 +517,10 @@ async function savePayment() {
         });
         if (response.success) {
             const sub = response.data.subscription || {};
-            let msg = '✅ To\'lov muvaffaqiyatli qo\'shildi!\n';
+            let msg = '✅ To\'lov muvaffaqiyatli qo\'shildi va admin faollashtirildi!\n';
             if (sub.endDate) {
                 const end = new Date(sub.endDate);
-                msg += '📅 Tugash vaqti: ' + end.toLocaleString('uz-UZ', {
-                    year: 'numeric', month: 'long', day: 'numeric',
-                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-                });
+                msg += '📅 Tugash vaqti: ' + formatDate(end);
             }
             alert(msg);
             document.getElementById('paymentModal').classList.remove('active');
@@ -416,7 +533,7 @@ async function savePayment() {
 }
 
 // ============================================================
-// ⭐ XABAR YUBORISH MODAL (Admin-Main Frontend)
+// ⭐ XABAR YUBORISH
 // ============================================================
 function initNotificationModal() {
     const modal = document.getElementById('notificationModal');
@@ -449,9 +566,6 @@ function initNotificationModal() {
     if (sendBtn) sendBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); sendNotification(); });
 }
 
-// ============================================================
-// ⭐ XABAR YUBORISH FUNKSIYASI (Admin-Main Frontend)
-// ============================================================
 async function sendNotification() {
     const titleInput = document.getElementById('notificationTitle');
     const messageInput = document.getElementById('notificationMessage');
@@ -470,7 +584,6 @@ async function sendNotification() {
     try {
         const token = localStorage.getItem('adminToken');
         const API_URL = 'https://admin-customerr.onrender.com/api/notifications';
-        console.log('📨 API so\'rov yuborilmoqda...');
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -488,8 +601,7 @@ async function sendNotification() {
                 if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; }
             }, 2000);
         } else {
-            const errorMsg = data.message || data.error || 'Noma\'lum xatolik';
-            showNotificationResult('❌ Xabar yuborishda xatolik: ' + errorMsg, 'error');
+            showNotificationResult('❌ Xabar yuborishda xatolik: ' + (data.message || 'Noma\'lum xatolik'), 'error');
             if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; }
         }
     } catch (error) {
@@ -509,7 +621,7 @@ function showNotificationResult(msg, type) {
 }
 
 // ============================================================
-// ⭐ BAN ADMIN FUNKSIYASI (Admin-Main Frontend)
+// ⭐ BAN / UNBAN
 // ============================================================
 async function banAdmin(id) {
     const reason = prompt('Bloklash sababini yozing:');
@@ -517,7 +629,6 @@ async function banAdmin(id) {
     try {
         const result = await API.post(`/admins/${id}/ban`, { reason: reason?.trim() || 'Admin panelda cheklov' });
         if (result.success) {
-            // ⭐ FORMATLANGAN VAQTNI KO'RSATISH
             const msg = result.data?.formattedBannedAt 
                 ? `✅ Admin Customer bloklandi!\n📌 Sabab: ${reason || 'Admin panelda cheklov'}\n📅 Bloklangan vaqt: ${result.data.formattedBannedAt}`
                 : `✅ Admin Customer bloklandi!\n📌 Sabab: ${reason || 'Admin panelda cheklov'}`;
@@ -533,7 +644,7 @@ async function unbanAdmin(id) {
     if (!confirm('Haqiqatan ham bu Admin Customerni blokdan chiqarmoqchimisiz?')) return;
     try {
         const result = await API.post(`/admins/${id}/unban`);
-        if (result.success) { alert('✅ Admin Customer blokdan chiqarildi!'); loadProfile(); }
+        if (result.success) { alert('✅ Admin Customer blokdan chiqarildi va faollashtirildi!'); loadProfile(); }
     } catch (error) { alert('❌ Xatolik: ' + error.message); }
 }
 
@@ -548,7 +659,7 @@ function initButtons() {
     const subscriptionBtn = document.getElementById('subscriptionBtn');
     if (subscriptionBtn) {
         subscriptionBtn.addEventListener('click', () => {
-            const type = prompt('Obuna turini tanlang:\n1. Oylik (30 kun) -> monthly\n2. 6 oylik (180 kun) -> 6months\n3. Yillik (365 kun) -> yearly\n4. Custom (qo\'lda vaqt) -> custom\n5. Bekor qilish -> none', 'monthly');
+            const type = prompt('Obuna turini tanlang:\n1. Oylik (30 kun)\n2. 6 oylik (180 kun)\n3. Yillik (365 kun)\n4. Custom\n5. Bekor qilish', 'monthly');
             if (type === 'custom') {
                 const days = parseInt(prompt('Kun:', '0')) || 0;
                 const hours = parseInt(prompt('Soat:', '0')) || 0;

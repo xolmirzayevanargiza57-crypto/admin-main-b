@@ -150,7 +150,7 @@ function formatDate(date) {
 }
 
 // ============================================================
-// ⭐ XABARLARNI YUKLASH (TO'LIQ)
+// ⭐ XABARLARNI YUKLASH
 // ============================================================
 async function loadNotifications() {
     try {
@@ -175,14 +175,13 @@ async function loadNotifications() {
 }
 
 // ============================================================
-// ⭐ XABARLARNI KO'RSATISH (TO'LIQ)
+// ⭐ XABARLARNI KO'RSATISH
 // ============================================================
 function renderNotifications(notifications) {
     const container = document.getElementById('notificationsList');
     if (!container) return;
     
-    // ⭐ Admin-Main uchun: o'zi yuborgan va o'ziga kelgan xabarlar
-    // Admin-Customer uchun: faqat o'ziga kelgan xabarlar
+    // ⭐ Admin-Main yoki Admin-Customer ekanligini tekshirish
     const user = Auth.getUser();
     const isAdminMain = user?.role === 'admin_main';
     
@@ -212,7 +211,7 @@ function renderNotifications(notifications) {
             hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
         });
         const isRead = item.isRead ? '✅ O\'qilgan' : '🟡 O\'qilmagan';
-        const isSentByMe = item.sentBy === Auth.getUser()?._id;
+        const isSentByMe = item.sentBy === user?._id;
         const senderName = item.sentByName || 'Admin';
         const recipientName = item.recipientName || 'Barcha adminlar';
         
@@ -620,13 +619,16 @@ async function savePayment() {
 // ============================================================
 function initNotificationModal() {
     const modal = document.getElementById('notificationModal');
-    const sendBtn = document.getElementById('sendNotificationBtn');
+    const sendBtn = document.getElementById('sendNotificationSubmitBtn');
     const closeBtn = document.getElementById('closeNotificationModal');
     const cancelBtn = document.getElementById('cancelNotificationModal');
     const titleInput = document.getElementById('notificationTitle');
     const messageInput = document.getElementById('notificationMessage');
     const resultDiv = document.getElementById('notificationResult');
+    
     if (!modal || !sendBtn) return;
+    
+    // Profil sahifasidagi "Xabar yuborish" tugmasi
     const profileSendBtn = document.getElementById('sendNotificationBtn');
     if (profileSendBtn) {
         profileSendBtn.addEventListener('click', function(e) {
@@ -641,35 +643,94 @@ function initNotificationModal() {
             if (titleInput) titleInput.focus();
         });
     }
-    if (closeBtn) closeBtn.addEventListener('click', function() { modal.classList.remove('active'); document.body.style.overflow = ''; if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } });
-    if (cancelBtn) cancelBtn.addEventListener('click', function() { modal.classList.remove('active'); document.body.style.overflow = ''; if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } });
-    if (modal) modal.addEventListener('click', function(e) { if (e.target === modal) { modal.classList.remove('active'); document.body.style.overflow = ''; if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } } });
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal && modal.classList.contains('active')) { modal.classList.remove('active'); document.body.style.overflow = ''; if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } } });
-    if (messageInput) messageInput.addEventListener('keydown', function(e) { if (e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); sendNotification(); } });
-    if (sendBtn) sendBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); sendNotification(); });
+    
+    if (closeBtn) closeBtn.addEventListener('click', function() { 
+        modal.classList.remove('active'); 
+        document.body.style.overflow = ''; 
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } 
+    });
+    
+    if (cancelBtn) cancelBtn.addEventListener('click', function() { 
+        modal.classList.remove('active'); 
+        document.body.style.overflow = ''; 
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } 
+    });
+    
+    if (modal) modal.addEventListener('click', function(e) { 
+        if (e.target === modal) { 
+            modal.classList.remove('active'); 
+            document.body.style.overflow = ''; 
+            if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } 
+        } 
+    });
+    
+    document.addEventListener('keydown', function(e) { 
+        if (e.key === 'Escape' && modal && modal.classList.contains('active')) { 
+            modal.classList.remove('active'); 
+            document.body.style.overflow = ''; 
+            if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } 
+        } 
+    });
+    
+    if (messageInput) messageInput.addEventListener('keydown', function(e) { 
+        if (e.key === 'Enter' && e.ctrlKey) { 
+            e.preventDefault(); 
+            sendNotification(); 
+        } 
+    });
+    
+    if (sendBtn) sendBtn.addEventListener('click', function(e) { 
+        e.preventDefault(); 
+        e.stopPropagation(); 
+        sendNotification(); 
+    });
 }
 
 async function sendNotification() {
     const titleInput = document.getElementById('notificationTitle');
     const messageInput = document.getElementById('notificationMessage');
-    const sendBtn = document.getElementById('sendNotificationBtn');
+    const sendBtn = document.getElementById('sendNotificationSubmitBtn');
     const resultDiv = document.getElementById('notificationResult');
     const title = titleInput ? titleInput.value.trim() : '';
     const message = messageInput ? messageInput.value.trim() : '';
+    
     console.log('🔍 Title:', title);
     console.log('🔍 Message:', message);
     console.log('🔍 Admin ID:', adminId);
-    if (!title) { showNotificationResult('❌ Iltimos, sarlavhani kiriting!', 'error'); if (titleInput) titleInput.focus(); return; }
-    if (!message) { showNotificationResult('❌ Iltimos, xabar matnini kiriting!', 'error'); if (messageInput) messageInput.focus(); return; }
-    if (!adminId) { showNotificationResult('❌ Admin ID topilmadi!', 'error'); return; }
-    if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...'; }
+    
+    if (!title) { 
+        showNotificationResult('❌ Iltimos, sarlavhani kiriting!', 'error'); 
+        if (titleInput) titleInput.focus(); 
+        return; 
+    }
+    
+    if (!message) { 
+        showNotificationResult('❌ Iltimos, xabar matnini kiriting!', 'error'); 
+        if (messageInput) messageInput.focus(); 
+        return; 
+    }
+    
+    if (!adminId) { 
+        showNotificationResult('❌ Admin ID topilmadi!', 'error'); 
+        return; 
+    }
+    
+    if (sendBtn) { 
+        sendBtn.disabled = true; 
+        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...'; 
+    }
+    
     showNotificationResult('⏳ Xabar yuborilmoqda...', 'info');
+    
     try {
         const token = localStorage.getItem('adminToken');
         const API_URL = 'https://admin-main-backend.onrender.com/api/notifications';
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Authorization': `Bearer ${token}` 
+            },
             body: JSON.stringify({ 
                 title: title, 
                 message: message, 
@@ -679,14 +740,18 @@ async function sendNotification() {
                 expiresInDays: 30 
             })
         });
+        
         const data = await response.json();
         console.log('📨 API javobi:', data);
+        
         if (response.ok && data.success) {
             showNotificationResult('✅ Xabar muvaffaqiyatli yuborildi!', 'success');
             if (titleInput) titleInput.value = '';
             if (messageInput) messageInput.value = '';
+            
             // Xabarlarni qayta yuklash
             loadNotifications();
+            
             setTimeout(() => {
                 const modal = document.getElementById('notificationModal');
                 if (modal) { modal.classList.remove('active'); document.body.style.overflow = ''; }
@@ -709,7 +774,11 @@ function showNotificationResult(msg, type) {
     resultDiv.textContent = msg;
     resultDiv.className = 'form-message ' + type;
     resultDiv.style.display = 'block';
-    setTimeout(() => { if (type !== 'success') { resultDiv.style.display = 'none'; } }, 6000);
+    setTimeout(() => { 
+        if (type !== 'success') { 
+            resultDiv.style.display = 'none'; 
+        } 
+    }, 6000);
 }
 
 // ============================================================
@@ -746,8 +815,10 @@ async function unbanAdmin(id) {
 function initButtons() {
     const banBtn = document.getElementById('banBtn');
     if (banBtn) banBtn.addEventListener('click', () => { if (!adminId) return; banAdmin(adminId); });
+    
     const unbanBtn = document.getElementById('unbanBtn');
     if (unbanBtn) unbanBtn.addEventListener('click', () => { if (!adminId) return; unbanAdmin(adminId); });
+    
     const subscriptionBtn = document.getElementById('subscriptionBtn');
     if (subscriptionBtn) {
         subscriptionBtn.addEventListener('click', () => {
@@ -763,6 +834,7 @@ function initButtons() {
             else if (type === 'none') { updateSubscription('none'); }
         });
     }
+    
     const deleteBtn = document.getElementById('deleteBtn');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', async () => {
@@ -788,7 +860,13 @@ async function updateSubscription(type, customDuration = null) {
     } catch (error) { alert('❌ Xatolik: ' + error.message); }
 }
 
+// ============================================================
+// XATOLIK VA MUVAFFAQIYAT XABARLARI
+// ============================================================
 function showError(message) {
+    console.error('⚠️ Xatolik:', message);
+    
+    // Xatolikni ekranda ko'rsatish
     const container = document.querySelector('.profile-container');
     if (container) {
         container.innerHTML = `
@@ -802,9 +880,30 @@ function showError(message) {
             </div>
         `;
     }
+    
+    // Toast xabar
+    const div = document.createElement('div');
+    div.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 9999;
+        padding: 14px 18px; background: #fef2f2;
+        border: 1px solid #fecaca; border-radius: 10px;
+        color: #dc2626; max-width: 400px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        display: flex; align-items: center; gap: 10px;
+        font-size: 0.85rem;
+    `;
+    div.innerHTML = `
+        <i class="fas fa-exclamation-circle"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" style="margin-left: auto; background: none; border: none; color: #dc2626; cursor: pointer; font-size: 1.1rem;">×</button>
+    `;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 5000);
 }
 
 function showSuccess(message) {
+    console.log('✅ Muvaffaqiyat:', message);
+    
     const div = document.createElement('div');
     div.style.cssText = `
         position: fixed; top: 20px; right: 20px; z-index: 9999;
@@ -823,3 +922,5 @@ function showSuccess(message) {
     document.body.appendChild(div);
     setTimeout(() => div.remove(), 3000);
 }
+
+console.log('✅ admin-profile.js yuklandi');

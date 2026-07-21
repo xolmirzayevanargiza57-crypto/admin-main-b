@@ -77,7 +77,6 @@ async function loadProfile() {
         if (data.success && data.data) {
             currentAdmin = data.data;
             renderProfile(currentAdmin);
-            // ⭐ COUNTDOWN START
             startCountdown();
         } else {
             showError('Ma\'lumotlar topilmadi');
@@ -89,14 +88,13 @@ async function loadProfile() {
 }
 
 // ============================================================
-// ⭐ COUNTDOWN - REAL TIME (HAR SONIYADA)
+// ⭐ COUNTDOWN - REAL TIME
 // ============================================================
 function startCountdown() {
     if (countdownInterval) {
         clearInterval(countdownInterval);
         countdownInterval = null;
     }
-    
     countdownInterval = setInterval(() => {
         updateCountdown();
     }, 1000);
@@ -126,7 +124,6 @@ function updateCountdown() {
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
     
-    // ⭐ TO'G'RI FORMAT: 2026-yil 21-iyul 09:09:00 (177 kun 4s 47m 48s qoldi)
     const formattedDate = formatDate(endDate);
     subEndEl.textContent = `${formattedDate} (${days} kun ${hours}s ${minutes}m ${seconds}s qoldi)`;
 }
@@ -153,7 +150,7 @@ function formatDate(date) {
 }
 
 // ============================================================
-// XABARLARNI YUKLASH
+// ⭐ XABARLARNI YUKLASH (TO'LIQ)
 // ============================================================
 async function loadNotifications() {
     try {
@@ -162,57 +159,143 @@ async function loadNotifications() {
         console.log('📨 Xabarlar javobi:', data);
         if (data.success && data.data) {
             renderNotifications(data.data);
+        } else {
+            const container = document.getElementById('notificationsList');
+            if (container) {
+                container.innerHTML = `<p class="text-muted">Xabarlar yuklanmadi: ${data.message || 'Noma\'lum xatolik'}</p>`;
+            }
         }
     } catch (error) {
         console.error('❌ Xabarlarni yuklash xatosi:', error);
+        const container = document.getElementById('notificationsList');
+        if (container) {
+            container.innerHTML = `<p class="text-muted">Xabarlarni yuklashda xatolik: ${error.message}</p>`;
+        }
     }
 }
 
+// ============================================================
+// ⭐ XABARLARNI KO'RSATISH (TO'LIQ)
+// ============================================================
 function renderNotifications(notifications) {
     const container = document.getElementById('notificationsList');
     if (!container) return;
     
-    const adminNotifications = notifications.filter(n => 
-        n.recipientId === adminId || n.recipientRole === 'admin_customer'
-    );
+    // ⭐ Admin-Main uchun: o'zi yuborgan va o'ziga kelgan xabarlar
+    // Admin-Customer uchun: faqat o'ziga kelgan xabarlar
+    const user = Auth.getUser();
+    const isAdminMain = user?.role === 'admin_main';
     
-    if (!adminNotifications || adminNotifications.length === 0) {
+    // Filtrlash: Admin-Main o'z yuborganlarini ham ko'radi
+    let filteredNotifications = notifications;
+    if (!isAdminMain) {
+        // Admin-Customer: faqat o'ziga kelgan xabarlar
+        filteredNotifications = notifications.filter(n => 
+            n.recipientId === adminId || 
+            n.recipientRole === 'admin_customer' ||
+            n.recipientRole === 'all'
+        );
+    }
+    // Admin-Main: hamma xabarlarni ko'radi (o'zi yuborgan + o'ziga kelgan)
+    
+    if (!filteredNotifications || filteredNotifications.length === 0) {
         container.innerHTML = '<p class="text-muted">Xabarlar yo\'q</p>';
         return;
     }
     
-    container.innerHTML = adminNotifications.map((item, index) => {
+    console.log('📨 Xabarlar render qilinmoqda:', filteredNotifications.length, 'ta');
+    
+    container.innerHTML = filteredNotifications.map((item, index) => {
         const date = new Date(item.createdAt);
         const formattedDate = date.toLocaleString('uz-UZ', {
             year: 'numeric', month: '2-digit', day: '2-digit',
             hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
         });
         const isRead = item.isRead ? '✅ O\'qilgan' : '🟡 O\'qilmagan';
+        const isSentByMe = item.sentBy === Auth.getUser()?._id;
+        const senderName = item.sentByName || 'Admin';
+        const recipientName = item.recipientName || 'Barcha adminlar';
+        
+        // ⭐ Admin-Main o'chirish tugmasi ko'rinadi
+        const canDelete = isAdminMain;
+        
+        // ⭐ Admin-Customer faqat o'qilgan deb belgilay oladi (o'ziga kelgan xabarlarni)
+        const canMarkRead = !isAdminMain && 
+                           !item.isRead && 
+                           (item.recipientId === adminId || item.recipientRole === 'admin_customer');
+        
         return `
             <div class="history-item" style="${!item.isRead ? 'border-left: 3px solid #007aff;' : ''}">
                 <div class="history-left">
                     <span class="history-number">#${index + 1}</span>
                     <div class="history-details">
-                        <p class="history-type"><strong>${item.title || 'Xabar'}</strong> <span style="font-size: 0.7rem; color: var(--text-muted);">${isRead}</span></p>
+                        <p class="history-type">
+                            <strong>${item.title || 'Xabar'}</strong>
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">
+                                ${isRead} • ${isSentByMe ? '✉️ Yuborgan: Men' : `✉️ Yuborgan: ${senderName}`}
+                            </span>
+                            <span style="font-size: 0.7rem; color: var(--text-muted); margin-left: 8px;">
+                                📬 Qabul qiluvchi: ${recipientName}
+                            </span>
+                        </p>
                         <p class="history-dates">${item.message || ''}</p>
-                        <p class="history-dates"><i class="fas fa-calendar"></i> ${formattedDate} ${item.sentByName ? '• ' + item.sentByName : ''}</p>
+                        <p class="history-dates"><i class="fas fa-calendar"></i> ${formattedDate}</p>
                     </div>
                 </div>
-                ${!item.isRead ? `
-                    <button class="mark-read-btn" data-id="${item._id}" style="background: none; border: 1px solid #007aff; color: #007aff; font-size: 0.65rem; cursor: pointer; padding: 3px 10px; border-radius: 6px;">O'qildi</button>
-                ` : ''}
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    ${canMarkRead ? `
+                        <button class="mark-read-btn" data-id="${item._id}" 
+                                style="background: none; border: 1px solid #007aff; color: #007aff; font-size: 0.65rem; cursor: pointer; padding: 3px 10px; border-radius: 6px;">
+                            O'qildi
+                        </button>
+                    ` : ''}
+                    ${canDelete ? `
+                        <button class="delete-notification-btn" data-id="${item._id}" 
+                                style="background: none; border: 1px solid #ff3b30; color: #ff3b30; font-size: 0.65rem; cursor: pointer; padding: 3px 10px; border-radius: 6px;">
+                            <i class="fas fa-trash"></i> O'chirish
+                        </button>
+                    ` : ''}
+                    ${item.isRead ? '<span style="font-size: 0.65rem; color: var(--text-muted);">✓ O\'qilgan</span>' : ''}
+                </div>
             </div>
         `;
     }).join('');
     
+    // ⭐ O'qilgan deb belgilash (faqat Admin-Customer)
     document.querySelectorAll('.mark-read-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
             try {
-                await API.post(`/notifications/${id}/read`);
-                loadNotifications();
+                const response = await API.post(`/notifications/${id}/read`);
+                if (response.success) {
+                    showSuccess('Xabar o\'qilgan deb belgilandi!');
+                    loadNotifications();
+                } else {
+                    showError(response.message || 'Xatolik yuz berdi!');
+                }
             } catch (error) {
                 console.error('❌ Xatolik:', error);
+                showError('Xabarni o\'qilgan deb belgilashda xatolik!');
+            }
+        });
+    });
+    
+    // ⭐ Xabarni o'chirish (faqat Admin-Main)
+    document.querySelectorAll('.delete-notification-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const id = this.dataset.id;
+            if (!confirm('Haqiqatan ham bu xabarni o\'chirmoqchimisiz?')) return;
+            try {
+                const response = await API.delete(`/notifications/${id}`);
+                if (response.success) {
+                    showSuccess('Xabar o\'chirildi!');
+                    loadNotifications();
+                } else {
+                    showError(response.message || 'Xatolik yuz berdi!');
+                }
+            } catch (error) {
+                console.error('❌ Xatolik:', error);
+                showError('Xabarni o\'chirishda xatolik!');
             }
         });
     });
@@ -287,7 +370,7 @@ function renderProfile(admin) {
         subTypeEl.textContent = typeMap[subType] || 'Yo\'q';
     }
     
-    // Obuna muddati - COUNTDOWN BILAN
+    // Obuna muddati
     const subEndEl = document.getElementById('profileSubEnd');
     if (subEndEl) {
         if (sub.endDate && subStatus === 'active') {
@@ -533,7 +616,7 @@ async function savePayment() {
 }
 
 // ============================================================
-// ⭐ XABAR YUBORISH
+// ⭐ XABAR YUBORISH MODAL
 // ============================================================
 function initNotificationModal() {
     const modal = document.getElementById('notificationModal');
@@ -583,11 +666,18 @@ async function sendNotification() {
     showNotificationResult('⏳ Xabar yuborilmoqda...', 'info');
     try {
         const token = localStorage.getItem('adminToken');
-        const API_URL = 'https://admin-customerr.onrender.com/api/notifications';
+        const API_URL = 'https://admin-main-backend.onrender.com/api/notifications';
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ title: title, message: message, type: 'info', recipientId: adminId, recipientRole: 'admin_customer', expiresInDays: 30 })
+            body: JSON.stringify({ 
+                title: title, 
+                message: message, 
+                type: 'info', 
+                recipientId: adminId, 
+                recipientRole: 'admin_customer', 
+                expiresInDays: 30 
+            })
         });
         const data = await response.json();
         console.log('📨 API javobi:', data);
@@ -595,6 +685,8 @@ async function sendNotification() {
             showNotificationResult('✅ Xabar muvaffaqiyatli yuborildi!', 'success');
             if (titleInput) titleInput.value = '';
             if (messageInput) messageInput.value = '';
+            // Xabarlarni qayta yuklash
+            loadNotifications();
             setTimeout(() => {
                 const modal = document.getElementById('notificationModal');
                 if (modal) { modal.classList.remove('active'); document.body.style.overflow = ''; }
@@ -710,4 +802,24 @@ function showError(message) {
             </div>
         `;
     }
+}
+
+function showSuccess(message) {
+    const div = document.createElement('div');
+    div.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 9999;
+        padding: 14px 18px; background: #ecfdf5;
+        border: 1px solid #a7f3d0; border-radius: 10px;
+        color: #065f46; max-width: 400px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        display: flex; align-items: center; gap: 10px;
+        font-size: 0.85rem;
+    `;
+    div.innerHTML = `
+        <i class="fas fa-check-circle"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" style="margin-left: auto; background: none; border: none; color: #065f46; cursor: pointer; font-size: 1.1rem;">×</button>
+    `;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 3000);
 }

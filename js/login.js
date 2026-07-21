@@ -1,6 +1,6 @@
-// ============================================
-// LOGIN - ADMIN MAIN
-// ============================================
+// ============================================================
+// LOGIN - Admin Main Frontend (TO'LIQ)
+// ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('loginForm');
@@ -10,11 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorDiv = document.getElementById('errorMessage');
     const errorText = document.getElementById('errorText');
     const passwordToggle = document.getElementById('passwordToggle');
-
-    const storedMessage = localStorage.getItem('authMessage');
-    if (storedMessage) {
-        showError(storedMessage);
-    }
 
     // Agar allaqachon login qilgan bo'lsa
     if (Auth.isAuthenticated()) {
@@ -27,18 +22,14 @@ document.addEventListener('DOMContentLoaded', () => {
         passwordToggle.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
             const type = passwordInput.type === 'password' ? 'text' : 'password';
             passwordInput.type = type;
-            
             const icon = this.querySelector('i');
-            if (icon) {
-                icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-            }
+            if (icon) icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
         });
     }
 
-    // Email validation - BLUR da
+    // Email validation
     emailInput.addEventListener('blur', function() {
         const value = this.value.trim();
         const isValid = value.includes('@') && value.includes('.');
@@ -48,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Password validation - BLUR da
+    // Password validation
     passwordInput.addEventListener('blur', function() {
         const value = this.value;
         const isValid = value.length >= 6;
@@ -66,8 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = passwordInput.value;
 
         let isValid = true;
-        
-        // Email tekshirish
         if (!email || !email.includes('@') || !email.includes('.')) {
             emailInput.classList.add('error');
             emailInput.classList.remove('success');
@@ -77,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
             emailInput.classList.remove('error');
         }
         
-        // Password tekshirish
         if (!password || password.length < 6) {
             passwordInput.classList.add('error');
             passwordInput.classList.remove('success');
@@ -88,11 +76,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!isValid) {
-            showError('Email va parolni to\'g\'ri kiriting!');
+            errorText.textContent = 'Email va parolni to\'g\'ri kiriting!';
+            errorDiv.classList.add('show');
             return;
         }
 
-        // Loading holati
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Kutilmoqda...';
         errorDiv.classList.remove('show');
@@ -102,22 +90,27 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (result.success) {
                 localStorage.removeItem('authMessage');
-                // Muvaffaqiyatli login
                 btn.innerHTML = '<i class="fas fa-check"></i> Muvaffaqiyatli!';
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
                 }, 500);
             } else {
-                showError(result.error || 'Email yoki parol noto\'g\'ri');
-                document.querySelector('.login-card').style.animation = 'shake 0.5s ease';
-                setTimeout(() => {
-                    document.querySelector('.login-card').style.animation = '';
-                }, 500);
-                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Kirish';
-                btn.disabled = false;
+                // ⭐ BLOKLANGAN YOKI OBUNA TUGAGAN USER
+                if (result.action === 'contact_support') {
+                    errorText.textContent = result.error || 'Iltimos, yordam uchun raqamga qo\'ng\'iroq qiling.';
+                    errorDiv.classList.add('show');
+                    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Kirish';
+                    btn.disabled = false;
+                } else {
+                    errorText.textContent = result.error || 'Email yoki parol noto\'g\'ri';
+                    errorDiv.classList.add('show');
+                    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Kirish';
+                    btn.disabled = false;
+                }
             }
         } catch (error) {
-            showError(error.message || 'Tarmoq xatosi! Qayta urinib ko\'ring.');
+            errorText.textContent = error.message || 'Tarmoq xatosi! Qayta urinib ko\'ring.';
+            errorDiv.classList.add('show');
             btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Kirish';
             btn.disabled = false;
         }
@@ -130,19 +123,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function showError(msg) {
-        errorText.textContent = msg;
-        errorDiv.classList.add('show');
-    }
+    // Xatolikni tozalash
+    [emailInput, passwordInput].forEach(inp => {
+        inp.addEventListener('input', () => {
+            errorText.textContent = '';
+            errorDiv.classList.remove('show');
+        });
+        inp.addEventListener('focus', () => {
+            errorText.textContent = '';
+            errorDiv.classList.remove('show');
+        });
+    });
 });
-
-// Shake animatsiyasi
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        20%, 60% { transform: translateX(-10px); }
-        40%, 80% { transform: translateX(10px); }
-    }
-`;
-document.head.appendChild(style);

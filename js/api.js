@@ -1,5 +1,5 @@
 // ============================================
-// API - Admin Main (TO'LIQ TUZATILGAN)
+// API - Admin Main (TO'LIQ)
 // ============================================
 
 const API = {

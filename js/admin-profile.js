@@ -5,6 +5,7 @@
 let adminId = null;
 let currentAdmin = null;
 let countdownInterval = null;
+let notificationRefreshInterval = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!Auth.isAuthenticated()) {
@@ -28,7 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
     initEditModal();
     initPaymentModal();
     initNotificationModal();
+    initUnbanModal();
     initButtons();
+    
+    // ⭐ HAR 5 SONIYADA XABARLARNI YANGILASH (REAL-TIME)
+    notificationRefreshInterval = setInterval(() => {
+        loadNotifications();
+    }, 5000);
     
     // Joriy parol toggle
     const currentPasswordToggle = document.getElementById('currentPasswordToggle');
@@ -181,21 +188,17 @@ function renderNotifications(notifications) {
     const container = document.getElementById('notificationsList');
     if (!container) return;
     
-    // ⭐ Admin-Main yoki Admin-Customer ekanligini tekshirish
     const user = Auth.getUser();
     const isAdminMain = user?.role === 'admin_main';
     
-    // Filtrlash: Admin-Main o'z yuborganlarini ham ko'radi
     let filteredNotifications = notifications;
     if (!isAdminMain) {
-        // Admin-Customer: faqat o'ziga kelgan xabarlar
         filteredNotifications = notifications.filter(n => 
             n.recipientId === adminId || 
             n.recipientRole === 'admin_customer' ||
             n.recipientRole === 'all'
         );
     }
-    // Admin-Main: hamma xabarlarni ko'radi (o'zi yuborgan + o'ziga kelgan)
     
     if (!filteredNotifications || filteredNotifications.length === 0) {
         container.innerHTML = '<p class="text-muted">Xabarlar yo\'q</p>';
@@ -207,6 +210,7 @@ function renderNotifications(notifications) {
     container.innerHTML = filteredNotifications.map((item, index) => {
         const date = new Date(item.createdAt);
         const formattedDate = date.toLocaleString('uz-UZ', {
+            timeZone: 'Asia/Tashkent',
             year: 'numeric', month: '2-digit', day: '2-digit',
             hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
         });
@@ -215,10 +219,7 @@ function renderNotifications(notifications) {
         const senderName = item.sentByName || 'Admin';
         const recipientName = item.recipientName || 'Barcha adminlar';
         
-        // ⭐ Admin-Main o'chirish tugmasi ko'rinadi
         const canDelete = isAdminMain;
-        
-        // ⭐ Admin-Customer faqat o'qilgan deb belgilay oladi (o'ziga kelgan xabarlarni)
         const canMarkRead = !isAdminMain && 
                            !item.isRead && 
                            (item.recipientId === adminId || item.recipientRole === 'admin_customer');
@@ -260,7 +261,6 @@ function renderNotifications(notifications) {
         `;
     }).join('');
     
-    // ⭐ O'qilgan deb belgilash (faqat Admin-Customer)
     document.querySelectorAll('.mark-read-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
@@ -279,7 +279,6 @@ function renderNotifications(notifications) {
         });
     });
     
-    // ⭐ Xabarni o'chirish (faqat Admin-Main)
     document.querySelectorAll('.delete-notification-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
@@ -628,7 +627,6 @@ function initNotificationModal() {
     
     if (!modal || !sendBtn) return;
     
-    // Profil sahifasidagi "Xabar yuborish" tugmasi
     const profileSendBtn = document.getElementById('sendNotificationBtn');
     if (profileSendBtn) {
         profileSendBtn.addEventListener('click', function(e) {
@@ -749,7 +747,6 @@ async function sendNotification() {
             if (titleInput) titleInput.value = '';
             if (messageInput) messageInput.value = '';
             
-            // Xabarlarni qayta yuklash
             loadNotifications();
             
             setTimeout(() => {
@@ -795,18 +792,192 @@ async function banAdmin(id) {
                 : `✅ Admin Customer bloklandi!\n📌 Sabab: ${reason || 'Admin panelda cheklov'}`;
             alert(msg);
             loadProfile();
+            loadNotifications();
         }
     } catch (error) {
         alert('❌ Xatolik: ' + error.message);
     }
 }
 
-async function unbanAdmin(id) {
-    if (!confirm('Haqiqatan ham bu Admin Customerni blokdan chiqarmoqchimisiz?')) return;
+// ============================================================
+// ⭐ UNBAN MODAL
+// ============================================================
+function initUnbanModal() {
+    const modal = document.getElementById('unbanModal');
+    const unbanBtn = document.getElementById('unbanBtn');
+    const closeBtn = document.getElementById('closeUnbanModal');
+    const cancelBtn = document.getElementById('cancelUnbanModal');
+    const saveBtn = document.getElementById('saveUnbanModal');
+    const paymentType = document.getElementById('unbanPaymentType');
+    const customGroup = document.getElementById('unbanCustomDurationGroup');
+
+    if (!modal || !unbanBtn) return;
+
+    // Unban tugmasiga bosganda modal ochiladi
+    unbanBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        document.getElementById('unbanPaymentType').value = 'monthly';
+        document.getElementById('unbanCustomDays').value = '0';
+        document.getElementById('unbanCustomHours').value = '0';
+        document.getElementById('unbanCustomMinutes').value = '0';
+        document.getElementById('unbanCustomSeconds').value = '0';
+        document.getElementById('unbanStartDate').value = '';
+        document.getElementById('unbanEndDate').value = '';
+        document.getElementById('unbanAmount').value = '';
+        if (customGroup) customGroup.style.display = 'none';
+        
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('unbanStartDate').value = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+    });
+
+    if (paymentType) {
+        paymentType.addEventListener('change', function() {
+            if (customGroup) {
+                customGroup.style.display = this.value === 'custom' ? 'block' : 'none';
+            }
+            if (this.value === 'none') {
+                document.getElementById('unbanStartDate').disabled = true;
+                document.getElementById('unbanEndDate').disabled = true;
+                document.getElementById('unbanAmount').disabled = true;
+            } else {
+                document.getElementById('unbanStartDate').disabled = false;
+                document.getElementById('unbanEndDate').disabled = false;
+                document.getElementById('unbanAmount').disabled = false;
+            }
+        });
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    }
+
+    if (saveBtn) {
+        saveBtn.addEventListener('click', async function() {
+            await saveUnbanWithPayment();
+        });
+    }
+}
+
+// ============================================================
+// ⭐ UNBAN + TO'LOV QO'SHISH (BIR VAQTDA)
+// ============================================================
+async function saveUnbanWithPayment() {
+    const paymentType = document.getElementById('unbanPaymentType').value;
+    const customDays = parseInt(document.getElementById('unbanCustomDays').value) || 0;
+    const customHours = parseInt(document.getElementById('unbanCustomHours').value) || 0;
+    const customMinutes = parseInt(document.getElementById('unbanCustomMinutes').value) || 0;
+    const customSeconds = parseInt(document.getElementById('unbanCustomSeconds').value) || 0;
+    const startDate = document.getElementById('unbanStartDate').value;
+    const endDate = document.getElementById('unbanEndDate').value;
+    const amount = document.getElementById('unbanAmount').value.trim();
+
+    // Agar paymentType 'none' bo'lsa, faqat unban qilamiz
+    if (paymentType === 'none') {
+        if (!confirm('Haqiqatan ham bu Admin Customerni blokdan chiqarmoqchimisiz (obunasiz)?')) return;
+        try {
+            const result = await API.post(`/admins/${adminId}/unban`);
+            if (result.success) {
+                alert('✅ Admin Customer blokdan chiqarildi!');
+                document.getElementById('unbanModal').classList.remove('active');
+                document.body.style.overflow = '';
+                loadProfile();
+                loadNotifications();
+            } else {
+                alert('❌ Xatolik: ' + (result.message || 'Noma\'lum xatolik'));
+            }
+        } catch (error) {
+            alert('❌ Xatolik: ' + error.message);
+        }
+        return;
+    }
+
+    // Validatsiya
+    if (paymentType === 'custom') {
+        if (customDays === 0 && customHours === 0 && customMinutes === 0 && customSeconds === 0) {
+            alert('❌ Custom vaqt uchun vaqt belgilang!');
+            return;
+        }
+    }
+
+    let amountNumber = parseInt(amount);
+    if (amount && isNaN(amountNumber)) {
+        alert('❌ To\'lov miqdori noto\'g\'ri formatda!');
+        return;
+    }
+
+    const saveBtn = document.getElementById('saveUnbanModal');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saqlanmoqda...';
+
     try {
-        const result = await API.post(`/admins/${id}/unban`);
-        if (result.success) { alert('✅ Admin Customer blokdan chiqarildi va faollashtirildi!'); loadProfile(); }
-    } catch (error) { alert('❌ Xatolik: ' + error.message); }
+        // 1. Avval Unban qilamiz
+        const unbanResult = await API.post(`/admins/${adminId}/unban`);
+        if (!unbanResult.success) {
+            alert('❌ Blokdan chiqarishda xatolik: ' + (unbanResult.message || 'Noma\'lum xatolik'));
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-unlock"></i> Blokdan chiqarish va faollashtirish';
+            return;
+        }
+
+        // 2. Keyin to'lov qo'shamiz
+        let customDuration = null;
+        if (paymentType === 'custom') {
+            customDuration = { days: customDays, hours: customHours, minutes: customMinutes, seconds: customSeconds };
+        }
+
+        const paymentData = {
+            amount: amountNumber || 0,
+            subscriptionType: paymentType,
+            customDuration: customDuration,
+            startDate: startDate || null,
+            endDate: endDate || null,
+            note: 'Blokdan chiqarishda qo\'shildi'
+        };
+
+        const paymentResult = await API.post(`/admins/${adminId}/payment`, paymentData);
+
+        if (paymentResult.success) {
+            alert('✅ Admin Customer blokdan chiqarildi va to\'lov qo\'shildi!');
+            document.getElementById('unbanModal').classList.remove('active');
+            document.body.style.overflow = '';
+            loadProfile();
+            loadNotifications();
+        } else {
+            alert('❌ To\'lov qo\'shishda xatolik: ' + (paymentResult.message || 'Noma\'lum xatolik'));
+        }
+    } catch (error) {
+        console.error('❌ Xatolik:', error);
+        alert('❌ Xatolik: ' + error.message);
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fas fa-unlock"></i> Blokdan chiqarish va faollashtirish';
+    }
 }
 
 // ============================================================
@@ -817,7 +988,11 @@ function initButtons() {
     if (banBtn) banBtn.addEventListener('click', () => { if (!adminId) return; banAdmin(adminId); });
     
     const unbanBtn = document.getElementById('unbanBtn');
-    if (unbanBtn) unbanBtn.addEventListener('click', () => { if (!adminId) return; unbanAdmin(adminId); });
+    if (unbanBtn) {
+        const newUnbanBtn = unbanBtn.cloneNode(true);
+        unbanBtn.parentNode.replaceChild(newUnbanBtn, unbanBtn);
+        initUnbanModal();
+    }
     
     const subscriptionBtn = document.getElementById('subscriptionBtn');
     if (subscriptionBtn) {
@@ -860,13 +1035,8 @@ async function updateSubscription(type, customDuration = null) {
     } catch (error) { alert('❌ Xatolik: ' + error.message); }
 }
 
-// ============================================================
-// XATOLIK VA MUVAFFAQIYAT XABARLARI
-// ============================================================
 function showError(message) {
     console.error('⚠️ Xatolik:', message);
-    
-    // Xatolikni ekranda ko'rsatish
     const container = document.querySelector('.profile-container');
     if (container) {
         container.innerHTML = `
@@ -880,30 +1050,9 @@ function showError(message) {
             </div>
         `;
     }
-    
-    // Toast xabar
-    const div = document.createElement('div');
-    div.style.cssText = `
-        position: fixed; top: 20px; right: 20px; z-index: 9999;
-        padding: 14px 18px; background: #fef2f2;
-        border: 1px solid #fecaca; border-radius: 10px;
-        color: #dc2626; max-width: 400px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        display: flex; align-items: center; gap: 10px;
-        font-size: 0.85rem;
-    `;
-    div.innerHTML = `
-        <i class="fas fa-exclamation-circle"></i>
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()" style="margin-left: auto; background: none; border: none; color: #dc2626; cursor: pointer; font-size: 1.1rem;">×</button>
-    `;
-    document.body.appendChild(div);
-    setTimeout(() => div.remove(), 5000);
 }
 
 function showSuccess(message) {
-    console.log('✅ Muvaffaqiyat:', message);
-    
     const div = document.createElement('div');
     div.style.cssText = `
         position: fixed; top: 20px; right: 20px; z-index: 9999;
@@ -922,5 +1071,17 @@ function showSuccess(message) {
     document.body.appendChild(div);
     setTimeout(() => div.remove(), 3000);
 }
+
+// ⭐ CLEANUP
+window.addEventListener('beforeunload', function() {
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    if (notificationRefreshInterval) {
+        clearInterval(notificationRefreshInterval);
+        notificationRefreshInterval = null;
+    }
+});
 
 console.log('✅ admin-profile.js yuklandi');

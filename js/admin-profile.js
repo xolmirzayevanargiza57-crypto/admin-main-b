@@ -183,7 +183,7 @@ async function loadNotifications() {
 }
 
 // ============================================================
-// ⭐ XABARLARNI KO'RSATISH (TUZATILGAN)
+// ⭐ XABARLARNI KO'RSATISH (TO'G'RI FILTR + SCROLL)
 // ============================================================
 function renderNotifications(notifications) {
     const container = document.getElementById('notificationsList');
@@ -195,11 +195,12 @@ function renderNotifications(notifications) {
     // ⭐ TO'G'RI FILTRLASH: faqat o'sha adminId ga yuborilgan xabarlar
     let filteredNotifications = notifications.filter(n => {
         if (isAdminMain) {
+            // Admin-Main: faqat o'sha adminId ga yuborilgan xabarlar
             return n.recipientId === adminId;
+        } else {
+            // Admin-Customer: faqat o'ziga (adminId) yuborilgan yoki 'all' bo'lgan xabarlar
+            return n.recipientId === adminId || n.recipientRole === 'all';
         }
-        return n.recipientId === adminId || 
-               n.recipientRole === 'admin_customer' ||
-               n.recipientRole === 'all';
     });
     
     if (!filteredNotifications || filteredNotifications.length === 0) {
@@ -226,10 +227,13 @@ function renderNotifications(notifications) {
         // ⭐ Admin-Main o'chirish tugmasi ko'rinadi
         const canDelete = isAdminMain;
         
-        // ⭐ Admin-Customer faqat o'qilgan deb belgilay oladi (o'ziga kelgan xabarlarni)
-        const canMarkRead = !isAdminMain && 
-                           !item.isRead && 
-                           (item.recipientId === adminId || item.recipientRole === 'admin_customer');
+        // ⭐ Admin-Customer faqat o'qilgan deb belgilay oladi
+        const canMarkRead = !isAdminMain && !item.isRead && (item.recipientId === adminId || item.recipientRole === 'all');
+        
+        // ⭐ Xabar matnini cheklash
+        const messageText = item.message || '';
+        const maxMessageLength = 300;
+        const shortMessage = messageText.length > maxMessageLength ? messageText.substring(0, maxMessageLength) + '...' : messageText;
         
         return `
             <div class="history-item ${isRead ? 'read' : 'unread'}" style="${!item.isRead ? 'border-left: 3px solid #007aff;' : ''}">
@@ -245,7 +249,9 @@ function renderNotifications(notifications) {
                                 📬 Qabul qiluvchi: ${recipientName}
                             </span>
                         </p>
-                        <p class="history-dates" style="word-wrap: break-word; overflow-wrap: break-word; max-width: 100%;">${item.message || ''}</p>
+                        <div class="notification-message-wrapper" style="max-height: 80px; overflow-y: auto; padding-right: 4px; margin: 4px 0;">
+                            <p class="history-dates" style="word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; margin: 0;">${shortMessage}</p>
+                        </div>
                         <p class="history-dates"><i class="fas fa-calendar"></i> ${formattedDate}</p>
                     </div>
                 </div>
@@ -309,7 +315,7 @@ function renderNotifications(notifications) {
 }
 
 // ============================================================
-// ⭐ PROFILNI RENDER QILISH
+// PROFILNI RENDER QILISH
 // ============================================================
 function renderProfile(admin) {
     console.log('🎨 Profil render qilinmoqda:', admin);

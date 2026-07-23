@@ -233,10 +233,14 @@ function renderNotifications(notifications) {
     
     // ⭐ TO'G'RI FILTRLASH: faqat o'sha adminId ga yuborilgan xabarlar
     let filteredNotifications = notifications.filter(n => {
-        // ⭐ FAQAT O'SHA ADMIN CUSTOMER ID GA YUBORILGAN XABARLAR
-        // YOKI 'all' (barcha adminlarga) yuborilgan xabarlar
-        return n.recipientId === adminId || n.recipientRole === 'all';
+        // FAQAT O'SHA ADMIN CUSTOMER ID GA YUBORILGAN XABARLAR
+        return n.recipientId === adminId;
     });
+    
+    // ⭐ Agar 'all' (barcha adminlarga) yuborilgan xabarlar ham ko'rinishi kerak bo'lsa:
+    // filteredNotifications = notifications.filter(n => {
+    //     return n.recipientId === adminId || n.recipientRole === 'all';
+    // });
     
     if (!filteredNotifications || filteredNotifications.length === 0) {
         container.innerHTML = '<p class="text-muted" style="text-align: center; padding: 20px;">Xabarlar yo\'q</p>';
@@ -251,7 +255,6 @@ function renderNotifications(notifications) {
             hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
         });
         
-        // ⭐ O'qilgan/O'qilmagan holati
         const isRead = item.isRead;
         const readStatus = isRead ? '✅ O\'qilgan' : '🟡 O\'qilmagan';
         const isSentByMe = item.sentBy === user?._id;
@@ -341,7 +344,6 @@ function renderNotifications(notifications) {
         });
     });
 }
-
 // ============================================================
 // PROFILNI RENDER QILISH
 // ============================================================

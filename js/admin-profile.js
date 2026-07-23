@@ -192,7 +192,6 @@ function renderNotifications(notifications) {
     const user = Auth.getUser();
     const isAdminMain = user?.role === 'admin_main';
     
-    // ⭐ TO'G'RI FILTRLASH: faqat o'sha adminId ga yuborilgan xabarlar
     let filteredNotifications = notifications.filter(n => {
         if (isAdminMain) {
             return n.recipientId === adminId;
@@ -300,7 +299,7 @@ function renderNotifications(notifications) {
 }
 
 // ============================================================
-// PROFILNI RENDER QILISH
+// ⭐ PROFILNI RENDER QILISH
 // ============================================================
 function renderProfile(admin) {
     console.log('🎨 Profil render qilinmoqda:', admin);
@@ -318,7 +317,7 @@ function renderProfile(admin) {
         initialEl.textContent = initial;
     }
     
-    // STATUS
+    // ⭐ STATUS
     const statusEl = document.getElementById('profileStatus');
     if (statusEl) {
         if (admin.status === 'active') {
@@ -333,14 +332,20 @@ function renderProfile(admin) {
         }
     }
     
-    // SUBSCRIPTION
+    // ⭐ SUBSCRIPTION
     const sub = admin.subscription || {};
     const subType = sub.type || 'none';
     const subStatus = sub.status || 'inactive';
     
     const subLabelEl = document.getElementById('profileSubscription');
     if (subLabelEl) {
-        if (admin.status === 'active' && subType !== 'none' && subStatus === 'active') {
+        // ⭐ To'lov holatini tekshirish
+        const now = new Date();
+        const endDate = sub.endDate ? new Date(sub.endDate) : null;
+        const isExpired = endDate && endDate < now;
+        const isActive = subStatus === 'active' && !isExpired;
+        
+        if (isActive && subType !== 'none') {
             const typeMap = {
                 'monthly': 'Oylik (299,999 so\'m)',
                 '6months': '6 oylik (1,899,999 so\'m)',
@@ -349,13 +354,16 @@ function renderProfile(admin) {
             };
             subLabelEl.textContent = '✅ ' + (typeMap[subType] || 'Faol');
             subLabelEl.className = 'subscription-badge monthly';
+        } else if (isExpired && subType !== 'none') {
+            subLabelEl.textContent = '⏰ Muddati tugagan';
+            subLabelEl.className = 'subscription-badge expired';
         } else {
             subLabelEl.textContent = '❌ Obunasi yo\'q';
             subLabelEl.className = 'subscription-badge inactive';
         }
     }
     
-    // Obuna turi
+    // ⭐ Obuna turi
     const subTypeEl = document.getElementById('profileSubType');
     if (subTypeEl) {
         const typeMap = {
@@ -368,72 +376,110 @@ function renderProfile(admin) {
         subTypeEl.textContent = typeMap[subType] || 'Yo\'q';
     }
     
-    // Obuna muddati
+    // ⭐ Obuna muddati (countdown bilan)
     const subEndEl = document.getElementById('profileSubEnd');
     if (subEndEl) {
-        if (sub.endDate && subStatus === 'active') {
-            const endDate = new Date(sub.endDate);
-            const now = new Date();
+        const now = new Date();
+        const endDate = sub.endDate ? new Date(sub.endDate) : null;
+        const isExpired = endDate && endDate < now;
+        
+        if (endDate && subStatus === 'active' && !isExpired) {
             const diff = endDate - now;
-            if (diff > 0) {
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-                const formattedDate = formatDate(endDate);
-                subEndEl.textContent = `${formattedDate} (${days} kun ${hours}s ${minutes}m ${seconds}s qoldi)`;
-            } else {
-                subEndEl.textContent = '⚠️ Vaqt tugagan!';
-            }
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            const formattedDate = formatDate(endDate);
+            subEndEl.textContent = `${formattedDate} (${days} kun ${hours}s ${minutes}m ${seconds}s qoldi)`;
+        } else if (isExpired && subType !== 'none') {
+            subEndEl.textContent = `⏰ Muddati tugagan: ${formatDate(endDate)}`;
         } else {
             subEndEl.textContent = '-';
         }
     }
     
-    // To'lov
+    // ⭐ To'lov
     const amountEl = document.getElementById('profileSubAmount');
     if (amountEl) {
         const amount = sub.amount || 0;
         amountEl.textContent = amount.toLocaleString() + ' so\'m';
     }
     
-    // To'lov tarixi
+    // ⭐ To'lov tarixi
     const history = admin.paymentHistory || admin.subscriptionHistory || [];
     renderSubscriptionHistory(history);
 }
 
+// ============================================================
+// ⭐ TO'LOV TARIXINI RENDER QILISH
+// ============================================================
 function renderSubscriptionHistory(history) {
     const historyList = document.getElementById('historyList');
     if (!historyList) return;
+    
     if (!history || history.length === 0) {
         historyList.innerHTML = '<p class="text-muted">To\'lov tarixi yo\'q</p>';
         return;
     }
-    historyList.innerHTML = history.slice(-10).reverse().map((item, index) => {
+    
+    // ⭐ To'lovlarni sanasi bo'yicha saralash (eng yangisi birinchi)
+    const sortedHistory = [...history].sort((a, b) => {
+        const dateA = a.purchaseDate ? new Date(a.purchaseDate) : new Date(0);
+        const dateB = b.purchaseDate ? new Date(b.purchaseDate) : new Date(0);
+        return dateB - dateA;
+    });
+    
+    historyList.innerHTML = sortedHistory.map((item, index) => {
         const startDate = item.startDate ? formatDate(new Date(item.startDate)) : '-';
         const endDate = item.endDate ? formatDate(new Date(item.endDate)) : '-';
+        
+        // ⭐ Holatni aniqlash
+        const now = new Date();
+        const endDateTime = item.endDate ? new Date(item.endDate) : null;
+        const isExpired = endDateTime && endDateTime < now;
+        const isActive = item.status === 'active' && !isExpired;
+        
+        let statusLabel = '❌ Faol emas';
+        let statusClass = 'inactive';
+        
+        if (isActive) {
+            statusLabel = '✅ Faol';
+            statusClass = 'active';
+        } else if (isExpired) {
+            statusLabel = '⏰ Muddati tugagan';
+            statusClass = 'expired';
+        }
+        
         const typeLabel = {
-            'monthly': 'Oylik',
-            '6months': '6 oylik',
-            'yearly': 'Yillik',
-            'custom': 'Custom',
-            'none': 'Bekor qilindi'
+            'monthly': '📅 Oylik',
+            '6months': '📅 6 oylik',
+            'yearly': '📅 Yillik',
+            'custom': '⚙️ Custom',
+            'none': '❌ Bekor qilindi'
         }[item.type] || item.type;
-        const statusClass = item.status === 'active' ? 'active' : 'inactive';
-        const statusText = item.status === 'active' ? '✅ Faol' : '❌ Tugagan';
+        
         const amount = item.amount || 0;
         const note = item.note ? `<p class="history-dates"><i class="fas fa-sticky-note"></i> ${item.note}</p>` : '';
+        
+        // ⭐ Xarid sanasi
+        const purchaseDate = item.purchaseDate ? formatDate(new Date(item.purchaseDate)) : '-';
+        
         return `
-            <div class="history-item">
+            <div class="history-item" style="${isExpired ? 'border-left: 4px solid #ff9500;' : isActive ? 'border-left: 4px solid #34c759;' : 'border-left: 4px solid #ff3b30;'}">
                 <div class="history-left">
                     <span class="history-number">#${index + 1}</span>
                     <div class="history-details">
-                        <p class="history-type">${typeLabel} - ${amount.toLocaleString()} so'm</p>
+                        <p class="history-type">
+                            ${typeLabel} - ${amount.toLocaleString()} so'm
+                            <span style="font-size: 0.7rem; margin-left: 8px;">
+                                <span class="status-badge ${statusClass}" style="font-size: 0.7rem; padding: 2px 10px;">${statusLabel}</span>
+                            </span>
+                        </p>
                         <p class="history-dates"><i class="fas fa-calendar"></i> ${startDate} → ${endDate}</p>
+                        <p class="history-dates"><i class="fas fa-shopping-cart"></i> Sotib olingan: ${purchaseDate}</p>
                         ${note}
                     </div>
                 </div>
-                <span class="status-badge ${statusClass}">${statusText}</span>
             </div>
         `;
     }).join('');
@@ -532,7 +578,7 @@ async function saveEdit() {
 }
 
 // ============================================================
-// ⭐ TO'LOV QO'SHISH MODAL (TUZATILGAN)
+// ⭐ TO'LOV QO'SHISH MODAL
 // ============================================================
 function initPaymentModal() {
     const modal = document.getElementById('paymentModal');
@@ -550,7 +596,6 @@ function initPaymentModal() {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
         
-        // ⭐ DEFAULT QIYMATLAR
         document.getElementById('paymentType').value = 'monthly';
         document.getElementById('paymentAmount').value = '';
         document.getElementById('paymentCustomDays').value = '0';
@@ -561,11 +606,9 @@ function initPaymentModal() {
         document.getElementById('paymentEndDate').value = '';
         document.getElementById('paymentNote').value = '';
         
-        // ⭐ Custom ga tegishli maydonlarni yashirish
         if (amountGroup) amountGroup.style.display = 'none';
         if (customGroup) customGroup.style.display = 'none';
         
-        // ⭐ Hozirgi vaqtni boshlanish sanasiga qo'yish
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -575,22 +618,16 @@ function initPaymentModal() {
         document.getElementById('paymentStartDate').value = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
     });
     
-    // ⭐ Payment type o'zgarganda
     if (paymentType) {
         paymentType.addEventListener('change', function() {
             const isCustom = this.value === 'custom';
             
-            // ⭐ To'lov miqdori — faqat custom uchun
             if (amountGroup) {
                 amountGroup.style.display = isCustom ? 'block' : 'none';
             }
-            
-            // ⭐ Vaqtni belgilash — faqat custom uchun
             if (customGroup) {
                 customGroup.style.display = isCustom ? 'block' : 'none';
             }
-            
-            // ⭐ Custom bo'lmasa, vaqt maydonlarini tozalash
             if (!isCustom) {
                 document.getElementById('paymentCustomDays').value = '0';
                 document.getElementById('paymentCustomHours').value = '0';
@@ -598,13 +635,10 @@ function initPaymentModal() {
                 document.getElementById('paymentCustomSeconds').value = '0';
                 document.getElementById('paymentAmount').value = '';
             }
-            
-            // ⭐ Tugash sanasini avtomatik hisoblash
             calculatePaymentEndDate();
         });
     }
     
-    // ⭐ Boshlanish sanasi o'zgarganda tugash sanasini hisoblash
     const startDateInput = document.getElementById('paymentStartDate');
     if (startDateInput) {
         startDateInput.addEventListener('change', function() {
@@ -615,7 +649,6 @@ function initPaymentModal() {
         });
     }
     
-    // ⭐ Custom vaqt o'zgarganda tugash sanasini hisoblash
     ['paymentCustomDays', 'paymentCustomHours', 'paymentCustomMinutes', 'paymentCustomSeconds'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -655,7 +688,6 @@ function calculatePaymentEndDate() {
     
     const end = new Date(start);
     
-    // ⭐ Custom bo'lsa, qo'lda belgilangan vaqtni qo'shamiz
     if (paymentType === 'custom') {
         const days = parseInt(document.getElementById('paymentCustomDays').value) || 0;
         const hours = parseInt(document.getElementById('paymentCustomHours').value) || 0;
@@ -672,7 +704,6 @@ function calculatePaymentEndDate() {
         end.setMinutes(end.getMinutes() + minutes);
         end.setSeconds(end.getSeconds() + seconds);
     } else {
-        // ⭐ Monthly, 6months, yearly
         const durationMap = {
             'monthly': 30,
             '6months': 180,
@@ -686,7 +717,6 @@ function calculatePaymentEndDate() {
         end.setDate(end.getDate() + days);
     }
     
-    // ⭐ Format: YYYY-MM-DDTHH:mm
     const year = end.getFullYear();
     const month = String(end.getMonth() + 1).padStart(2, '0');
     const day = String(end.getDate()).padStart(2, '0');
@@ -712,9 +742,7 @@ async function savePayment() {
     
     console.log('📤 To\'lov ma\'lumotlari:', { paymentType, amount, customDays, customHours, customMinutes, customSeconds, startDate, endDate, note });
     
-    // ⭐ Custom bo'lsa, validatsiya
     if (paymentType === 'custom') {
-        // To'lov miqdori majburiy
         if (!amount || amount === '') {
             alert('❌ Iltimos, to\'lov miqdorini kiriting!');
             document.getElementById('paymentAmount').focus();
@@ -727,7 +755,6 @@ async function savePayment() {
             return;
         }
         
-        // Vaqt majburiy (hech bo'lmaganda bittasi 0 dan katta bo'lishi kerak)
         if (customDays === 0 && customHours === 0 && customMinutes === 0 && customSeconds === 0) {
             alert('❌ Iltimos, custom vaqt uchun vaqt belgilang (kun, soat, daqiqa yoki sekund)!');
             document.getElementById('paymentCustomMinutes').focus();
@@ -735,14 +762,12 @@ async function savePayment() {
         }
     }
     
-    // ⭐ Boshlanish sanasi majburiy (agar paymentType 'none' bo'lmasa)
     if (paymentType !== 'none' && !startDate) {
         alert('❌ Iltimos, boshlanish sanasini tanlang!');
         document.getElementById('paymentStartDate').focus();
         return;
     }
     
-    // ⭐ Custom bo'lmasa, amount va vaqt kerak emas
     let customDuration = null;
     let amountNumber = 0;
     
@@ -758,7 +783,6 @@ async function savePayment() {
         amountNumber = 0;
     }
     
-    // ⭐ Tugash sanasi
     let endDateTime = null;
     if (endDate) {
         endDateTime = new Date(endDate);
@@ -768,7 +792,6 @@ async function savePayment() {
         }
     }
     
-    // ⭐ Boshlanish sanasi
     let startDateTime = null;
     if (startDate) {
         startDateTime = new Date(startDate);
@@ -1185,7 +1208,6 @@ function initUnbanModal() {
         });
     }
 
-    // ⭐ Boshlanish sanasi o'zgarganda tugash sanasini hisoblash
     const startDateInput = document.getElementById('unbanStartDate');
     if (startDateInput) {
         startDateInput.addEventListener('change', function() {
@@ -1196,7 +1218,6 @@ function initUnbanModal() {
         });
     }
     
-    // ⭐ Custom vaqt o'zgarganda tugash sanasini hisoblash
     ['unbanCustomDays', 'unbanCustomHours', 'unbanCustomMinutes', 'unbanCustomSeconds'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -1309,7 +1330,6 @@ async function saveUnbanWithPayment() {
     const endDate = document.getElementById('unbanEndDate').value;
     const amount = document.getElementById('unbanAmount').value.trim();
 
-    // ⭐ Agar paymentType 'none' bo'lsa, faqat unban qilamiz
     if (paymentType === 'none') {
         if (!confirm('Haqiqatan ham bu Admin Customerni blokdan chiqarmoqchimisiz (obunasiz)?')) return;
         try {
@@ -1329,7 +1349,6 @@ async function saveUnbanWithPayment() {
         return;
     }
 
-    // ⭐ Custom bo'lsa, vaqt va amount majburiy
     if (paymentType === 'custom') {
         if (customDays === 0 && customHours === 0 && customMinutes === 0 && customSeconds === 0) {
             alert('❌ Custom vaqt uchun vaqt belgilang!');
@@ -1347,7 +1366,6 @@ async function saveUnbanWithPayment() {
         }
     }
 
-    // ⭐ Boshlanish sanasi majburiy
     if (!startDate) {
         alert('❌ Iltimos, boshlanish sanasini tanlang!');
         document.getElementById('unbanStartDate').focus();
@@ -1359,7 +1377,6 @@ async function saveUnbanWithPayment() {
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saqlanmoqda...';
 
     try {
-        // ⭐ 1. Avval Unban qilamiz
         const unbanResult = await API.post(`/admins/${adminId}/unban`);
         if (!unbanResult.success) {
             alert('❌ Blokdan chiqarishda xatolik: ' + (unbanResult.message || 'Noma\'lum xatolik'));
@@ -1368,7 +1385,6 @@ async function saveUnbanWithPayment() {
             return;
         }
 
-        // ⭐ 2. Keyin to'lov qo'shamiz
         let customDuration = null;
         let amountNumber = 0;
         

@@ -1,5 +1,5 @@
 // ============================================================
-// ADMIN PROFILE - Admin-Main Frontend (TO'LIQ)
+// ADMIN PROFILE - TO'LIQ TUZATILGAN
 // ============================================================
 
 let adminId = null;
@@ -8,79 +8,51 @@ let countdownInterval = null;
 let notificationRefreshInterval = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (!Auth.isAuthenticated()) {
-        window.location.href = 'index.html';
-        return;
-    }
-    
+    if (!Auth.isAuthenticated()) { window.location.href = 'index.html'; return; }
     const params = new URLSearchParams(window.location.search);
     adminId = params.get('id');
-    
-    if (!adminId) {
-        alert('Admin ID topilmadi!');
-        window.location.href = 'admins.html';
-        return;
-    }
-    
-    console.log('🔍 Admin ID:', adminId);
-    
+    if (!adminId) { alert('Admin ID topilmadi!'); window.location.href = 'admins.html'; return; }
     loadProfile();
     loadNotifications();
     initEditModal();
     initPaymentModal();
+    initSubscriptionModal(); // ⭐ Yangi modal
     initNotificationModal();
     initUnbanModal();
     initButtons();
-    
-    // ⭐ HAR 5 SONIYADA XABARLARNI YANGILASH (REAL-TIME)
-    notificationRefreshInterval = setInterval(() => {
-        loadNotifications();
-    }, 5000);
-    
-    // Joriy parol toggle
+    notificationRefreshInterval = setInterval(() => { loadNotifications(); }, 5000);
+
     const currentPasswordToggle = document.getElementById('currentPasswordToggle');
     if (currentPasswordToggle) {
         currentPasswordToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
             const input = document.getElementById('currentPasswordDisplay');
             if (input) {
                 const type = input.type === 'password' ? 'text' : 'password';
                 input.type = type;
                 const icon = this.querySelector('i');
-                if (icon) {
-                    icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-                }
+                if (icon) icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
             }
         });
     }
-    
     const editPasswordToggle = document.getElementById('editPasswordToggle');
     if (editPasswordToggle) {
         editPasswordToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
             const input = document.getElementById('editPassword');
             if (input) {
                 const type = input.type === 'password' ? 'text' : 'password';
                 input.type = type;
                 const icon = this.querySelector('i');
-                if (icon) {
-                    icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-                }
+                if (icon) icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
             }
         });
     }
 });
 
-// ============================================================
-// PROFILNI YUKLASH
-// ============================================================
 async function loadProfile() {
     try {
-        console.log('🔄 Profil yuklanmoqda... ID:', adminId);
         const data = await API.get(`/admins/${adminId}`);
-        console.log('📦 API javobi:', data);
         if (data.success && data.data) {
             currentAdmin = data.data;
             renderProfile(currentAdmin);
@@ -89,141 +61,83 @@ async function loadProfile() {
             showError('Ma\'lumotlar topilmadi');
         }
     } catch (error) {
-        console.error('❌ Profil yuklash xatosi:', error);
         showError('Profil ma\'lumotlarini yuklashda xatolik: ' + error.message);
     }
 }
 
-// ============================================================
-// ⭐ COUNTDOWN - REAL TIME
-// ============================================================
 function startCountdown() {
-    if (countdownInterval) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-    }
-    countdownInterval = setInterval(() => {
-        updateCountdown();
-    }, 1000);
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    countdownInterval = setInterval(() => { updateCountdown(); }, 1000);
 }
 
 function updateCountdown() {
     const subEndEl = document.getElementById('profileSubEnd');
     if (!subEndEl || !currentAdmin) return;
-    
     const sub = currentAdmin.subscription || {};
-    if (!sub.endDate || sub.status !== 'active') {
-        subEndEl.textContent = '-';
-        return;
-    }
-    
+    if (!sub.endDate || sub.status !== 'active') { subEndEl.textContent = '-'; return; }
     const endDate = new Date(sub.endDate);
     const now = new Date();
     const diff = endDate - now;
-    
-    if (diff <= 0) {
-        subEndEl.textContent = '⚠️ Vaqt tugagan!';
-        return;
-    }
-    
+    if (diff <= 0) { subEndEl.textContent = '⚠️ Vaqt tugagan!'; return; }
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    
-    const formattedDate = formatDate(endDate);
-    subEndEl.textContent = `${formattedDate} (${days} kun ${hours}s ${minutes}m ${seconds}s qoldi)`;
+    subEndEl.textContent = `${formatDate(endDate)} (${days} kun ${hours}s ${minutes}m ${seconds}s qoldi)`;
 }
 
-// ============================================================
-// ⭐ DATE FORMAT FUNKSIYASI
-// ============================================================
 function formatDate(date) {
     if (!date) return 'Noma\'lum vaqt';
     try {
         const d = new Date(date);
         if (isNaN(d.getTime())) return 'Noma\'lum vaqt';
-        const year = d.getFullYear();
-        const monthNames = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
-        const month = monthNames[d.getMonth()];
-        const day = d.getDate();
-        const hours = String(d.getHours()).padStart(2, '0');
-        const minutes = String(d.getMinutes()).padStart(2, '0');
-        const seconds = String(d.getSeconds()).padStart(2, '0');
-        return `${year}-yil ${day}-${month} ${hours}:${minutes}:${seconds}`;
-    } catch (error) {
-        return 'Noma\'lum vaqt';
-    }
+        const monthNames = ['yanvar','fevral','mart','aprel','may','iyun','iyul','avgust','sentabr','oktabr','noyabr','dekabr'];
+        return `${d.getFullYear()}-yil ${d.getDate()}-${monthNames[d.getMonth()]} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+    } catch (e) { return 'Noma\'lum vaqt'; }
 }
 
 // ============================================================
-// ⭐ XABARLARNI YUKLASH
+// ⭐ XABARLAR — SCROLL BILAN
 // ============================================================
 async function loadNotifications() {
     try {
-        console.log('📨 Xabarlar yuklanmoqda...');
         const data = await API.get('/notifications');
-        console.log('📨 Xabarlar javobi:', data);
-        if (data.success && data.data) {
-            renderNotifications(data.data);
-        } else {
+        if (data.success && data.data) renderNotifications(data.data);
+        else {
             const container = document.getElementById('notificationsList');
-            if (container) {
-                container.innerHTML = `<p class="text-muted">Xabarlar yuklanmadi: ${data.message || 'Noma\'lum xatolik'}</p>`;
-            }
+            if (container) container.innerHTML = `<p class="text-muted">Xabarlar yuklanmadi</p>`;
         }
     } catch (error) {
-        console.error('❌ Xabarlarni yuklash xatosi:', error);
         const container = document.getElementById('notificationsList');
-        if (container) {
-            container.innerHTML = `<p class="text-muted">Xabarlarni yuklashda xatolik: ${error.message}</p>`;
-        }
+        if (container) container.innerHTML = `<p class="text-muted">Xatolik: ${error.message}</p>`;
     }
 }
 
-// ============================================================
-// ⭐ XABARLARNI KO'RSATISH
-// ============================================================
 function renderNotifications(notifications) {
     const container = document.getElementById('notificationsList');
     if (!container) return;
-    
     const user = Auth.getUser();
     const isAdminMain = user?.role === 'admin_main';
-    
-    let filteredNotifications = notifications;
+    let filtered = notifications;
     if (!isAdminMain) {
-        filteredNotifications = notifications.filter(n => 
-            n.recipientId === adminId || 
-            n.recipientRole === 'admin_customer' ||
-            n.recipientRole === 'all'
-        );
+        filtered = notifications.filter(n => n.recipientId === adminId || n.recipientRole === 'admin_customer' || n.recipientRole === 'all');
     }
-    
-    if (!filteredNotifications || filteredNotifications.length === 0) {
-        container.innerHTML = '<p class="text-muted">Xabarlar yo\'q</p>';
-        return;
-    }
-    
-    console.log('📨 Xabarlar render qilinmoqda:', filteredNotifications.length, 'ta');
-    
-    container.innerHTML = filteredNotifications.map((item, index) => {
+    if (!filtered || filtered.length === 0) { container.innerHTML = '<p class="text-muted">Xabarlar yo\'q</p>'; return; }
+
+    // ⭐ SCROLL: max-height va overflow-y
+    container.style.maxHeight = '320px';
+    container.style.overflowY = 'auto';
+    container.style.paddingRight = '4px';
+
+    container.innerHTML = filtered.map((item, index) => {
         const date = new Date(item.createdAt);
-        const formattedDate = date.toLocaleString('uz-UZ', {
-            timeZone: 'Asia/Tashkent',
-            year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-        });
+        const formattedDate = date.toLocaleString('uz-UZ', { timeZone: 'Asia/Tashkent', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
         const isRead = item.isRead ? '✅ O\'qilgan' : '🟡 O\'qilmagan';
         const isSentByMe = item.sentBy === user?._id;
         const senderName = item.sentByName || 'Admin';
         const recipientName = item.recipientName || 'Barcha adminlar';
-        
         const canDelete = isAdminMain;
-        const canMarkRead = !isAdminMain && 
-                           !item.isRead && 
-                           (item.recipientId === adminId || item.recipientRole === 'admin_customer');
-        
+        const canMarkRead = !isAdminMain && !item.isRead && (item.recipientId === adminId || item.recipientRole === 'admin_customer');
         return `
             <div class="history-item" style="${!item.isRead ? 'border-left: 3px solid #007aff;' : ''}">
                 <div class="history-left">
@@ -231,122 +145,75 @@ function renderNotifications(notifications) {
                     <div class="history-details">
                         <p class="history-type">
                             <strong>${item.title || 'Xabar'}</strong>
-                            <span style="font-size: 0.7rem; color: var(--text-muted);">
+                            <span style="font-size:0.7rem;color:var(--text-muted);">
                                 ${isRead} • ${isSentByMe ? '✉️ Yuborgan: Men' : `✉️ Yuborgan: ${senderName}`}
                             </span>
-                            <span style="font-size: 0.7rem; color: var(--text-muted); margin-left: 8px;">
-                                📬 Qabul qiluvchi: ${recipientName}
-                            </span>
+                            <span style="font-size:0.7rem;color:var(--text-muted);margin-left:8px;">📬 Qabul qiluvchi: ${recipientName}</span>
                         </p>
                         <p class="history-dates">${item.message || ''}</p>
                         <p class="history-dates"><i class="fas fa-calendar"></i> ${formattedDate}</p>
                     </div>
                 </div>
-                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                    ${canMarkRead ? `
-                        <button class="mark-read-btn" data-id="${item._id}" 
-                                style="background: none; border: 1px solid #007aff; color: #007aff; font-size: 0.65rem; cursor: pointer; padding: 3px 10px; border-radius: 6px;">
-                            O'qildi
-                        </button>
-                    ` : ''}
-                    ${canDelete ? `
-                        <button class="delete-notification-btn" data-id="${item._id}" 
-                                style="background: none; border: 1px solid #ff3b30; color: #ff3b30; font-size: 0.65rem; cursor: pointer; padding: 3px 10px; border-radius: 6px;">
-                            <i class="fas fa-trash"></i> O'chirish
-                        </button>
-                    ` : ''}
-                    ${item.isRead ? '<span style="font-size: 0.65rem; color: var(--text-muted);">✓ O\'qilgan</span>' : ''}
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                    ${canMarkRead ? `<button class="mark-read-btn" data-id="${item._id}" style="background:none;border:1px solid #007aff;color:#007aff;font-size:0.65rem;cursor:pointer;padding:3px 10px;border-radius:6px;">O'qildi</button>` : ''}
+                    ${canDelete ? `<button class="delete-notification-btn" data-id="${item._id}" style="background:none;border:1px solid #ff3b30;color:#ff3b30;font-size:0.65rem;cursor:pointer;padding:3px 10px;border-radius:6px;"><i class="fas fa-trash"></i> O'chirish</button>` : ''}
+                    ${item.isRead ? '<span style="font-size:0.65rem;color:var(--text-muted);">✓ O\'qilgan</span>' : ''}
                 </div>
-            </div>
-        `;
+            </div>`;
     }).join('');
-    
+
     document.querySelectorAll('.mark-read-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
             try {
                 const response = await API.post(`/notifications/${id}/read`);
-                if (response.success) {
-                    showSuccess('Xabar o\'qilgan deb belgilandi!');
-                    loadNotifications();
-                } else {
-                    showError(response.message || 'Xatolik yuz berdi!');
-                }
-            } catch (error) {
-                console.error('❌ Xatolik:', error);
-                showError('Xabarni o\'qilgan deb belgilashda xatolik!');
-            }
+                if (response.success) { showSuccess('Xabar o\'qilgan deb belgilandi!'); loadNotifications(); }
+                else showError(response.message || 'Xatolik!');
+            } catch (error) { showError('Xatolik!'); }
         });
     });
-    
+
     document.querySelectorAll('.delete-notification-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
             if (!confirm('Haqiqatan ham bu xabarni o\'chirmoqchimisiz?')) return;
             try {
                 const response = await API.delete(`/notifications/${id}`);
-                if (response.success) {
-                    showSuccess('Xabar o\'chirildi!');
-                    loadNotifications();
-                } else {
-                    showError(response.message || 'Xatolik yuz berdi!');
-                }
-            } catch (error) {
-                console.error('❌ Xatolik:', error);
-                showError('Xabarni o\'chirishda xatolik!');
-            }
+                if (response.success) { showSuccess('Xabar o\'chirildi!'); loadNotifications(); }
+                else showError(response.message || 'Xatolik!');
+            } catch (error) { showError('Xatolik!'); }
         });
     });
 }
 
 // ============================================================
-// PROFILNI RENDER QILISH
+// PROFIL RENDER
 // ============================================================
 function renderProfile(admin) {
-    console.log('🎨 Profil render qilinmoqda:', admin);
-    
     const nameEl = document.getElementById('profileName');
     const emailEl = document.getElementById('profileEmail');
     const phoneEl = document.getElementById('profilePhone');
     const initialEl = document.getElementById('profileInitial');
-    
     if (nameEl) nameEl.textContent = admin.fullName || '-';
     if (emailEl) emailEl.textContent = admin.email || '-';
     if (phoneEl) phoneEl.textContent = admin.phone || '-';
-    if (initialEl) {
-        const initial = (admin.fullName || 'A').charAt(0).toUpperCase();
-        initialEl.textContent = initial;
-    }
-    
-    // STATUS
+    if (initialEl) initialEl.textContent = (admin.fullName || 'A').charAt(0).toUpperCase();
+
     const statusEl = document.getElementById('profileStatus');
     if (statusEl) {
-        if (admin.status === 'active') {
-            statusEl.textContent = '✅ Faol';
-            statusEl.className = 'status-badge active';
-        } else if (admin.status === 'blocked') {
-            statusEl.textContent = '⛔ Bloklangan';
-            statusEl.className = 'status-badge blocked';
-        } else {
-            statusEl.textContent = '❌ Faol emas';
-            statusEl.className = 'status-badge inactive';
-        }
+        if (admin.status === 'active') { statusEl.textContent = '✅ Faol'; statusEl.className = 'status-badge active'; }
+        else if (admin.status === 'blocked') { statusEl.textContent = '⛔ Bloklangan'; statusEl.className = 'status-badge blocked'; }
+        else { statusEl.textContent = '❌ Faol emas'; statusEl.className = 'status-badge inactive'; }
     }
-    
-    // SUBSCRIPTION
+
     const sub = admin.subscription || {};
     const subType = sub.type || 'none';
     const subStatus = sub.status || 'inactive';
-    
+
     const subLabelEl = document.getElementById('profileSubscription');
     if (subLabelEl) {
         if (admin.status === 'active' && subType !== 'none' && subStatus === 'active') {
-            const typeMap = {
-                'monthly': 'Oylik (299,999 so\'m)',
-                '6months': '6 oylik (1,899,999 so\'m)',
-                'yearly': 'Yillik (3,599,999 so\'m)',
-                'custom': 'Custom obuna'
-            };
+            const typeMap = { 'monthly': 'Oylik (299,999 so\'m)', '6months': '6 oylik (1,899,999 so\'m)', 'yearly': 'Yillik (3,599,999 so\'m)', 'custom': 'Custom obuna' };
             subLabelEl.textContent = '✅ ' + (typeMap[subType] || 'Faol');
             subLabelEl.className = 'subscription-badge monthly';
         } else {
@@ -354,88 +221,57 @@ function renderProfile(admin) {
             subLabelEl.className = 'subscription-badge inactive';
         }
     }
-    
-    // Obuna turi
+
     const subTypeEl = document.getElementById('profileSubType');
     if (subTypeEl) {
-        const typeMap = {
-            'monthly': 'Oylik (299,999 so\'m)',
-            '6months': '6 oylik (1,899,999 so\'m)',
-            'yearly': 'Yillik (3,599,999 so\'m)',
-            'custom': 'Custom obuna',
-            'none': 'Yo\'q'
-        };
+        const typeMap = { 'monthly': 'Oylik (299,999 so\'m)', '6months': '6 oylik (1,899,999 so\'m)', 'yearly': 'Yillik (3,599,999 so\'m)', 'custom': 'Custom obuna', 'none': 'Yo\'q' };
         subTypeEl.textContent = typeMap[subType] || 'Yo\'q';
     }
-    
-    // Obuna muddati
+
     const subEndEl = document.getElementById('profileSubEnd');
     if (subEndEl) {
         if (sub.endDate && subStatus === 'active') {
             const endDate = new Date(sub.endDate);
-            const now = new Date();
-            const diff = endDate - now;
+            const diff = endDate - new Date();
             if (diff > 0) {
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-                const formattedDate = formatDate(endDate);
-                subEndEl.textContent = `${formattedDate} (${days} kun ${hours}s ${minutes}m ${seconds}s qoldi)`;
-            } else {
-                subEndEl.textContent = '⚠️ Vaqt tugagan!';
-            }
-        } else {
-            subEndEl.textContent = '-';
-        }
+                subEndEl.textContent = `${formatDate(endDate)} (${days} kun ${hours}s ${minutes}m ${seconds}s qoldi)`;
+            } else { subEndEl.textContent = '⚠️ Vaqt tugagan!'; }
+        } else { subEndEl.textContent = '-'; }
     }
-    
-    // To'lov
+
     const amountEl = document.getElementById('profileSubAmount');
-    if (amountEl) {
-        const amount = sub.amount || 0;
-        amountEl.textContent = amount.toLocaleString() + ' so\'m';
-    }
-    
-    // To'lov tarixi
-    const history = admin.paymentHistory || admin.subscriptionHistory || [];
-    renderSubscriptionHistory(history);
+    if (amountEl) amountEl.textContent = (sub.amount || 0).toLocaleString() + ' so\'m';
+
+    renderSubscriptionHistory(admin.paymentHistory || admin.subscriptionHistory || []);
 }
 
 function renderSubscriptionHistory(history) {
     const historyList = document.getElementById('historyList');
     if (!historyList) return;
-    if (!history || history.length === 0) {
-        historyList.innerHTML = '<p class="text-muted">To\'lov tarixi yo\'q</p>';
-        return;
-    }
+    if (!history || history.length === 0) { historyList.innerHTML = '<p class="text-muted">To\'lov tarixi yo\'q</p>'; return; }
     historyList.innerHTML = history.slice(-10).reverse().map((item, index) => {
         const startDate = item.startDate ? formatDate(new Date(item.startDate)) : '-';
         const endDate = item.endDate ? formatDate(new Date(item.endDate)) : '-';
-        const typeLabel = {
-            'monthly': 'Oylik',
-            '6months': '6 oylik',
-            'yearly': 'Yillik',
-            'custom': 'Custom',
-            'none': 'Bekor qilindi'
-        }[item.type] || item.type;
+        const typeLabel = { 'monthly': 'Oylik', '6months': '6 oylik', 'yearly': 'Yillik', 'custom': 'Custom', 'none': 'Bekor qilindi' }[item.type] || item.type;
         const statusClass = item.status === 'active' ? 'active' : 'inactive';
         const statusText = item.status === 'active' ? '✅ Faol' : '❌ Tugagan';
-        const amount = item.amount || 0;
         const note = item.note ? `<p class="history-dates"><i class="fas fa-sticky-note"></i> ${item.note}</p>` : '';
         return `
             <div class="history-item">
                 <div class="history-left">
                     <span class="history-number">#${index + 1}</span>
                     <div class="history-details">
-                        <p class="history-type">${typeLabel} - ${amount.toLocaleString()} so'm</p>
+                        <p class="history-type">${typeLabel} - ${(item.amount || 0).toLocaleString()} so'm</p>
                         <p class="history-dates"><i class="fas fa-calendar"></i> ${startDate} → ${endDate}</p>
                         ${note}
                     </div>
                 </div>
                 <span class="status-badge ${statusClass}">${statusText}</span>
-            </div>
-        `;
+            </div>`;
     }).join('');
 }
 
@@ -448,36 +284,11 @@ function initEditModal() {
     const closeEditBtn = document.getElementById('closeEditModal');
     const cancelEditBtn = document.getElementById('cancelEditModal');
     const saveEditBtn = document.getElementById('saveEditModal');
-    
-    if (editBtn) {
-        editBtn.addEventListener('click', () => { if (currentAdmin) openEditModal(); });
-    }
-    if (closeEditBtn) {
-        closeEditBtn.addEventListener('click', () => { editModal.classList.remove('active'); document.body.style.overflow = ''; });
-    }
-    if (cancelEditBtn) {
-        cancelEditBtn.addEventListener('click', () => { editModal.classList.remove('active'); document.body.style.overflow = ''; });
-    }
-    if (editModal) {
-        editModal.addEventListener('click', (e) => {
-            if (e.target === editModal) {
-                editModal.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        });
-    }
-    if (saveEditBtn) {
-        saveEditBtn.addEventListener('click', async () => { await saveEdit(); });
-    }
-    const editForm = document.getElementById('editForm');
-    if (editForm) {
-        editForm.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                if (saveEditBtn) saveEditBtn.click();
-            }
-        });
-    }
+    if (editBtn) editBtn.addEventListener('click', () => { if (currentAdmin) openEditModal(); });
+    if (closeEditBtn) closeEditBtn.addEventListener('click', () => { editModal.classList.remove('active'); document.body.style.overflow = ''; });
+    if (cancelEditBtn) cancelEditBtn.addEventListener('click', () => { editModal.classList.remove('active'); document.body.style.overflow = ''; });
+    if (editModal) editModal.addEventListener('click', (e) => { if (e.target === editModal) { editModal.classList.remove('active'); document.body.style.overflow = ''; } });
+    if (saveEditBtn) saveEditBtn.addEventListener('click', async () => { await saveEdit(); });
 }
 
 function openEditModal() {
@@ -487,14 +298,8 @@ function openEditModal() {
     document.getElementById('editPhone').value = currentAdmin.phone || '';
     document.getElementById('editStatus').value = currentAdmin.status || 'active';
     document.getElementById('editPassword').value = '';
-    const currentPasswordDisplay = document.getElementById('currentPasswordDisplay');
-    if (currentPasswordDisplay) {
-        currentPasswordDisplay.value = '••••••••••';
-        currentPasswordDisplay.type = 'password';
-        currentPasswordDisplay.style.fontSize = '1.2rem';
-        currentPasswordDisplay.style.letterSpacing = '2px';
-        currentPasswordDisplay.dataset.oldPassword = currentAdmin.password || '';
-    }
+    const cp = document.getElementById('currentPasswordDisplay');
+    if (cp) { cp.value = '••••••••••'; cp.type = 'password'; cp.dataset.oldPassword = currentAdmin.password || ''; }
     document.getElementById('editModal').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
@@ -509,30 +314,21 @@ async function saveEdit() {
     if (!email.includes('@')) { alert('Email noto\'g\'ri formatda!'); return; }
     try {
         const updateData = { fullName, email, phone, status: status === 'none' ? 'inactive' : status };
-        if (newPassword && newPassword.length >= 6) {
-            updateData.password = newPassword;
-        } else if (newPassword && newPassword.length < 6) {
-            alert('Yangi parol kamida 6 ta belgi bo\'lishi kerak!');
-            return;
-        }
-        if (status === 'none') {
-            updateData.subscription = { type: 'none', status: 'inactive', startDate: null, endDate: null, amount: 0 };
-        }
+        if (newPassword && newPassword.length >= 6) updateData.password = newPassword;
+        else if (newPassword && newPassword.length < 6) { alert('Yangi parol kamida 6 ta belgi!'); return; }
+        if (status === 'none') updateData.subscription = { type: 'none', status: 'inactive', startDate: null, endDate: null, amount: 0 };
         const response = await API.put(`/admins/${adminId}`, updateData);
         if (response.success) {
             alert('✅ Admin muvaffaqiyatli yangilandi!');
             document.getElementById('editModal').classList.remove('active');
             document.body.style.overflow = '';
-            document.getElementById('editPassword').value = '';
             loadProfile();
         }
-    } catch (error) {
-        alert('❌ Xatolik: ' + error.message);
-    }
+    } catch (error) { alert('❌ Xatolik: ' + error.message); }
 }
 
 // ============================================================
-// ⭐ TO'LOV QO'SHISH MODAL
+// ⭐ TO'LOV QO'SHISH MODAL — BOSHLANISH SANASI + CUSTOM DA NARX
 // ============================================================
 function initPaymentModal() {
     const modal = document.getElementById('paymentModal');
@@ -542,7 +338,16 @@ function initPaymentModal() {
     const saveBtn = document.getElementById('savePaymentModal');
     const paymentType = document.getElementById('paymentType');
     const customGroup = document.getElementById('customDurationGroup');
+    const amountGroup = document.getElementById('paymentAmountGroup');
     if (!modal || !addBtn) return;
+
+    function toggleAmountAndCustom() {
+        const val = paymentType.value;
+        // ⭐ To'lov miqdori faqat custom da ko'rinadi
+        if (amountGroup) amountGroup.style.display = val === 'custom' ? 'block' : 'none';
+        if (customGroup) customGroup.style.display = val === 'custom' ? 'block' : 'none';
+    }
+
     addBtn.addEventListener('click', () => {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -555,13 +360,20 @@ function initPaymentModal() {
         document.getElementById('paymentEndDate').value = '';
         document.getElementById('paymentEndTime').value = '';
         document.getElementById('paymentNote').value = '';
-        if (customGroup) customGroup.style.display = 'none';
+        // Boshlanish sanasini hozirgi vaqtga o'rnat
+        const now = new Date();
+        const startInput = document.getElementById('paymentStartDate');
+        if (startInput) {
+            startInput.value = now.getFullYear() + '-' +
+                String(now.getMonth()+1).padStart(2,'0') + '-' +
+                String(now.getDate()).padStart(2,'0') + 'T' +
+                String(now.getHours()).padStart(2,'0') + ':' +
+                String(now.getMinutes()).padStart(2,'0');
+        }
+        toggleAmountAndCustom();
     });
-    if (paymentType) {
-        paymentType.addEventListener('change', () => {
-            if (customGroup) customGroup.style.display = paymentType.value === 'custom' ? 'block' : 'none';
-        });
-    }
+
+    if (paymentType) paymentType.addEventListener('change', toggleAmountAndCustom);
     if (closeBtn) closeBtn.addEventListener('click', () => { modal.classList.remove('active'); document.body.style.overflow = ''; });
     if (cancelBtn) cancelBtn.addEventListener('click', () => { modal.classList.remove('active'); document.body.style.overflow = ''; });
     if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) { modal.classList.remove('active'); document.body.style.overflow = ''; } });
@@ -577,44 +389,102 @@ async function savePayment() {
     const customSeconds = parseInt(document.getElementById('customSeconds').value) || 0;
     const endDate = document.getElementById('paymentEndDate').value;
     const endTime = document.getElementById('paymentEndTime').value;
+    const startDateInput = document.getElementById('paymentStartDate');
     const note = document.getElementById('paymentNote').value.trim();
-    if (!amount || amount === '') { alert('❌ To\'lov miqdorini kiriting!'); document.getElementById('paymentAmount').focus(); return; }
-    const amountNumber = parseInt(amount);
-    if (isNaN(amountNumber) || amountNumber <= 0) { alert('❌ To\'lov miqdori 0 dan katta bo\'lishi kerak!'); document.getElementById('paymentAmount').focus(); return; }
+
+    // ⭐ Faqat custom da narx tekshiriladi
     if (paymentType === 'custom') {
+        if (!amount || amount === '') { alert('❌ To\'lov miqdorini kiriting!'); document.getElementById('paymentAmount').focus(); return; }
+        const amountNumber = parseInt(amount);
+        if (isNaN(amountNumber) || amountNumber <= 0) { alert('❌ To\'lov miqdori 0 dan katta bo\'lishi kerak!'); return; }
         if (customDays === 0 && customHours === 0 && customMinutes === 0 && customSeconds === 0) { alert('❌ Hech qanday vaqt belgilanmadi!'); return; }
     }
+
     let customDuration = null;
     let endDateTime = null;
-    if (paymentType === 'custom') { customDuration = { days: customDays, hours: customHours, minutes: customMinutes, seconds: customSeconds }; }
+    let startDateTime = null;
+
+    if (paymentType === 'custom') customDuration = { days: customDays, hours: customHours, minutes: customMinutes, seconds: customSeconds };
     if (endDate && endTime) {
         endDateTime = new Date(`${endDate}T${endTime}`);
         if (isNaN(endDateTime.getTime())) { alert('❌ Noto\'g\'ri vaqt formati!'); return; }
     }
+    if (startDateInput && startDateInput.value) {
+        startDateTime = new Date(startDateInput.value);
+        if (isNaN(startDateTime.getTime())) startDateTime = null;
+    }
+
+    // Narxni avtomatik qo'yish (custom bo'lmasa)
+    let amountNumber = 0;
+    if (paymentType === 'custom') {
+        amountNumber = parseInt(amount) || 0;
+    } else {
+        const priceMap = { 'monthly': 299999, '6months': 1899999, 'yearly': 3599999 };
+        amountNumber = priceMap[paymentType] || 0;
+    }
+
     try {
         const response = await API.post(`/admins/${adminId}/payment`, {
-            amount: amountNumber, subscriptionType: paymentType, customDuration: customDuration,
-            endDate: endDateTime ? endDateTime.toISOString() : null, note: note || 'Admin tomonidan qo\'shildi', startDate: new Date().toISOString()
+            amount: amountNumber,
+            subscriptionType: paymentType,
+            customDuration,
+            endDate: endDateTime ? endDateTime.toISOString() : null,
+            startDate: startDateTime ? startDateTime.toISOString() : null,
+            note: note || 'Admin tomonidan qo\'shildi'
         });
         if (response.success) {
             const sub = response.data.subscription || {};
-            let msg = '✅ To\'lov muvaffaqiyatli qo\'shildi va admin faollashtirildi!\n';
-            if (sub.endDate) {
-                const end = new Date(sub.endDate);
-                msg += '📅 Tugash vaqti: ' + formatDate(end);
-            }
+            let msg = '✅ To\'lov muvaffaqiyatli qo\'shildi!\n';
+            if (sub.endDate) msg += '📅 Tugash vaqti: ' + formatDate(new Date(sub.endDate));
             alert(msg);
             document.getElementById('paymentModal').classList.remove('active');
             document.body.style.overflow = '';
             loadProfile();
         }
-    } catch (error) {
-        alert('❌ Xatolik: ' + error.message);
-    }
+    } catch (error) { alert('❌ Xatolik: ' + error.message); }
 }
 
 // ============================================================
-// ⭐ XABAR YUBORISH MODAL
+// ⭐ OBUNA SOTISH MODAL (prompt o'rniga modal)
+// ============================================================
+function initSubscriptionModal() {
+    const subscriptionBtn = document.getElementById('subscriptionBtn');
+    if (!subscriptionBtn) return;
+
+    subscriptionBtn.addEventListener('click', () => {
+        // paymentModal ni ishlatamiz — bir xil
+        const modal = document.getElementById('paymentModal');
+        if (!modal) return;
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        document.getElementById('paymentAmount').value = '';
+        document.getElementById('paymentType').value = 'monthly';
+        document.getElementById('customDays').value = '0';
+        document.getElementById('customHours').value = '0';
+        document.getElementById('customMinutes').value = '0';
+        document.getElementById('customSeconds').value = '0';
+        document.getElementById('paymentEndDate').value = '';
+        document.getElementById('paymentEndTime').value = '';
+        document.getElementById('paymentNote').value = '';
+        const now = new Date();
+        const startInput = document.getElementById('paymentStartDate');
+        if (startInput) {
+            startInput.value = now.getFullYear() + '-' +
+                String(now.getMonth()+1).padStart(2,'0') + '-' +
+                String(now.getDate()).padStart(2,'0') + 'T' +
+                String(now.getHours()).padStart(2,'0') + ':' +
+                String(now.getMinutes()).padStart(2,'0');
+        }
+        // Custom group va amount ni toggle qil
+        const amountGroup = document.getElementById('paymentAmountGroup');
+        const customGroup = document.getElementById('customDurationGroup');
+        if (amountGroup) amountGroup.style.display = 'none';
+        if (customGroup) customGroup.style.display = 'none';
+    });
+}
+
+// ============================================================
+// XABAR YUBORISH MODAL
 // ============================================================
 function initNotificationModal() {
     const modal = document.getElementById('notificationModal');
@@ -624,14 +494,11 @@ function initNotificationModal() {
     const titleInput = document.getElementById('notificationTitle');
     const messageInput = document.getElementById('notificationMessage');
     const resultDiv = document.getElementById('notificationResult');
-    
     if (!modal || !sendBtn) return;
-    
     const profileSendBtn = document.getElementById('sendNotificationBtn');
     if (profileSendBtn) {
         profileSendBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
             if (titleInput) titleInput.value = '';
@@ -641,126 +508,48 @@ function initNotificationModal() {
             if (titleInput) titleInput.focus();
         });
     }
-    
-    if (closeBtn) closeBtn.addEventListener('click', function() { 
-        modal.classList.remove('active'); 
-        document.body.style.overflow = ''; 
-        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } 
-    });
-    
-    if (cancelBtn) cancelBtn.addEventListener('click', function() { 
-        modal.classList.remove('active'); 
-        document.body.style.overflow = ''; 
-        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } 
-    });
-    
-    if (modal) modal.addEventListener('click', function(e) { 
-        if (e.target === modal) { 
-            modal.classList.remove('active'); 
-            document.body.style.overflow = ''; 
-            if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } 
-        } 
-    });
-    
-    document.addEventListener('keydown', function(e) { 
-        if (e.key === 'Escape' && modal && modal.classList.contains('active')) { 
-            modal.classList.remove('active'); 
-            document.body.style.overflow = ''; 
-            if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } 
-        } 
-    });
-    
-    if (messageInput) messageInput.addEventListener('keydown', function(e) { 
-        if (e.key === 'Enter' && e.ctrlKey) { 
-            e.preventDefault(); 
-            sendNotification(); 
-        } 
-    });
-    
-    if (sendBtn) sendBtn.addEventListener('click', function(e) { 
-        e.preventDefault(); 
-        e.stopPropagation(); 
-        sendNotification(); 
-    });
+    if (closeBtn) closeBtn.addEventListener('click', () => { modal.classList.remove('active'); document.body.style.overflow = ''; });
+    if (cancelBtn) cancelBtn.addEventListener('click', () => { modal.classList.remove('active'); document.body.style.overflow = ''; });
+    if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) { modal.classList.remove('active'); document.body.style.overflow = ''; } });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('active')) { modal.classList.remove('active'); document.body.style.overflow = ''; } });
+    if (sendBtn) sendBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); sendNotification(); });
 }
 
 async function sendNotification() {
     const titleInput = document.getElementById('notificationTitle');
     const messageInput = document.getElementById('notificationMessage');
     const sendBtn = document.getElementById('sendNotificationSubmitBtn');
-    const resultDiv = document.getElementById('notificationResult');
     const title = titleInput ? titleInput.value.trim() : '';
     const message = messageInput ? messageInput.value.trim() : '';
-    
-    console.log('🔍 Title:', title);
-    console.log('🔍 Message:', message);
-    console.log('🔍 Admin ID:', adminId);
-    
-    if (!title) { 
-        showNotificationResult('❌ Iltimos, sarlavhani kiriting!', 'error'); 
-        if (titleInput) titleInput.focus(); 
-        return; 
-    }
-    
-    if (!message) { 
-        showNotificationResult('❌ Iltimos, xabar matnini kiriting!', 'error'); 
-        if (messageInput) messageInput.focus(); 
-        return; 
-    }
-    
-    if (!adminId) { 
-        showNotificationResult('❌ Admin ID topilmadi!', 'error'); 
-        return; 
-    }
-    
-    if (sendBtn) { 
-        sendBtn.disabled = true; 
-        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...'; 
-    }
-    
+    if (!title) { showNotificationResult('❌ Iltimos, sarlavhani kiriting!', 'error'); if (titleInput) titleInput.focus(); return; }
+    if (!message) { showNotificationResult('❌ Iltimos, xabar matnini kiriting!', 'error'); if (messageInput) messageInput.focus(); return; }
+    if (!adminId) { showNotificationResult('❌ Admin ID topilmadi!', 'error'); return; }
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...'; }
     showNotificationResult('⏳ Xabar yuborilmoqda...', 'info');
-    
     try {
         const token = localStorage.getItem('adminToken');
-        const API_URL = 'https://admin-main-backend.onrender.com/api/notifications';
-        const response = await fetch(API_URL, {
+        const response = await fetch('https://admin-main-backend.onrender.com/api/notifications', {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json', 
-                'Authorization': `Bearer ${token}` 
-            },
-            body: JSON.stringify({ 
-                title: title, 
-                message: message, 
-                type: 'info', 
-                recipientId: adminId, 
-                recipientRole: 'admin_customer', 
-                expiresInDays: 30 
-            })
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ title, message, type: 'info', recipientId: adminId, recipientRole: 'admin_customer', expiresInDays: 30 })
         });
-        
         const data = await response.json();
-        console.log('📨 API javobi:', data);
-        
         if (response.ok && data.success) {
             showNotificationResult('✅ Xabar muvaffaqiyatli yuborildi!', 'success');
             if (titleInput) titleInput.value = '';
             if (messageInput) messageInput.value = '';
-            
             loadNotifications();
-            
             setTimeout(() => {
                 const modal = document.getElementById('notificationModal');
                 if (modal) { modal.classList.remove('active'); document.body.style.overflow = ''; }
                 if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; }
             }, 2000);
         } else {
-            showNotificationResult('❌ Xabar yuborishda xatolik: ' + (data.message || 'Noma\'lum xatolik'), 'error');
+            showNotificationResult('❌ Xatolik: ' + (data.message || 'Noma\'lum xatolik'), 'error');
             if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; }
         }
     } catch (error) {
-        console.error('❌ Xabar yuborish xatosi:', error);
-        showNotificationResult('❌ Xabar yuborishda xatolik: ' + (error.message || 'Server xatosi!'), 'error');
+        showNotificationResult('❌ Xatolik: ' + error.message, 'error');
         if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; }
     }
 }
@@ -771,15 +560,11 @@ function showNotificationResult(msg, type) {
     resultDiv.textContent = msg;
     resultDiv.className = 'form-message ' + type;
     resultDiv.style.display = 'block';
-    setTimeout(() => { 
-        if (type !== 'success') { 
-            resultDiv.style.display = 'none'; 
-        } 
-    }, 6000);
+    setTimeout(() => { if (type !== 'success') resultDiv.style.display = 'none'; }, 6000);
 }
 
 // ============================================================
-// ⭐ BAN / UNBAN
+// BAN
 // ============================================================
 async function banAdmin(id) {
     const reason = prompt('Bloklash sababini yozing:');
@@ -787,16 +572,11 @@ async function banAdmin(id) {
     try {
         const result = await API.post(`/admins/${id}/ban`, { reason: reason?.trim() || 'Admin panelda cheklov' });
         if (result.success) {
-            const msg = result.data?.formattedBannedAt 
-                ? `✅ Admin Customer bloklandi!\n📌 Sabab: ${reason || 'Admin panelda cheklov'}\n📅 Bloklangan vaqt: ${result.data.formattedBannedAt}`
-                : `✅ Admin Customer bloklandi!\n📌 Sabab: ${reason || 'Admin panelda cheklov'}`;
-            alert(msg);
+            alert(`✅ Admin Customer bloklandi!\n📌 Sabab: ${reason || 'Admin panelda cheklov'}\n📅 ${result.data?.formattedBannedAt || ''}`);
             loadProfile();
             loadNotifications();
         }
-    } catch (error) {
-        alert('❌ Xatolik: ' + error.message);
-    }
+    } catch (error) { alert('❌ Xatolik: ' + error.message); }
 }
 
 // ============================================================
@@ -810,83 +590,51 @@ function initUnbanModal() {
     const saveBtn = document.getElementById('saveUnbanModal');
     const paymentType = document.getElementById('unbanPaymentType');
     const customGroup = document.getElementById('unbanCustomDurationGroup');
-
+    const amountGroup = document.getElementById('unbanAmountGroup');
     if (!modal || !unbanBtn) return;
 
-    // Unban tugmasiga bosganda modal ochiladi
     unbanBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
+        e.preventDefault(); e.stopPropagation();
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
-        
         document.getElementById('unbanPaymentType').value = 'monthly';
         document.getElementById('unbanCustomDays').value = '0';
         document.getElementById('unbanCustomHours').value = '0';
         document.getElementById('unbanCustomMinutes').value = '0';
         document.getElementById('unbanCustomSeconds').value = '0';
-        document.getElementById('unbanStartDate').value = '';
         document.getElementById('unbanEndDate').value = '';
         document.getElementById('unbanAmount').value = '';
         if (customGroup) customGroup.style.display = 'none';
-        
+        if (amountGroup) amountGroup.style.display = 'none';
         const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        document.getElementById('unbanStartDate').value = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+        const startInput = document.getElementById('unbanStartDate');
+        if (startInput) {
+            startInput.value = now.getFullYear() + '-' +
+                String(now.getMonth()+1).padStart(2,'0') + '-' +
+                String(now.getDate()).padStart(2,'0') + 'T' +
+                String(now.getHours()).padStart(2,'0') + ':' +
+                String(now.getMinutes()).padStart(2,'0');
+        }
     });
 
     if (paymentType) {
         paymentType.addEventListener('change', function() {
-            if (customGroup) {
-                customGroup.style.display = this.value === 'custom' ? 'block' : 'none';
-            }
-            if (this.value === 'none') {
-                document.getElementById('unbanStartDate').disabled = true;
-                document.getElementById('unbanEndDate').disabled = true;
-                document.getElementById('unbanAmount').disabled = true;
-            } else {
-                document.getElementById('unbanStartDate').disabled = false;
-                document.getElementById('unbanEndDate').disabled = false;
-                document.getElementById('unbanAmount').disabled = false;
-            }
+            const val = this.value;
+            if (customGroup) customGroup.style.display = val === 'custom' ? 'block' : 'none';
+            // ⭐ To'lov miqdori faqat custom da
+            if (amountGroup) amountGroup.style.display = val === 'custom' ? 'block' : 'none';
+            const disabled = val === 'none';
+            document.getElementById('unbanStartDate').disabled = disabled;
+            document.getElementById('unbanEndDate').disabled = disabled;
         });
     }
 
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function() {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-    }
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', function() {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-    }
-    if (modal) {
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        });
-    }
-
-    if (saveBtn) {
-        saveBtn.addEventListener('click', async function() {
-            await saveUnbanWithPayment();
-        });
-    }
+    if (closeBtn) closeBtn.addEventListener('click', () => { modal.classList.remove('active'); document.body.style.overflow = ''; });
+    if (cancelBtn) cancelBtn.addEventListener('click', () => { modal.classList.remove('active'); document.body.style.overflow = ''; });
+    if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) { modal.classList.remove('active'); document.body.style.overflow = ''; } });
+    if (saveBtn) saveBtn.addEventListener('click', async () => { await saveUnbanWithPayment(); });
 }
 
-// ============================================================
-// ⭐ UNBAN + TO'LOV QO'SHISH (BIR VAQTDA)
-// ============================================================
 async function saveUnbanWithPayment() {
     const paymentType = document.getElementById('unbanPaymentType').value;
     const customDays = parseInt(document.getElementById('unbanCustomDays').value) || 0;
@@ -897,7 +645,6 @@ async function saveUnbanWithPayment() {
     const endDate = document.getElementById('unbanEndDate').value;
     const amount = document.getElementById('unbanAmount').value.trim();
 
-    // Agar paymentType 'none' bo'lsa, faqat unban qilamiz
     if (paymentType === 'none') {
         if (!confirm('Haqiqatan ham bu Admin Customerni blokdan chiqarmoqchimisiz (obunasiz)?')) return;
         try {
@@ -906,29 +653,16 @@ async function saveUnbanWithPayment() {
                 alert('✅ Admin Customer blokdan chiqarildi!');
                 document.getElementById('unbanModal').classList.remove('active');
                 document.body.style.overflow = '';
-                loadProfile();
-                loadNotifications();
-            } else {
-                alert('❌ Xatolik: ' + (result.message || 'Noma\'lum xatolik'));
-            }
-        } catch (error) {
-            alert('❌ Xatolik: ' + error.message);
-        }
+                loadProfile(); loadNotifications();
+            } else { alert('❌ Xatolik: ' + (result.message || 'Noma\'lum xatolik')); }
+        } catch (error) { alert('❌ Xatolik: ' + error.message); }
         return;
     }
 
-    // Validatsiya
     if (paymentType === 'custom') {
-        if (customDays === 0 && customHours === 0 && customMinutes === 0 && customSeconds === 0) {
-            alert('❌ Custom vaqt uchun vaqt belgilang!');
-            return;
-        }
-    }
-
-    let amountNumber = parseInt(amount);
-    if (amount && isNaN(amountNumber)) {
-        alert('❌ To\'lov miqdori noto\'g\'ri formatda!');
-        return;
+        if (customDays === 0 && customHours === 0 && customMinutes === 0 && customSeconds === 0) { alert('❌ Custom vaqt uchun vaqt belgilang!'); return; }
+        const amountNumber = parseInt(amount);
+        if (!amount || isNaN(amountNumber) || amountNumber <= 0) { alert('❌ To\'lov miqdorini kiriting!'); return; }
     }
 
     const saveBtn = document.getElementById('saveUnbanModal');
@@ -936,7 +670,6 @@ async function saveUnbanWithPayment() {
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saqlanmoqda...';
 
     try {
-        // 1. Avval Unban qilamiz
         const unbanResult = await API.post(`/admins/${adminId}/unban`);
         if (!unbanResult.success) {
             alert('❌ Blokdan chiqarishda xatolik: ' + (unbanResult.message || 'Noma\'lum xatolik'));
@@ -945,34 +678,30 @@ async function saveUnbanWithPayment() {
             return;
         }
 
-        // 2. Keyin to'lov qo'shamiz
         let customDuration = null;
-        if (paymentType === 'custom') {
-            customDuration = { days: customDays, hours: customHours, minutes: customMinutes, seconds: customSeconds };
-        }
+        if (paymentType === 'custom') customDuration = { days: customDays, hours: customHours, minutes: customMinutes, seconds: customSeconds };
 
-        const paymentData = {
-            amount: amountNumber || 0,
+        // Narxni avtomatik qo'yish
+        let amountNumber = 0;
+        if (paymentType === 'custom') amountNumber = parseInt(amount) || 0;
+        else { const priceMap = { 'monthly': 299999, '6months': 1899999, 'yearly': 3599999 }; amountNumber = priceMap[paymentType] || 0; }
+
+        const paymentResult = await API.post(`/admins/${adminId}/payment`, {
+            amount: amountNumber,
             subscriptionType: paymentType,
-            customDuration: customDuration,
+            customDuration,
             startDate: startDate || null,
             endDate: endDate || null,
             note: 'Blokdan chiqarishda qo\'shildi'
-        };
-
-        const paymentResult = await API.post(`/admins/${adminId}/payment`, paymentData);
+        });
 
         if (paymentResult.success) {
             alert('✅ Admin Customer blokdan chiqarildi va to\'lov qo\'shildi!');
             document.getElementById('unbanModal').classList.remove('active');
             document.body.style.overflow = '';
-            loadProfile();
-            loadNotifications();
-        } else {
-            alert('❌ To\'lov qo\'shishda xatolik: ' + (paymentResult.message || 'Noma\'lum xatolik'));
-        }
+            loadProfile(); loadNotifications();
+        } else { alert('❌ To\'lov qo\'shishda xatolik: ' + (paymentResult.message || 'Noma\'lum xatolik')); }
     } catch (error) {
-        console.error('❌ Xatolik:', error);
         alert('❌ Xatolik: ' + error.message);
     } finally {
         saveBtn.disabled = false;
@@ -986,30 +715,14 @@ async function saveUnbanWithPayment() {
 function initButtons() {
     const banBtn = document.getElementById('banBtn');
     if (banBtn) banBtn.addEventListener('click', () => { if (!adminId) return; banAdmin(adminId); });
-    
+
     const unbanBtn = document.getElementById('unbanBtn');
     if (unbanBtn) {
         const newUnbanBtn = unbanBtn.cloneNode(true);
         unbanBtn.parentNode.replaceChild(newUnbanBtn, unbanBtn);
         initUnbanModal();
     }
-    
-    const subscriptionBtn = document.getElementById('subscriptionBtn');
-    if (subscriptionBtn) {
-        subscriptionBtn.addEventListener('click', () => {
-            const type = prompt('Obuna turini tanlang:\n1. Oylik (30 kun)\n2. 6 oylik (180 kun)\n3. Yillik (365 kun)\n4. Custom\n5. Bekor qilish', 'monthly');
-            if (type === 'custom') {
-                const days = parseInt(prompt('Kun:', '0')) || 0;
-                const hours = parseInt(prompt('Soat:', '0')) || 0;
-                const minutes = parseInt(prompt('Daqiqa:', '0')) || 0;
-                const seconds = parseInt(prompt('Sekund:', '0')) || 0;
-                if (days === 0 && hours === 0 && minutes === 0 && seconds === 0) { alert('Hech qanday vaqt belgilanmadi!'); return; }
-                updateSubscription('custom', { days, hours, minutes, seconds });
-            } else if (type === 'monthly' || type === '6months' || type === 'yearly') { updateSubscription(type); }
-            else if (type === 'none') { updateSubscription('none'); }
-        });
-    }
-    
+
     const deleteBtn = document.getElementById('deleteBtn');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', async () => {
@@ -1022,66 +735,32 @@ function initButtons() {
     }
 }
 
-async function updateSubscription(type, customDuration = null) {
-    try {
-        const data = { subscriptionType: type };
-        if (customDuration) data.customDuration = customDuration;
-        const response = await API.put(`/admins/${adminId}/subscription`, data);
-        if (response.success) {
-            const msg = type === 'monthly' ? 'Oylik' : type === '6months' ? '6 oylik' : type === 'yearly' ? 'Yillik' : type === 'custom' ? 'Custom' : 'Bekor qilindi';
-            alert('✅ Obuna muvaffaqiyatli ' + msg + '!');
-            loadProfile();
-        }
-    } catch (error) { alert('❌ Xatolik: ' + error.message); }
-}
-
 function showError(message) {
-    console.error('⚠️ Xatolik:', message);
     const container = document.querySelector('.profile-container');
     if (container) {
         container.innerHTML = `
-            <div class="error-card" style="text-align: center; padding: 40px 20px;">
-                <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: var(--color-danger); margin-bottom: 16px;"></i>
-                <h3 style="color: var(--text-primary); margin-bottom: 8px;">Xatolik yuz berdi</h3>
-                <p style="color: var(--text-muted);">${message}</p>
-                <button onclick="window.location.href='admins.html'" class="btn-primary" style="margin-top: 16px; display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px;">
+            <div style="text-align:center;padding:40px 20px;">
+                <i class="fas fa-exclamation-circle" style="font-size:3rem;color:var(--color-danger);margin-bottom:16px;"></i>
+                <h3 style="color:var(--text-primary);margin-bottom:8px;">Xatolik yuz berdi</h3>
+                <p style="color:var(--text-muted);">${message}</p>
+                <button onclick="window.location.href='admins.html'" class="btn-primary" style="margin-top:16px;display:inline-flex;align-items:center;gap:8px;padding:12px 24px;">
                     <i class="fas fa-arrow-left"></i> Orqaga
                 </button>
-            </div>
-        `;
+            </div>`;
     }
 }
 
 function showSuccess(message) {
     const div = document.createElement('div');
-    div.style.cssText = `
-        position: fixed; top: 20px; right: 20px; z-index: 9999;
-        padding: 14px 18px; background: #ecfdf5;
-        border: 1px solid #a7f3d0; border-radius: 10px;
-        color: #065f46; max-width: 400px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        display: flex; align-items: center; gap: 10px;
-        font-size: 0.85rem;
-    `;
-    div.innerHTML = `
-        <i class="fas fa-check-circle"></i>
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()" style="margin-left: auto; background: none; border: none; color: #065f46; cursor: pointer; font-size: 1.1rem;">×</button>
-    `;
+    div.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;padding:14px 18px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;color:#065f46;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.1);display:flex;align-items:center;gap:10px;font-size:0.85rem;';
+    div.innerHTML = `<i class="fas fa-check-circle"></i><span>${message}</span><button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;color:#065f46;cursor:pointer;font-size:1.1rem;">×</button>`;
     document.body.appendChild(div);
     setTimeout(() => div.remove(), 3000);
 }
 
-// ⭐ CLEANUP
 window.addEventListener('beforeunload', function() {
-    if (countdownInterval) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-    }
-    if (notificationRefreshInterval) {
-        clearInterval(notificationRefreshInterval);
-        notificationRefreshInterval = null;
-    }
+    if (countdownInterval) clearInterval(countdownInterval);
+    if (notificationRefreshInterval) clearInterval(notificationRefreshInterval);
 });
 
 console.log('✅ admin-profile.js yuklandi');

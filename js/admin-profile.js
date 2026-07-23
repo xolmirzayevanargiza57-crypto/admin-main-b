@@ -532,7 +532,7 @@ async function saveEdit() {
 }
 
 // ============================================================
-// ⭐ TO'LOV QO'SHISH MODAL
+// ⭐ TO'LOV QO'SHISH MODAL (TUZATILGAN)
 // ============================================================
 function initPaymentModal() {
     const modal = document.getElementById('paymentModal');
@@ -549,6 +549,8 @@ function initPaymentModal() {
     addBtn.addEventListener('click', () => {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
+        
+        // ⭐ DEFAULT QIYMATLAR
         document.getElementById('paymentType').value = 'monthly';
         document.getElementById('paymentAmount').value = '';
         document.getElementById('paymentCustomDays').value = '0';
@@ -558,9 +560,12 @@ function initPaymentModal() {
         document.getElementById('paymentStartDate').value = '';
         document.getElementById('paymentEndDate').value = '';
         document.getElementById('paymentNote').value = '';
+        
+        // ⭐ Custom ga tegishli maydonlarni yashirish
         if (amountGroup) amountGroup.style.display = 'none';
         if (customGroup) customGroup.style.display = 'none';
         
+        // ⭐ Hozirgi vaqtni boshlanish sanasiga qo'yish
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -570,17 +575,58 @@ function initPaymentModal() {
         document.getElementById('paymentStartDate').value = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
     });
     
+    // ⭐ Payment type o'zgarganda
     if (paymentType) {
         paymentType.addEventListener('change', function() {
-            // ⭐ Amount faqat custom uchun
+            const isCustom = this.value === 'custom';
+            
+            // ⭐ To'lov miqdori — faqat custom uchun
             if (amountGroup) {
-                amountGroup.style.display = this.value === 'custom' ? 'block' : 'none';
+                amountGroup.style.display = isCustom ? 'block' : 'none';
             }
+            
+            // ⭐ Vaqtni belgilash — faqat custom uchun
             if (customGroup) {
-                customGroup.style.display = this.value === 'custom' ? 'block' : 'none';
+                customGroup.style.display = isCustom ? 'block' : 'none';
             }
+            
+            // ⭐ Custom bo'lmasa, vaqt maydonlarini tozalash
+            if (!isCustom) {
+                document.getElementById('paymentCustomDays').value = '0';
+                document.getElementById('paymentCustomHours').value = '0';
+                document.getElementById('paymentCustomMinutes').value = '0';
+                document.getElementById('paymentCustomSeconds').value = '0';
+                document.getElementById('paymentAmount').value = '';
+            }
+            
+            // ⭐ Tugash sanasini avtomatik hisoblash
+            calculatePaymentEndDate();
         });
     }
+    
+    // ⭐ Boshlanish sanasi o'zgarganda tugash sanasini hisoblash
+    const startDateInput = document.getElementById('paymentStartDate');
+    if (startDateInput) {
+        startDateInput.addEventListener('change', function() {
+            calculatePaymentEndDate();
+        });
+        startDateInput.addEventListener('input', function() {
+            calculatePaymentEndDate();
+        });
+    }
+    
+    // ⭐ Custom vaqt o'zgarganda tugash sanasini hisoblash
+    ['paymentCustomDays', 'paymentCustomHours', 'paymentCustomMinutes', 'paymentCustomSeconds'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', function() {
+                calculatePaymentEndDate();
+            });
+            el.addEventListener('input', function() {
+                calculatePaymentEndDate();
+            });
+        }
+    });
     
     if (closeBtn) closeBtn.addEventListener('click', () => { modal.classList.remove('active'); document.body.style.overflow = ''; });
     if (cancelBtn) cancelBtn.addEventListener('click', () => { modal.classList.remove('active'); document.body.style.overflow = ''; });
@@ -588,6 +634,71 @@ function initPaymentModal() {
     if (saveBtn) saveBtn.addEventListener('click', async () => { await savePayment(); });
 }
 
+// ============================================================
+// ⭐ TO'LOV TUGASH SANASINI HISOBLASH (REAL-TIME)
+// ============================================================
+function calculatePaymentEndDate() {
+    const paymentType = document.getElementById('paymentType').value;
+    const startDate = document.getElementById('paymentStartDate').value;
+    const endDateInput = document.getElementById('paymentEndDate');
+    
+    if (!startDate) {
+        endDateInput.value = '';
+        return;
+    }
+    
+    const start = new Date(startDate);
+    if (isNaN(start.getTime())) {
+        endDateInput.value = '';
+        return;
+    }
+    
+    const end = new Date(start);
+    
+    // ⭐ Custom bo'lsa, qo'lda belgilangan vaqtni qo'shamiz
+    if (paymentType === 'custom') {
+        const days = parseInt(document.getElementById('paymentCustomDays').value) || 0;
+        const hours = parseInt(document.getElementById('paymentCustomHours').value) || 0;
+        const minutes = parseInt(document.getElementById('paymentCustomMinutes').value) || 0;
+        const seconds = parseInt(document.getElementById('paymentCustomSeconds').value) || 0;
+        
+        if (days === 0 && hours === 0 && minutes === 0 && seconds === 0) {
+            endDateInput.value = '';
+            return;
+        }
+        
+        end.setDate(end.getDate() + days);
+        end.setHours(end.getHours() + hours);
+        end.setMinutes(end.getMinutes() + minutes);
+        end.setSeconds(end.getSeconds() + seconds);
+    } else {
+        // ⭐ Monthly, 6months, yearly
+        const durationMap = {
+            'monthly': 30,
+            '6months': 180,
+            'yearly': 365
+        };
+        const days = durationMap[paymentType] || 0;
+        if (days === 0) {
+            endDateInput.value = '';
+            return;
+        }
+        end.setDate(end.getDate() + days);
+    }
+    
+    // ⭐ Format: YYYY-MM-DDTHH:mm
+    const year = end.getFullYear();
+    const month = String(end.getMonth() + 1).padStart(2, '0');
+    const day = String(end.getDate()).padStart(2, '0');
+    const hours = String(end.getHours()).padStart(2, '0');
+    const minutes = String(end.getMinutes()).padStart(2, '0');
+    
+    endDateInput.value = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+}
+
+// ============================================================
+// ⭐ TO'LOVNI SAQLASH
+// ============================================================
 async function savePayment() {
     const paymentType = document.getElementById('paymentType').value;
     const amount = document.getElementById('paymentAmount').value.trim();
@@ -599,33 +710,88 @@ async function savePayment() {
     const endDate = document.getElementById('paymentEndDate').value;
     const note = document.getElementById('paymentNote').value.trim();
     
-    // ⭐ Custom bo'lsa, amount va vaqt majburiy
+    console.log('📤 To\'lov ma\'lumotlari:', { paymentType, amount, customDays, customHours, customMinutes, customSeconds, startDate, endDate, note });
+    
+    // ⭐ Custom bo'lsa, validatsiya
     if (paymentType === 'custom') {
-        if (!amount || amount === '') { alert('❌ To\'lov miqdorini kiriting!'); document.getElementById('paymentAmount').focus(); return; }
+        // To'lov miqdori majburiy
+        if (!amount || amount === '') {
+            alert('❌ Iltimos, to\'lov miqdorini kiriting!');
+            document.getElementById('paymentAmount').focus();
+            return;
+        }
         const amountNumber = parseInt(amount);
-        if (isNaN(amountNumber) || amountNumber <= 0) { alert('❌ To\'lov miqdori 0 dan katta bo\'lishi kerak!'); document.getElementById('paymentAmount').focus(); return; }
-        if (customDays === 0 && customHours === 0 && customMinutes === 0 && customSeconds === 0) { alert('❌ Custom vaqt uchun vaqt belgilang!'); return; }
+        if (isNaN(amountNumber) || amountNumber <= 0) {
+            alert('❌ To\'lov miqdori 0 dan katta bo\'lishi kerak!');
+            document.getElementById('paymentAmount').focus();
+            return;
+        }
+        
+        // Vaqt majburiy (hech bo'lmaganda bittasi 0 dan katta bo'lishi kerak)
+        if (customDays === 0 && customHours === 0 && customMinutes === 0 && customSeconds === 0) {
+            alert('❌ Iltimos, custom vaqt uchun vaqt belgilang (kun, soat, daqiqa yoki sekund)!');
+            document.getElementById('paymentCustomMinutes').focus();
+            return;
+        }
     }
     
-    let customDuration = null;
-    let endDateTime = null;
-    if (paymentType === 'custom') { 
-        customDuration = { days: customDays, hours: customHours, minutes: customMinutes, seconds: customSeconds }; 
+    // ⭐ Boshlanish sanasi majburiy (agar paymentType 'none' bo'lmasa)
+    if (paymentType !== 'none' && !startDate) {
+        alert('❌ Iltimos, boshlanish sanasini tanlang!');
+        document.getElementById('paymentStartDate').focus();
+        return;
     }
+    
+    // ⭐ Custom bo'lmasa, amount va vaqt kerak emas
+    let customDuration = null;
+    let amountNumber = 0;
+    
+    if (paymentType === 'custom') {
+        customDuration = { 
+            days: customDays, 
+            hours: customHours, 
+            minutes: customMinutes, 
+            seconds: customSeconds 
+        };
+        amountNumber = parseInt(amount) || 0;
+    } else {
+        amountNumber = 0;
+    }
+    
+    // ⭐ Tugash sanasi
+    let endDateTime = null;
     if (endDate) {
         endDateTime = new Date(endDate);
-        if (isNaN(endDateTime.getTime())) { alert('❌ Noto\'g\'ri vaqt formati!'); return; }
+        if (isNaN(endDateTime.getTime())) {
+            alert('❌ Noto\'g\'ri tugash vaqti formati!');
+            return;
+        }
     }
+    
+    // ⭐ Boshlanish sanasi
+    let startDateTime = null;
+    if (startDate) {
+        startDateTime = new Date(startDate);
+        if (isNaN(startDateTime.getTime())) {
+            alert('❌ Noto\'g\'ri boshlanish vaqti formati!');
+            return;
+        }
+    }
+    
+    const saveBtn = document.getElementById('savePaymentModal');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saqlanmoqda...';
     
     try {
         const response = await API.post(`/admins/${adminId}/payment`, {
-            amount: parseInt(amount) || 0, 
-            subscriptionType: paymentType, 
+            amount: amountNumber,
+            subscriptionType: paymentType,
             customDuration: customDuration,
-            endDate: endDateTime ? endDateTime.toISOString() : null, 
-            note: note || 'Admin tomonidan qo\'shildi', 
-            startDate: startDate || null
+            endDate: endDateTime ? endDateTime.toISOString() : null,
+            startDate: startDateTime ? startDateTime.toISOString() : null,
+            note: note || 'Admin tomonidan qo\'shildi'
         });
+        
         if (response.success) {
             const sub = response.data.subscription || {};
             let msg = '✅ To\'lov muvaffaqiyatli qo\'shildi va admin faollashtirildi!\n';
@@ -637,9 +803,15 @@ async function savePayment() {
             document.getElementById('paymentModal').classList.remove('active');
             document.body.style.overflow = '';
             loadProfile();
+        } else {
+            alert('❌ Xatolik: ' + (response.message || 'Noma\'lum xatolik'));
         }
     } catch (error) {
+        console.error('❌ Xatolik:', error);
         alert('❌ Xatolik: ' + error.message);
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fas fa-save"></i> To\'lovni qo\'shish';
     }
 }
 
@@ -675,11 +847,12 @@ function initSubscriptionModal() {
     
     if (typeSelect) {
         typeSelect.addEventListener('change', function() {
+            const isCustom = this.value === 'custom';
             if (customGroup) {
-                customGroup.style.display = this.value === 'custom' ? 'block' : 'none';
+                customGroup.style.display = isCustom ? 'block' : 'none';
             }
             if (amountGroup) {
-                amountGroup.style.display = this.value === 'custom' ? 'block' : 'none';
+                amountGroup.style.display = isCustom ? 'block' : 'none';
             }
         });
     }
@@ -703,29 +876,53 @@ async function saveSubscription() {
             alert('❌ Custom vaqt uchun vaqt belgilang!');
             return;
         }
-        if (!amount || amount === '') { alert('❌ To\'lov miqdorini kiriting!'); document.getElementById('subscriptionAmount').focus(); return; }
+        if (!amount || amount === '') { 
+            alert('❌ To\'lov miqdorini kiriting!'); 
+            document.getElementById('subscriptionAmount').focus(); 
+            return; 
+        }
         const amountNumber = parseInt(amount);
-        if (isNaN(amountNumber) || amountNumber <= 0) { alert('❌ To\'lov miqdori 0 dan katta bo\'lishi kerak!'); return; }
+        if (isNaN(amountNumber) || amountNumber <= 0) { 
+            alert('❌ To\'lov miqdori 0 dan katta bo\'lishi kerak!'); 
+            return; 
+        }
     }
+    
+    const saveBtn = document.getElementById('saveSubscriptionModal');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saqlanmoqda...';
     
     try {
         let customDuration = null;
+        let amountNumber = 0;
+        
         if (type === 'custom') {
             customDuration = { days: customDays, hours: customHours, minutes: customMinutes, seconds: customSeconds };
+            amountNumber = parseInt(amount) || 0;
         }
+        
         const response = await API.put(`/admins/${adminId}/subscription`, {
             subscriptionType: type,
             customDuration: customDuration,
-            amount: parseInt(amount) || 0
+            amount: amountNumber
         });
+        
         if (response.success) {
             const msg = type === 'monthly' ? 'Oylik' : type === '6months' ? '6 oylik' : type === 'yearly' ? 'Yillik' : type === 'custom' ? 'Custom' : 'Bekor qilindi';
             alert('✅ Obuna muvaffaqiyatli ' + msg + '!');
             document.getElementById('subscriptionModal').classList.remove('active');
             document.body.style.overflow = '';
             loadProfile();
+        } else {
+            alert('❌ Xatolik: ' + (response.message || 'Noma\'lum xatolik'));
         }
-    } catch (error) { alert('❌ Xatolik: ' + error.message); }
+    } catch (error) {
+        console.error('❌ Xatolik:', error);
+        alert('❌ Xatolik: ' + error.message);
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fas fa-save"></i> Saqlash';
+    }
 }
 
 // ============================================================
@@ -899,7 +1096,6 @@ function showNotificationResult(msg, type) {
 async function banAdmin(id) {
     if (!currentAdmin) return;
     
-    // ⭐ Agar admin allaqachon bloklangan bo'lsa
     if (currentAdmin.status === 'blocked') {
         alert('⚠️ Bu Admin Customer allaqachon bloklangan!');
         return;
@@ -942,7 +1138,6 @@ function initUnbanModal() {
         e.preventDefault();
         e.stopPropagation();
         
-        // ⭐ Agar admin bloklanmagan bo'lsa
         if (currentAdmin && currentAdmin.status !== 'blocked') {
             alert('⚠️ Bu Admin Customer bloklanmagan!');
             return;
@@ -973,11 +1168,12 @@ function initUnbanModal() {
 
     if (paymentType) {
         paymentType.addEventListener('change', function() {
+            const isCustom = this.value === 'custom';
             if (customGroup) {
-                customGroup.style.display = this.value === 'custom' ? 'block' : 'none';
+                customGroup.style.display = isCustom ? 'block' : 'none';
             }
             if (amountGroup) {
-                amountGroup.style.display = this.value === 'custom' ? 'block' : 'none';
+                amountGroup.style.display = isCustom ? 'block' : 'none';
             }
             if (this.value === 'none') {
                 document.getElementById('unbanStartDate').disabled = true;
@@ -988,6 +1184,30 @@ function initUnbanModal() {
             }
         });
     }
+
+    // ⭐ Boshlanish sanasi o'zgarganda tugash sanasini hisoblash
+    const startDateInput = document.getElementById('unbanStartDate');
+    if (startDateInput) {
+        startDateInput.addEventListener('change', function() {
+            calculateUnbanEndDate();
+        });
+        startDateInput.addEventListener('input', function() {
+            calculateUnbanEndDate();
+        });
+    }
+    
+    // ⭐ Custom vaqt o'zgarganda tugash sanasini hisoblash
+    ['unbanCustomDays', 'unbanCustomHours', 'unbanCustomMinutes', 'unbanCustomSeconds'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', function() {
+                calculateUnbanEndDate();
+            });
+            el.addEventListener('input', function() {
+                calculateUnbanEndDate();
+            });
+        }
+    });
 
     if (closeBtn) {
         closeBtn.addEventListener('click', function() {
@@ -1015,6 +1235,65 @@ function initUnbanModal() {
             await saveUnbanWithPayment();
         });
     }
+}
+
+// ============================================================
+// ⭐ UNBAN TUGASH SANASINI HISOBLASH
+// ============================================================
+function calculateUnbanEndDate() {
+    const paymentType = document.getElementById('unbanPaymentType').value;
+    const startDate = document.getElementById('unbanStartDate').value;
+    const endDateInput = document.getElementById('unbanEndDate');
+    
+    if (!startDate || paymentType === 'none') {
+        endDateInput.value = '';
+        return;
+    }
+    
+    const start = new Date(startDate);
+    if (isNaN(start.getTime())) {
+        endDateInput.value = '';
+        return;
+    }
+    
+    const end = new Date(start);
+    
+    if (paymentType === 'custom') {
+        const days = parseInt(document.getElementById('unbanCustomDays').value) || 0;
+        const hours = parseInt(document.getElementById('unbanCustomHours').value) || 0;
+        const minutes = parseInt(document.getElementById('unbanCustomMinutes').value) || 0;
+        const seconds = parseInt(document.getElementById('unbanCustomSeconds').value) || 0;
+        
+        if (days === 0 && hours === 0 && minutes === 0 && seconds === 0) {
+            endDateInput.value = '';
+            return;
+        }
+        
+        end.setDate(end.getDate() + days);
+        end.setHours(end.getHours() + hours);
+        end.setMinutes(end.getMinutes() + minutes);
+        end.setSeconds(end.getSeconds() + seconds);
+    } else {
+        const durationMap = {
+            'monthly': 30,
+            '6months': 180,
+            'yearly': 365
+        };
+        const days = durationMap[paymentType] || 0;
+        if (days === 0) {
+            endDateInput.value = '';
+            return;
+        }
+        end.setDate(end.getDate() + days);
+    }
+    
+    const year = end.getFullYear();
+    const month = String(end.getMonth() + 1).padStart(2, '0');
+    const day = String(end.getDate()).padStart(2, '0');
+    const hours = String(end.getHours()).padStart(2, '0');
+    const minutes = String(end.getMinutes()).padStart(2, '0');
+    
+    endDateInput.value = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
 }
 
 // ============================================================
@@ -1056,9 +1335,23 @@ async function saveUnbanWithPayment() {
             alert('❌ Custom vaqt uchun vaqt belgilang!');
             return;
         }
-        if (!amount || amount === '') { alert('❌ To\'lov miqdorini kiriting!'); document.getElementById('unbanAmount').focus(); return; }
+        if (!amount || amount === '') { 
+            alert('❌ To\'lov miqdorini kiriting!'); 
+            document.getElementById('unbanAmount').focus(); 
+            return; 
+        }
         const amountNumber = parseInt(amount);
-        if (isNaN(amountNumber) || amountNumber <= 0) { alert('❌ To\'lov miqdori 0 dan katta bo\'lishi kerak!'); return; }
+        if (isNaN(amountNumber) || amountNumber <= 0) { 
+            alert('❌ To\'lov miqdori 0 dan katta bo\'lishi kerak!'); 
+            return; 
+        }
+    }
+
+    // ⭐ Boshlanish sanasi majburiy
+    if (!startDate) {
+        alert('❌ Iltimos, boshlanish sanasini tanlang!');
+        document.getElementById('unbanStartDate').focus();
+        return;
     }
 
     const saveBtn = document.getElementById('saveUnbanModal');
@@ -1075,14 +1368,17 @@ async function saveUnbanWithPayment() {
             return;
         }
 
-        // ⭐ 2. Keyin to'lov qo'shamiz (agar paymentType 'none' bo'lmasa)
+        // ⭐ 2. Keyin to'lov qo'shamiz
         let customDuration = null;
+        let amountNumber = 0;
+        
         if (paymentType === 'custom') {
             customDuration = { days: customDays, hours: customHours, minutes: customMinutes, seconds: customSeconds };
+            amountNumber = parseInt(amount) || 0;
         }
 
         const paymentData = {
-            amount: parseInt(amount) || 0,
+            amount: amountNumber,
             subscriptionType: paymentType,
             customDuration: customDuration,
             startDate: startDate || null,

@@ -218,7 +218,6 @@ function renderNotifications(notifications) {
         // ⭐ O'qilgan/O'qilmagan holati
         const isRead = item.isRead;
         const readStatus = isRead ? '✅ O\'qilgan' : '🟡 O\'qilmagan';
-        const readClass = isRead ? 'read' : 'unread';
         
         const isSentByMe = item.sentBy === user?._id;
         const senderName = item.sentByName || 'Admin';
@@ -233,7 +232,7 @@ function renderNotifications(notifications) {
                            (item.recipientId === adminId || item.recipientRole === 'admin_customer');
         
         return `
-            <div class="history-item ${readClass}" style="${!item.isRead ? 'border-left: 3px solid #007aff;' : ''}">
+            <div class="history-item ${isRead ? 'read' : 'unread'}" style="${!item.isRead ? 'border-left: 3px solid #007aff;' : ''}">
                 <div class="history-left">
                     <span class="history-number">#${index + 1}</span>
                     <div class="history-details">
@@ -310,7 +309,7 @@ function renderNotifications(notifications) {
 }
 
 // ============================================================
-// PROFILNI RENDER QILISH
+// ⭐ PROFILNI RENDER QILISH
 // ============================================================
 function renderProfile(admin) {
     console.log('🎨 Profil render qilinmoqda:', admin);
@@ -328,7 +327,7 @@ function renderProfile(admin) {
         initialEl.textContent = initial;
     }
     
-    // STATUS
+    // ⭐ STATUS
     const statusEl = document.getElementById('profileStatus');
     if (statusEl) {
         if (admin.status === 'active') {
@@ -343,7 +342,7 @@ function renderProfile(admin) {
         }
     }
     
-    // SUBSCRIPTION
+    // ⭐ SUBSCRIPTION
     const sub = admin.subscription || {};
     const subType = sub.type || 'none';
     const subStatus = sub.status || 'inactive';
@@ -373,7 +372,7 @@ function renderProfile(admin) {
         }
     }
     
-    // Obuna turi
+    // ⭐ Obuna turi
     const subTypeEl = document.getElementById('profileSubType');
     if (subTypeEl) {
         const typeMap = {
@@ -386,7 +385,7 @@ function renderProfile(admin) {
         subTypeEl.textContent = typeMap[subType] || 'Yo\'q';
     }
     
-    // Obuna muddati
+    // ⭐ Obuna muddati
     const subEndEl = document.getElementById('profileSubEnd');
     if (subEndEl) {
         const now = new Date();
@@ -408,14 +407,14 @@ function renderProfile(admin) {
         }
     }
     
-    // To'lov
+    // ⭐ To'lov
     const amountEl = document.getElementById('profileSubAmount');
     if (amountEl) {
         const amount = sub.amount || 0;
         amountEl.textContent = amount.toLocaleString() + ' so\'m';
     }
     
-    // To'lov tarixi
+    // ⭐ To'lov tarixi
     const history = admin.paymentHistory || admin.subscriptionHistory || [];
     renderSubscriptionHistory(history);
 }
@@ -449,13 +448,16 @@ function renderSubscriptionHistory(history) {
         
         let statusLabel = '❌ Faol emas';
         let statusClass = 'inactive';
+        let statusColor = '#ff3b30';
         
         if (isActive) {
             statusLabel = '✅ Faol';
             statusClass = 'active';
+            statusColor = '#34c759';
         } else if (isExpired) {
             statusLabel = '⏰ Muddati tugagan';
             statusClass = 'expired';
+            statusColor = '#ff9500';
         }
         
         const typeLabel = {
@@ -471,7 +473,7 @@ function renderSubscriptionHistory(history) {
         const purchaseDate = item.purchaseDate ? formatDate(new Date(item.purchaseDate)) : '-';
         
         return `
-            <div class="history-item" style="${isExpired ? 'border-left: 4px solid #ff9500;' : isActive ? 'border-left: 4px solid #34c759;' : 'border-left: 4px solid #ff3b30;'}">
+            <div class="history-item" style="border-left: 4px solid ${statusColor};">
                 <div class="history-left">
                     <span class="history-number">#${index + 1}</span>
                     <div class="history-details">

@@ -52,6 +52,7 @@
             </header>
 
             <section class="profile-container">
+                <!-- Profile Header -->
                 <div class="profile-header">
                     <div class="profile-avatar large">
                         <span id="profileInitial">A</span>
@@ -69,6 +70,7 @@
                     </div>
                 </div>
 
+                <!-- Profile Stats -->
                 <div class="profile-stats">
                     <div class="stat-item">
                         <p class="stat-label"><i class="fas fa-calendar"></i> Obuna turi</p>
@@ -84,7 +86,7 @@
                     </div>
                 </div>
 
-                <!-- ⭐ TO'LOV TARIXI -->
+                <!-- To'lov Tarixi -->
                 <div class="subscription-history">
                     <h3><i class="fas fa-history"></i> To'lov Tarixi</h3>
                     <div id="historyList" class="history-list">
@@ -92,15 +94,15 @@
                     </div>
                 </div>
 
-                <!-- ⭐ XABARLAR RO'YXATI (SCROLL QILINADI) -->
+                <!-- ⭐ XABARLAR RO'YXATI (FLEX HOLATDA + SCROLL) -->
                 <div class="subscription-history" style="margin-top: 16px;">
                     <h3><i class="fas fa-bell"></i> Xabarlar 
                         <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted); margin-left: 8px;">
                             (Admin-Main o'chira oladi, Admin-Customer o'qilgan deb belgilay oladi)
                         </span>
                     </h3>
-                    <div id="notificationsList" class="history-list" style="max-height: 300px; overflow-y: auto; padding-right: 8px;">
-                        <p class="text-muted">Xabarlar yo'q</p>
+                    <div id="notificationsList" class="history-list" style="max-height: 400px; overflow-y: auto; overflow-x: hidden; padding-right: 8px; display: flex; flex-direction: column; gap: 8px;">
+                        <p class="text-muted" style="text-align: center; padding: 20px;">Xabarlar yo'q</p>
                     </div>
                 </div>
 

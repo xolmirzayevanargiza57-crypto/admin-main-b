@@ -84,6 +84,7 @@
                     </div>
                 </div>
 
+                <!-- ⭐ TO'LOV TARIXI -->
                 <div class="subscription-history">
                     <h3><i class="fas fa-history"></i> To'lov Tarixi</h3>
                     <div id="historyList" class="history-list">
@@ -147,7 +148,6 @@
                         </div>
                     </div>
 
-                    <!-- ⭐ CUSTOM VAQT -->
                     <div id="unbanCustomDurationGroup" style="display: none;">
                         <div class="form-group">
                             <label><i class="fas fa-clock"></i> Vaqtni belgilang</label>
@@ -169,7 +169,16 @@
                         </div>
                     </div>
 
-                    <!-- ⭐ BOSHLANISH SANASI -->
+                    <div id="unbanAmountGroup" style="display: none;">
+                        <div class="form-group">
+                            <label><i class="fas fa-money-bill"></i> To'lov miqdori (so'm)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="unbanAmount" placeholder="Masalan: 299999" />
+                            </div>
+                            <small class="text-muted">💡 Faqat Custom tanlanganda ko'rinadi</small>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label><i class="fas fa-calendar-day"></i> Boshlanish sanasi</label>
                         <div class="input-wrapper">
@@ -178,22 +187,12 @@
                         <small class="text-muted">💡 Bo'sh qoldirilsa, hozirgi vaqt olinadi</small>
                     </div>
 
-                    <!-- ⭐ TUGASH SANASI -->
                     <div class="form-group">
                         <label><i class="fas fa-calendar-day"></i> Tugash sanasi</label>
                         <div class="input-wrapper">
                             <input type="datetime-local" id="unbanEndDate" />
                         </div>
                         <small class="text-muted">💡 Bo'sh qoldirilsa, avtomatik hisoblanadi</small>
-                    </div>
-
-                    <!-- ⭐ TO'LOV MIQDORI (FAQAT CUSTOM UCHUN) -->
-                    <div class="form-group" id="unbanAmountGroup" style="display: none;">
-                        <label><i class="fas fa-money-bill"></i> To'lov miqdori (so'm)</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="unbanAmount" placeholder="Masalan: 299999" />
-                        </div>
-                        <small class="text-muted">💡 Faqat Custom tanlanganda ko'rinadi</small>
                     </div>
                 </form>
             </div>
@@ -249,12 +248,14 @@
                         </div>
                     </div>
 
-                    <div class="form-group" id="subscriptionAmountGroup" style="display: none;">
-                        <label><i class="fas fa-money-bill"></i> To'lov miqdori (so'm)</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="subscriptionAmount" placeholder="Masalan: 299999" />
+                    <div id="subscriptionAmountGroup" style="display: none;">
+                        <div class="form-group">
+                            <label><i class="fas fa-money-bill"></i> To'lov miqdori (so'm)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="subscriptionAmount" placeholder="Masalan: 299999" />
+                            </div>
+                            <small class="text-muted">💡 Faqat Custom tanlanganda ko'rinadi</small>
                         </div>
-                        <small class="text-muted">💡 Faqat Custom tanlanganda ko'rinadi</small>
                     </div>
                 </form>
             </div>

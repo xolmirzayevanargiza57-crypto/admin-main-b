@@ -183,7 +183,7 @@ async function loadNotifications() {
 }
 
 // ============================================================
-// ⭐ XABARLARNI KO'RSATISH (SCROLL QILINADI)
+// ⭐ XABARLARNI KO'RSATISH (TUZATILGAN)
 // ============================================================
 function renderNotifications(notifications) {
     const container = document.getElementById('notificationsList');
@@ -192,6 +192,7 @@ function renderNotifications(notifications) {
     const user = Auth.getUser();
     const isAdminMain = user?.role === 'admin_main';
     
+    // ⭐ TO'G'RI FILTRLASH: faqat o'sha adminId ga yuborilgan xabarlar
     let filteredNotifications = notifications.filter(n => {
         if (isAdminMain) {
             return n.recipientId === adminId;
@@ -213,25 +214,33 @@ function renderNotifications(notifications) {
             year: 'numeric', month: '2-digit', day: '2-digit',
             hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
         });
-        const isRead = item.isRead ? '✅ O\'qilgan' : '🟡 O\'qilmagan';
+        
+        // ⭐ O'qilgan/O'qilmagan holati
+        const isRead = item.isRead;
+        const readStatus = isRead ? '✅ O\'qilgan' : '🟡 O\'qilmagan';
+        const readClass = isRead ? 'read' : 'unread';
+        
         const isSentByMe = item.sentBy === user?._id;
         const senderName = item.sentByName || 'Admin';
         const recipientName = item.recipientName || 'Barcha adminlar';
         
+        // ⭐ Admin-Main o'chirish tugmasi ko'rinadi
         const canDelete = isAdminMain;
+        
+        // ⭐ Admin-Customer faqat o'qilgan deb belgilay oladi (o'ziga kelgan xabarlarni)
         const canMarkRead = !isAdminMain && 
                            !item.isRead && 
                            (item.recipientId === adminId || item.recipientRole === 'admin_customer');
         
         return `
-            <div class="history-item" style="${!item.isRead ? 'border-left: 3px solid #007aff;' : ''}">
+            <div class="history-item ${readClass}" style="${!item.isRead ? 'border-left: 3px solid #007aff;' : ''}">
                 <div class="history-left">
                     <span class="history-number">#${index + 1}</span>
                     <div class="history-details">
                         <p class="history-type">
                             <strong>${item.title || 'Xabar'}</strong>
                             <span style="font-size: 0.7rem; color: var(--text-muted);">
-                                ${isRead} • ${isSentByMe ? '✉️ Yuborgan: Men' : `✉️ Yuborgan: ${senderName}`}
+                                ${readStatus} • ${isSentByMe ? '✉️ Yuborgan: Men' : `✉️ Yuborgan: ${senderName}`}
                             </span>
                             <span style="font-size: 0.7rem; color: var(--text-muted); margin-left: 8px;">
                                 📬 Qabul qiluvchi: ${recipientName}
@@ -245,7 +254,7 @@ function renderNotifications(notifications) {
                     ${canMarkRead ? `
                         <button class="mark-read-btn" data-id="${item._id}" 
                                 style="background: none; border: 1px solid #007aff; color: #007aff; font-size: 0.65rem; cursor: pointer; padding: 3px 10px; border-radius: 6px;">
-                            O'qildi
+                            <i class="fas fa-check"></i> O'qildi
                         </button>
                     ` : ''}
                     ${canDelete ? `
@@ -254,12 +263,13 @@ function renderNotifications(notifications) {
                             <i class="fas fa-trash"></i> O'chirish
                         </button>
                     ` : ''}
-                    ${item.isRead ? '<span style="font-size: 0.65rem; color: var(--text-muted);">✓ O\'qilgan</span>' : ''}
+                    ${item.isRead ? '<span style="font-size: 0.65rem; color: var(--text-muted);">✓ O\'qilgan</span>' : '<span style="font-size: 0.65rem; color: #ff9500;">⏳ O\'qilmagan</span>'}
                 </div>
             </div>
         `;
     }).join('');
     
+    // ⭐ O'qilgan deb belgilash (faqat Admin-Customer)
     document.querySelectorAll('.mark-read-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
@@ -278,6 +288,7 @@ function renderNotifications(notifications) {
         });
     });
     
+    // ⭐ Xabarni o'chirish (faqat Admin-Main)
     document.querySelectorAll('.delete-notification-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
@@ -299,7 +310,7 @@ function renderNotifications(notifications) {
 }
 
 // ============================================================
-// ⭐ PROFILNI RENDER QILISH
+// PROFILNI RENDER QILISH
 // ============================================================
 function renderProfile(admin) {
     console.log('🎨 Profil render qilinmoqda:', admin);
@@ -317,7 +328,7 @@ function renderProfile(admin) {
         initialEl.textContent = initial;
     }
     
-    // ⭐ STATUS
+    // STATUS
     const statusEl = document.getElementById('profileStatus');
     if (statusEl) {
         if (admin.status === 'active') {
@@ -332,14 +343,13 @@ function renderProfile(admin) {
         }
     }
     
-    // ⭐ SUBSCRIPTION
+    // SUBSCRIPTION
     const sub = admin.subscription || {};
     const subType = sub.type || 'none';
     const subStatus = sub.status || 'inactive';
     
     const subLabelEl = document.getElementById('profileSubscription');
     if (subLabelEl) {
-        // ⭐ To'lov holatini tekshirish
         const now = new Date();
         const endDate = sub.endDate ? new Date(sub.endDate) : null;
         const isExpired = endDate && endDate < now;
@@ -363,7 +373,7 @@ function renderProfile(admin) {
         }
     }
     
-    // ⭐ Obuna turi
+    // Obuna turi
     const subTypeEl = document.getElementById('profileSubType');
     if (subTypeEl) {
         const typeMap = {
@@ -376,7 +386,7 @@ function renderProfile(admin) {
         subTypeEl.textContent = typeMap[subType] || 'Yo\'q';
     }
     
-    // ⭐ Obuna muddati (countdown bilan)
+    // Obuna muddati
     const subEndEl = document.getElementById('profileSubEnd');
     if (subEndEl) {
         const now = new Date();
@@ -398,14 +408,14 @@ function renderProfile(admin) {
         }
     }
     
-    // ⭐ To'lov
+    // To'lov
     const amountEl = document.getElementById('profileSubAmount');
     if (amountEl) {
         const amount = sub.amount || 0;
         amountEl.textContent = amount.toLocaleString() + ' so\'m';
     }
     
-    // ⭐ To'lov tarixi
+    // To'lov tarixi
     const history = admin.paymentHistory || admin.subscriptionHistory || [];
     renderSubscriptionHistory(history);
 }
@@ -422,7 +432,6 @@ function renderSubscriptionHistory(history) {
         return;
     }
     
-    // ⭐ To'lovlarni sanasi bo'yicha saralash (eng yangisi birinchi)
     const sortedHistory = [...history].sort((a, b) => {
         const dateA = a.purchaseDate ? new Date(a.purchaseDate) : new Date(0);
         const dateB = b.purchaseDate ? new Date(b.purchaseDate) : new Date(0);
@@ -433,7 +442,6 @@ function renderSubscriptionHistory(history) {
         const startDate = item.startDate ? formatDate(new Date(item.startDate)) : '-';
         const endDate = item.endDate ? formatDate(new Date(item.endDate)) : '-';
         
-        // ⭐ Holatni aniqlash
         const now = new Date();
         const endDateTime = item.endDate ? new Date(item.endDate) : null;
         const isExpired = endDateTime && endDateTime < now;
@@ -460,8 +468,6 @@ function renderSubscriptionHistory(history) {
         
         const amount = item.amount || 0;
         const note = item.note ? `<p class="history-dates"><i class="fas fa-sticky-note"></i> ${item.note}</p>` : '';
-        
-        // ⭐ Xarid sanasi
         const purchaseDate = item.purchaseDate ? formatDate(new Date(item.purchaseDate)) : '-';
         
         return `

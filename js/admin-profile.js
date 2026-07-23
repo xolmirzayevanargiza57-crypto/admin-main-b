@@ -1,5 +1,5 @@
 // ============================================================
-// ADMIN PROFILE - Admin-Main Frontend (TO'LIQ TUZATILGAN)
+// ADMIN PROFILE - Admin-Main Frontend (TO'LIQ)
 // ============================================================
 
 let adminId = null;
@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initNotificationModal();
     initUnbanModal();
     initButtons();
+    initSidebar(); // ⭐ Hamburger menu uchun
     
     // ⭐ HAR 3 SONIYADA XABARLARNI YANGILASH (TEZROQ)
     notificationRefreshInterval = setInterval(() => {
@@ -73,6 +74,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ============================================================
+// ⭐ SIDEBAR TOGGLE (HAMBURGER MENU)
+// ============================================================
+function initSidebar() {
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    if (!menuToggle || !sidebar) return;
+    
+    // Toggle sidebar
+    menuToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        sidebar.classList.toggle('open');
+        if (overlay) overlay.classList.toggle('show');
+    });
+    
+    // Overlay bosilganda yopish
+    if (overlay) {
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+        });
+    }
+    
+    // Document bosilganda yopish (mobile)
+    document.addEventListener('click', function(e) {
+        if (window.innerWidth <= 768) {
+            const isSidebar = sidebar.contains(e.target);
+            const isToggle = menuToggle.contains(e.target);
+            if (!isSidebar && !isToggle) {
+                sidebar.classList.remove('open');
+                if (overlay) overlay.classList.remove('show');
+            }
+        }
+    });
+}
 
 // ============================================================
 // PROFILNI YUKLASH

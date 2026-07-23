@@ -17,6 +17,7 @@
 </head>
 <body>
     <div class="app-container">
+        <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
                 <div class="brand-icon"><i class="fas fa-crown"></i></div>
@@ -90,14 +91,14 @@
                     </div>
                 </div>
 
-                <!-- ⭐ XABARLAR RO'YXATI -->
+                <!-- ⭐ XABARLAR RO'YXATI (SCROLL QILINADI) -->
                 <div class="subscription-history" style="margin-top: 16px;">
                     <h3><i class="fas fa-bell"></i> Xabarlar 
                         <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted); margin-left: 8px;">
                             (Admin-Main o'chira oladi, Admin-Customer o'qilgan deb belgilay oladi)
                         </span>
                     </h3>
-                    <div id="notificationsList" class="history-list">
+                    <div id="notificationsList" class="history-list" style="max-height: 300px; overflow-y: auto; padding-right: 8px;">
                         <p class="text-muted">Xabarlar yo'q</p>
                     </div>
                 </div>
@@ -126,7 +127,7 @@
 
     <!-- ⭐ UNBAN MODAL (BLOKDAN CHIQARISH VA TO'LOV) -->
     <div class="modal-overlay" id="unbanModal">
-        <div class="modal" style="max-width: 560px;">
+        <div class="modal" style="max-width: 580px;">
             <div class="modal-header">
                 <h3><i class="fas fa-unlock"></i> Admin Customerni blokdan chiqarish</h3>
                 <button class="modal-close" id="closeUnbanModal">&times;</button>
@@ -146,6 +147,7 @@
                         </div>
                     </div>
 
+                    <!-- ⭐ CUSTOM VAQT -->
                     <div id="unbanCustomDurationGroup" style="display: none;">
                         <div class="form-group">
                             <label><i class="fas fa-clock"></i> Vaqtni belgilang</label>
@@ -167,28 +169,31 @@
                         </div>
                     </div>
 
+                    <!-- ⭐ BOSHLANISH SANASI -->
                     <div class="form-group">
-                        <label><i class="fas fa-calendar-day"></i> Boshlanish vaqti</label>
+                        <label><i class="fas fa-calendar-day"></i> Boshlanish sanasi</label>
                         <div class="input-wrapper">
                             <input type="datetime-local" id="unbanStartDate" />
                         </div>
                         <small class="text-muted">💡 Bo'sh qoldirilsa, hozirgi vaqt olinadi</small>
                     </div>
 
+                    <!-- ⭐ TUGASH SANASI -->
                     <div class="form-group">
-                        <label><i class="fas fa-calendar-day"></i> Tugash vaqti</label>
+                        <label><i class="fas fa-calendar-day"></i> Tugash sanasi</label>
                         <div class="input-wrapper">
                             <input type="datetime-local" id="unbanEndDate" />
                         </div>
                         <small class="text-muted">💡 Bo'sh qoldirilsa, avtomatik hisoblanadi</small>
                     </div>
 
-                    <div class="form-group">
+                    <!-- ⭐ TO'LOV MIQDORI (FAQAT CUSTOM UCHUN) -->
+                    <div class="form-group" id="unbanAmountGroup" style="display: none;">
                         <label><i class="fas fa-money-bill"></i> To'lov miqdori (so'm)</label>
                         <div class="input-wrapper">
                             <input type="number" id="unbanAmount" placeholder="Masalan: 299999" />
                         </div>
-                        <small class="text-muted">💡 Bo'sh qoldirilsa, avtomatik narx qo'yiladi</small>
+                        <small class="text-muted">💡 Faqat Custom tanlanganda ko'rinadi</small>
                     </div>
                 </form>
             </div>
@@ -196,6 +201,67 @@
                 <button class="btn-secondary" id="cancelUnbanModal">Bekor qilish</button>
                 <button class="btn-primary" id="saveUnbanModal" style="background: #34c759; color: white;">
                     <i class="fas fa-unlock"></i> Blokdan chiqarish va faollashtirish
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⭐ OBUNA SOTISH MODAL -->
+    <div class="modal-overlay" id="subscriptionModal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-calendar-plus"></i> Obuna sotish</h3>
+                <button class="modal-close" id="closeSubscriptionModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="subscriptionForm">
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Obuna turi</label>
+                        <div class="input-wrapper">
+                            <select id="subscriptionTypeSelect" required>
+                                <option value="monthly">Oylik (30 kun) - 299,999 so'm</option>
+                                <option value="6months">6 oylik (180 kun) - 1,899,999 so'm</option>
+                                <option value="yearly">Yillik (365 kun) - 3,599,999 so'm</option>
+                                <option value="custom">Custom (qo'lda vaqt)</option>
+                                <option value="none">Bekor qilish</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="subscriptionCustomDurationGroup" style="display: none;">
+                        <div class="form-group">
+                            <label><i class="fas fa-clock"></i> Vaqtni belgilang</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+                                <div class="input-wrapper">
+                                    <input type="number" id="subscriptionCustomDays" placeholder="Kun" min="0" value="0" />
+                                </div>
+                                <div class="input-wrapper">
+                                    <input type="number" id="subscriptionCustomHours" placeholder="Soat" min="0" value="0" />
+                                </div>
+                                <div class="input-wrapper">
+                                    <input type="number" id="subscriptionCustomMinutes" placeholder="Daqiqa" min="0" value="0" />
+                                </div>
+                                <div class="input-wrapper">
+                                    <input type="number" id="subscriptionCustomSeconds" placeholder="Sekund" min="0" value="0" />
+                                </div>
+                            </div>
+                            <small class="text-muted">💡 Misol: 2 daqiqa = 0 kun, 0 soat, 2 daqiqa, 0 sekund</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="subscriptionAmountGroup" style="display: none;">
+                        <label><i class="fas fa-money-bill"></i> To'lov miqdori (so'm)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="subscriptionAmount" placeholder="Masalan: 299999" />
+                        </div>
+                        <small class="text-muted">💡 Faqat Custom tanlanganda ko'rinadi</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelSubscriptionModal">Bekor qilish</button>
+                <button class="btn-primary" id="saveSubscriptionModal" style="background: #34c759; color: white;">
+                    <i class="fas fa-save"></i> Saqlash
                 </button>
             </div>
         </div>
@@ -294,28 +360,31 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label><i class="fas fa-money-bill"></i> To'lov miqdori (so'm)</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="paymentAmount" placeholder="Masalan: 299999" required />
+                    <div id="paymentAmountGroup" style="display: none;">
+                        <div class="form-group">
+                            <label><i class="fas fa-money-bill"></i> To'lov miqdori (so'm)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="paymentAmount" placeholder="Masalan: 299999" />
+                            </div>
+                            <small class="text-muted">💡 Faqat Custom tanlanganda ko'rinadi</small>
                         </div>
                     </div>
 
-                    <div id="customDurationGroup" style="display: none;">
+                    <div id="paymentCustomDurationGroup" style="display: none;">
                         <div class="form-group">
                             <label><i class="fas fa-clock"></i> Vaqtni belgilang</label>
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
                                 <div class="input-wrapper">
-                                    <input type="number" id="customDays" placeholder="Kun" min="0" value="0" />
+                                    <input type="number" id="paymentCustomDays" placeholder="Kun" min="0" value="0" />
                                 </div>
                                 <div class="input-wrapper">
-                                    <input type="number" id="customHours" placeholder="Soat" min="0" value="0" />
+                                    <input type="number" id="paymentCustomHours" placeholder="Soat" min="0" value="0" />
                                 </div>
                                 <div class="input-wrapper">
-                                    <input type="number" id="customMinutes" placeholder="Daqiqa" min="0" value="0" />
+                                    <input type="number" id="paymentCustomMinutes" placeholder="Daqiqa" min="0" value="0" />
                                 </div>
                                 <div class="input-wrapper">
-                                    <input type="number" id="customSeconds" placeholder="Sekund" min="0" value="0" />
+                                    <input type="number" id="paymentCustomSeconds" placeholder="Sekund" min="0" value="0" />
                                 </div>
                             </div>
                             <small class="text-muted">💡 Misol: 2 daqiqa = 0 kun, 0 soat, 2 daqiqa, 0 sekund</small>
@@ -323,16 +392,19 @@
                     </div>
 
                     <div class="form-group">
-                        <label><i class="fas fa-calendar-day"></i> Tugash vaqti (ixtiyoriy)</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                            <div class="input-wrapper">
-                                <input type="date" id="paymentEndDate" />
-                            </div>
-                            <div class="input-wrapper">
-                                <input type="time" id="paymentEndTime" step="1" />
-                            </div>
+                        <label><i class="fas fa-calendar-day"></i> Boshlanish sanasi</label>
+                        <div class="input-wrapper">
+                            <input type="datetime-local" id="paymentStartDate" />
                         </div>
-                        <small class="text-muted">💡 Bo'sh qoldirilsa, hozirgi vaqtdan boshlab hisoblanadi</small>
+                        <small class="text-muted">💡 Bo'sh qoldirilsa, hozirgi vaqt olinadi</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-day"></i> Tugash sanasi</label>
+                        <div class="input-wrapper">
+                            <input type="datetime-local" id="paymentEndDate" />
+                        </div>
+                        <small class="text-muted">💡 Bo'sh qoldirilsa, avtomatik hisoblanadi</small>
                     </div>
 
                     <div class="form-group">

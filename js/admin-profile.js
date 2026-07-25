@@ -10,6 +10,36 @@ let countdownInterval = null;
 let notificationRefreshInterval = null;
 
 // ============================================================
+// ⭐ TO'LOV USULI MA'LUMOTLARI
+// ============================================================
+const PAYMENT_METHODS = {
+    cash: {
+        id: 'cash',
+        name: 'Naqd pul',
+        icon: 'https://www.gazeta.uz/sp/32221828/img/tild3365-3235-4161-a437-316637323436__banknoti-uzb.png',
+        emoji: '💵'
+    },
+    click: {
+        id: 'click',
+        name: 'Click',
+        icon: 'https://click.uz/uploads/20260423/ainvdbe3fa3432d6f1baab5b4972548938571776927939.jpg',
+        emoji: '📱'
+    },
+    paynet: {
+        id: 'paynet',
+        name: 'Paynet',
+        icon: 'https://frankfurt.apollo.olxcdn.com/v1/files/qum4yr71mite1-UZ/image',
+        emoji: '💳'
+    },
+    payme: {
+        id: 'payme',
+        name: 'Payme',
+        icon: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Paymeuz_logo.png',
+        emoji: '📲'
+    }
+};
+
+// ============================================================
 // SAHIFA YUKLANGANDA
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -39,12 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initButtons();
     initSidebar();
     
-    // HAR 3 SONIYADA XABARLARNI YANGILASH
     notificationRefreshInterval = setInterval(() => {
         loadNotifications();
     }, 3000);
     
-    // Joriy parol toggle
     const currentPasswordToggle = document.getElementById('currentPasswordToggle');
     if (currentPasswordToggle) {
         currentPasswordToggle.addEventListener('click', function(e) {
@@ -233,7 +261,6 @@ function renderNotifications(notifications) {
     const user = Auth.getUser();
     const isAdminMain = user?.role === 'admin_main';
     
-    // ⭐ FAQAT O'SHA ADMIN CUSTOMER ID GA YUBORILGAN XABARLAR
     let filteredNotifications = notifications.filter(n => {
         return n.recipientId === adminId;
     });
@@ -301,7 +328,6 @@ function renderNotifications(notifications) {
         `;
     }).join('');
     
-    // O'qilgan deb belgilash
     document.querySelectorAll('.mark-read-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
@@ -320,7 +346,6 @@ function renderNotifications(notifications) {
         });
     });
     
-    // Xabarni o'chirish
     document.querySelectorAll('.delete-notification-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
@@ -463,6 +488,16 @@ function renderSubscriptionHistory(history) {
         const amount = item.amount || 0;
         const note = item.note ? `<p class="history-dates"><i class="fas fa-sticky-note"></i> ${item.note}</p>` : '';
         const purchaseDate = item.purchaseDate ? formatDate(new Date(item.purchaseDate)) : '-';
+        // ⭐ TO'LOV USULINI KO'RSATISH
+        const paymentMethod = item.paymentMethod || 'cash';
+        const methodInfo = PAYMENT_METHODS[paymentMethod] || PAYMENT_METHODS.cash;
+        const methodDisplay = methodInfo ? `
+            <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; color: var(--text-muted);">
+                <img src="${methodInfo.icon}" style="width: 16px; height: 16px; object-fit: contain; border-radius: 2px;" onerror="this.style.display='none'">
+                ${methodInfo.name}
+            </span>
+        ` : '';
+        
         return `
             <div class="history-item" style="border-left: 4px solid ${statusColor};">
                 <div class="history-left">
@@ -473,6 +508,7 @@ function renderSubscriptionHistory(history) {
                             <span style="font-size: 0.7rem; margin-left: 8px;">
                                 <span class="status-badge ${statusClass}" style="font-size: 0.7rem; padding: 2px 10px;">${statusLabel}</span>
                             </span>
+                            ${methodDisplay}
                         </p>
                         <p class="history-dates"><i class="fas fa-calendar"></i> ${startDate} → ${endDate}</p>
                         <p class="history-dates"><i class="fas fa-shopping-cart"></i> Sotib olingan: ${purchaseDate}</p>
@@ -577,7 +613,46 @@ async function saveEdit() {
 }
 
 // ============================================================
-// TO'LOV QO'SHISH MODAL
+// ⭐ TO'LOV USULI SELECT VA RASMNI KO'RSATISH
+// ============================================================
+function initPaymentMethodSelect() {
+    const select = document.getElementById('paymentMethodSelect');
+    const previewDiv = document.getElementById('paymentMethodPreview');
+    
+    if (!select || !previewDiv) return;
+    
+    select.addEventListener('change', function() {
+        const methodId = this.value;
+        const method = PAYMENT_METHODS[methodId];
+        
+        if (method && methodId !== '') {
+            previewDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg-hover); border-radius: 8px; border: 1px solid var(--border-color); margin-top: 8px; animation: fadeIn 0.3s ease;">
+                    <img src="${method.icon}" alt="${method.name}" 
+                         style="width: 40px; height: 40px; object-fit: contain; border-radius: 6px; background: white; padding: 4px;"
+                         onerror="this.style.display='none'; this.parentElement.querySelector('.method-emoji').style.display='block';">
+                    <span class="method-emoji" style="font-size: 1.5rem; display: none;">${method.emoji}</span>
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary);">${method.name}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">To'lov usuli tanlandi</div>
+                    </div>
+                    <span style="margin-left: auto; color: var(--color-success);"><i class="fas fa-check-circle"></i></span>
+                </div>
+            `;
+            previewDiv.style.display = 'block';
+        } else {
+            previewDiv.innerHTML = '';
+            previewDiv.style.display = 'none';
+        }
+    });
+    
+    if (select.value && select.value !== '') {
+        select.dispatchEvent(new Event('change'));
+    }
+}
+
+// ============================================================
+// ⭐ TO'LOV QO'SHISH MODAL - TO'LIQ
 // ============================================================
 function initPaymentModal() {
     const modal = document.getElementById('paymentModal');
@@ -605,6 +680,17 @@ function initPaymentModal() {
         document.getElementById('paymentNote').value = '';
         if (amountGroup) amountGroup.style.display = 'none';
         if (customGroup) customGroup.style.display = 'none';
+        
+        const select = document.getElementById('paymentMethodSelect');
+        if (select) {
+            select.value = '';
+            const previewDiv = document.getElementById('paymentMethodPreview');
+            if (previewDiv) {
+                previewDiv.innerHTML = '';
+                previewDiv.style.display = 'none';
+            }
+        }
+        
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -612,6 +698,8 @@ function initPaymentModal() {
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
         document.getElementById('paymentStartDate').value = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+        
+        initPaymentMethodSelect();
     });
     
     if (paymentType) {
@@ -682,6 +770,9 @@ function calculatePaymentEndDate() {
     endDateInput.value = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
 }
 
+// ============================================================
+// ⭐ TO'LOVNI SAQLASH (paymentMethod bilan)
+// ============================================================
 async function savePayment() {
     const paymentType = document.getElementById('paymentType').value;
     const amount = document.getElementById('paymentAmount').value.trim();
@@ -692,6 +783,15 @@ async function savePayment() {
     const startDate = document.getElementById('paymentStartDate').value;
     const endDate = document.getElementById('paymentEndDate').value;
     const note = document.getElementById('paymentNote').value.trim();
+    
+    const paymentMethodSelect = document.getElementById('paymentMethodSelect');
+    const paymentMethod = paymentMethodSelect ? paymentMethodSelect.value : '';
+    
+    if (!paymentMethod || paymentMethod === '') {
+        alert('❌ Iltimos, to\'lov usulini tanlang!');
+        paymentMethodSelect.focus();
+        return;
+    }
     
     if (paymentType === 'custom') {
         if (!amount || amount === '') { alert('❌ Iltimos, to\'lov miqdorini kiriting!'); document.getElementById('paymentAmount').focus(); return; }
@@ -717,14 +817,18 @@ async function savePayment() {
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saqlanmoqda...';
     try {
         const response = await API.post(`/admins/${adminId}/payment`, {
-            amount: amountNumber, subscriptionType: paymentType, customDuration: customDuration,
+            amount: amountNumber,
+            subscriptionType: paymentType,
+            customDuration: customDuration,
             endDate: endDateTime ? endDateTime.toISOString() : null,
             startDate: startDateTime ? startDateTime.toISOString() : null,
-            note: note || 'Admin tomonidan qo\'shildi'
+            note: note || 'Admin tomonidan qo\'shildi',
+            paymentMethod: paymentMethod
         });
         if (response.success) {
             const sub = response.data.subscription || {};
-            let msg = '✅ To\'lov muvaffaqiyatli qo\'shildi va admin faollashtirildi!\n';
+            const methodName = PAYMENT_METHODS[paymentMethod]?.name || paymentMethod;
+            let msg = `✅ To\'lov muvaffaqiyatli qo\'shildi!\n💳 To\'lov usuli: ${methodName}\n`;
             if (sub.endDate) { const end = new Date(sub.endDate); msg += '📅 Tugash vaqti: ' + formatDate(end); }
             alert(msg);
             document.getElementById('paymentModal').classList.remove('active');
@@ -811,7 +915,7 @@ async function saveSubscription() {
 }
 
 // ============================================================
-// ⭐ XABAR YUBORISH MODAL (TO'G'RI - FAQAT BIR ADMINGA)
+// XABAR YUBORISH MODAL
 // ============================================================
 function initNotificationModal() {
     const modal = document.getElementById('notificationModal');
@@ -845,9 +949,6 @@ function initNotificationModal() {
     if (sendBtn) sendBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); sendNotification(); });
 }
 
-// ============================================================
-// ⭐ XABAR YUBORISH - FAQAT BIR ADMIN CUSTOMERGA
-// ============================================================
 async function sendNotification() {
     const titleInput = document.getElementById('notificationTitle');
     const messageInput = document.getElementById('notificationMessage');
@@ -881,7 +982,6 @@ async function sendNotification() {
         const token = localStorage.getItem('adminToken');
         const API_URL = 'https://admin-main-backend.onrender.com/api/notifications';
         
-        // ⭐ TO'G'RI MA'LUMOTLAR - FAQAT SHU ADMIN CUSTOMERGA YUBORISH
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
@@ -892,8 +992,8 @@ async function sendNotification() {
                 title: title,
                 message: message,
                 type: 'info',
-                recipientId: adminId,           // ⭐ FAQAT SHU ID GA
-                recipientRole: 'admin_customer', // ⭐ 'all' EMAS!
+                recipientId: adminId,
+                recipientRole: 'admin_customer',
                 expiresInDays: 30
             })
         });
@@ -1108,7 +1208,7 @@ async function saveUnbanWithPayment() {
         let customDuration = null;
         let amountNumber = 0;
         if (paymentType === 'custom') { customDuration = { days: customDays, hours: customHours, minutes: customMinutes, seconds: customSeconds }; amountNumber = parseInt(amount) || 0; }
-        const paymentData = { amount: amountNumber, subscriptionType: paymentType, customDuration: customDuration, startDate: startDate || null, endDate: endDate || null, note: 'Blokdan chiqarishda qo\'shildi' };
+        const paymentData = { amount: amountNumber, subscriptionType: paymentType, customDuration: customDuration, startDate: startDate || null, endDate: endDate || null, note: 'Blokdan chiqarishda qo\'shildi', paymentMethod: paymentType === 'none' ? 'cash' : 'cash' };
         const paymentResult = await API.post(`/admins/${adminId}/payment`, paymentData);
         if (paymentResult.success) {
             alert('✅ Admin Customer blokdan chiqarildi va to\'lov qo\'shildi!');

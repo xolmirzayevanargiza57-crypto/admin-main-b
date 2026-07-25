@@ -1,5 +1,7 @@
 // ============================================================
-// ADMIN PROFILE - Admin-Main Frontend (TO'LIQ)
+// ADMIN PROFILE - ADMIN-MAIN (TO'LIQ)
+// Loyiha: Admin-Main Frontend
+// Fayl: js/admin-profile.js
 // ============================================================
 
 let adminId = null;
@@ -7,6 +9,9 @@ let currentAdmin = null;
 let countdownInterval = null;
 let notificationRefreshInterval = null;
 
+// ============================================================
+// SAHIFA YUKLANGANDA
+// ============================================================
 document.addEventListener('DOMContentLoaded', () => {
     if (!Auth.isAuthenticated()) {
         window.location.href = 'index.html';
@@ -32,9 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initNotificationModal();
     initUnbanModal();
     initButtons();
-    initSidebar(); // ⭐ Hamburger menu uchun
+    initSidebar();
     
-    // ⭐ HAR 3 SONIYADA XABARLARNI YANGILASH (TEZROQ)
+    // HAR 3 SONIYADA XABARLARNI YANGILASH
     notificationRefreshInterval = setInterval(() => {
         loadNotifications();
     }, 3000);
@@ -76,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================================
-// ⭐ SIDEBAR TOGGLE (HAMBURGER MENU)
+// SIDEBAR TOGGLE
 // ============================================================
 function initSidebar() {
     const menuToggle = document.getElementById('menuToggle');
@@ -85,14 +90,12 @@ function initSidebar() {
     
     if (!menuToggle || !sidebar) return;
     
-    // Toggle sidebar
     menuToggle.addEventListener('click', function(e) {
         e.stopPropagation();
         sidebar.classList.toggle('open');
         if (overlay) overlay.classList.toggle('show');
     });
     
-    // Overlay bosilganda yopish
     if (overlay) {
         overlay.addEventListener('click', function() {
             sidebar.classList.remove('open');
@@ -100,7 +103,6 @@ function initSidebar() {
         });
     }
     
-    // Document bosilganda yopish (mobile)
     document.addEventListener('click', function(e) {
         if (window.innerWidth <= 768) {
             const isSidebar = sidebar.contains(e.target);
@@ -135,7 +137,7 @@ async function loadProfile() {
 }
 
 // ============================================================
-// ⭐ COUNTDOWN - REAL TIME
+// COUNTDOWN - REAL TIME
 // ============================================================
 function startCountdown() {
     if (countdownInterval) {
@@ -176,7 +178,7 @@ function updateCountdown() {
 }
 
 // ============================================================
-// ⭐ DATE FORMAT FUNKSIYASI
+// DATE FORMAT
 // ============================================================
 function formatDate(date) {
     if (!date) return 'Noma\'lum vaqt';
@@ -197,7 +199,7 @@ function formatDate(date) {
 }
 
 // ============================================================
-// ⭐ XABARLARNI YUKLASH
+// XABARLARNI YUKLASH
 // ============================================================
 async function loadNotifications() {
     try {
@@ -222,7 +224,7 @@ async function loadNotifications() {
 }
 
 // ============================================================
-// ⭐ XABARLARNI KO'RSATISH (TO'G'RI FILTR + SCROLL + FLEX)
+// XABARLARNI KO'RSATISH
 // ============================================================
 function renderNotifications(notifications) {
     const container = document.getElementById('notificationsList');
@@ -231,16 +233,10 @@ function renderNotifications(notifications) {
     const user = Auth.getUser();
     const isAdminMain = user?.role === 'admin_main';
     
-    // ⭐ TO'G'RI FILTRLASH: faqat o'sha adminId ga yuborilgan xabarlar
+    // ⭐ FAQAT O'SHA ADMIN CUSTOMER ID GA YUBORILGAN XABARLAR
     let filteredNotifications = notifications.filter(n => {
-        // FAQAT O'SHA ADMIN CUSTOMER ID GA YUBORILGAN XABARLAR
         return n.recipientId === adminId;
     });
-    
-    // ⭐ Agar 'all' (barcha adminlarga) yuborilgan xabarlar ham ko'rinishi kerak bo'lsa:
-    // filteredNotifications = notifications.filter(n => {
-    //     return n.recipientId === adminId || n.recipientRole === 'all';
-    // });
     
     if (!filteredNotifications || filteredNotifications.length === 0) {
         container.innerHTML = '<p class="text-muted" style="text-align: center; padding: 20px;">Xabarlar yo\'q</p>';
@@ -305,7 +301,7 @@ function renderNotifications(notifications) {
         `;
     }).join('');
     
-    // ⭐ O'qilgan deb belgilash (faqat Admin-Customer)
+    // O'qilgan deb belgilash
     document.querySelectorAll('.mark-read-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
@@ -324,7 +320,7 @@ function renderNotifications(notifications) {
         });
     });
     
-    // ⭐ Xabarni o'chirish (faqat Admin-Main)
+    // Xabarni o'chirish
     document.querySelectorAll('.delete-notification-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             const id = this.dataset.id;
@@ -344,6 +340,7 @@ function renderNotifications(notifications) {
         });
     });
 }
+
 // ============================================================
 // PROFILNI RENDER QILISH
 // ============================================================
@@ -436,7 +433,7 @@ function renderProfile(admin) {
 }
 
 // ============================================================
-// ⭐ TO'LOV TARIXINI RENDER QILISH
+// TO'LOV TARIXINI RENDER QILISH
 // ============================================================
 function renderSubscriptionHistory(history) {
     const historyList = document.getElementById('historyList');
@@ -580,7 +577,7 @@ async function saveEdit() {
 }
 
 // ============================================================
-// ⭐ TO'LOV QO'SHISH MODAL
+// TO'LOV QO'SHISH MODAL
 // ============================================================
 function initPaymentModal() {
     const modal = document.getElementById('paymentModal');
@@ -739,7 +736,7 @@ async function savePayment() {
 }
 
 // ============================================================
-// ⭐ OBUNA SOTISH MODAL
+// OBUNA SOTISH MODAL
 // ============================================================
 function initSubscriptionModal() {
     const modal = document.getElementById('subscriptionModal');
@@ -814,7 +811,7 @@ async function saveSubscription() {
 }
 
 // ============================================================
-// ⭐ XABAR YUBORISH MODAL
+// ⭐ XABAR YUBORISH MODAL (TO'G'RI - FAQAT BIR ADMINGA)
 // ============================================================
 function initNotificationModal() {
     const modal = document.getElementById('notificationModal');
@@ -848,6 +845,9 @@ function initNotificationModal() {
     if (sendBtn) sendBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); sendNotification(); });
 }
 
+// ============================================================
+// ⭐ XABAR YUBORISH - FAQAT BIR ADMIN CUSTOMERGA
+// ============================================================
 async function sendNotification() {
     const titleInput = document.getElementById('notificationTitle');
     const messageInput = document.getElementById('notificationMessage');
@@ -856,20 +856,50 @@ async function sendNotification() {
     const title = titleInput ? titleInput.value.trim() : '';
     const message = messageInput ? messageInput.value.trim() : '';
     
-    if (!title) { showNotificationResult('❌ Iltimos, sarlavhani kiriting!', 'error'); if (titleInput) titleInput.focus(); return; }
-    if (!message) { showNotificationResult('❌ Iltimos, xabar matnini kiriting!', 'error'); if (messageInput) messageInput.focus(); return; }
-    if (!adminId) { showNotificationResult('❌ Admin ID topilmadi!', 'error'); return; }
-    if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...'; }
+    if (!title) {
+        showNotificationResult('❌ Iltimos, sarlavhani kiriting!', 'error');
+        if (titleInput) titleInput.focus();
+        return;
+    }
+    if (!message) {
+        showNotificationResult('❌ Iltimos, xabar matnini kiriting!', 'error');
+        if (messageInput) messageInput.focus();
+        return;
+    }
+    if (!adminId) {
+        showNotificationResult('❌ Admin ID topilmadi!', 'error');
+        return;
+    }
+    
+    if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...';
+    }
     showNotificationResult('⏳ Xabar yuborilmoqda...', 'info');
+    
     try {
         const token = localStorage.getItem('adminToken');
         const API_URL = 'https://admin-main-backend.onrender.com/api/notifications';
+        
+        // ⭐ TO'G'RI MA'LUMOTLAR - FAQAT SHU ADMIN CUSTOMERGA YUBORISH
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ title: title, message: message, type: 'info', recipientId: adminId, recipientRole: 'admin_customer', expiresInDays: 30 })
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                title: title,
+                message: message,
+                type: 'info',
+                recipientId: adminId,           // ⭐ FAQAT SHU ID GA
+                recipientRole: 'admin_customer', // ⭐ 'all' EMAS!
+                expiresInDays: 30
+            })
         });
+        
         const data = await response.json();
+        
         if (response.ok && data.success) {
             showNotificationResult('✅ Xabar muvaffaqiyatli yuborildi!', 'success');
             if (titleInput) titleInput.value = '';
@@ -877,17 +907,29 @@ async function sendNotification() {
             loadNotifications();
             setTimeout(() => {
                 const modal = document.getElementById('notificationModal');
-                if (modal) { modal.classList.remove('active'); document.body.style.overflow = ''; }
-                if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; }
+                if (modal) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+                }
             }, 2000);
         } else {
             showNotificationResult('❌ Xabar yuborishda xatolik: ' + (data.message || 'Noma\'lum xatolik'), 'error');
-            if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; }
+            if (sendBtn) {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+            }
         }
     } catch (error) {
         console.error('❌ Xabar yuborish xatosi:', error);
         showNotificationResult('❌ Xabar yuborishda xatolik: ' + (error.message || 'Server xatosi!'), 'error');
-        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; }
+        if (sendBtn) {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+        }
     }
 }
 
@@ -901,7 +943,7 @@ function showNotificationResult(msg, type) {
 }
 
 // ============================================================
-// ⭐ BAN / UNBAN
+// BAN / UNBAN
 // ============================================================
 async function banAdmin(id) {
     if (!currentAdmin) return;
@@ -920,7 +962,7 @@ async function banAdmin(id) {
 }
 
 // ============================================================
-// ⭐ UNBAN MODAL
+// UNBAN MODAL
 // ============================================================
 function initUnbanModal() {
     const modal = document.getElementById('unbanModal');
@@ -1154,4 +1196,4 @@ window.addEventListener('beforeunload', function() {
     if (notificationRefreshInterval) { clearInterval(notificationRefreshInterval); notificationRefreshInterval = null; }
 });
 
-console.log('✅ admin-profile.js yuklandi');
+console.log('✅ admin-profile.js yuklandi (Admin-Main)');

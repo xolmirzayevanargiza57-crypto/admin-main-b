@@ -10,7 +10,7 @@ let countdownInterval = null;
 let notificationRefreshInterval = null;
 
 // ============================================================
-// ⭐ TO'LOV USULI MA'LUMOTLARI
+// ⭐ TO'LOV USULI MA'LUMOTLARI (YANGILANGAN)
 // ============================================================
 const PAYMENT_METHODS = {
     cash: {
@@ -22,7 +22,7 @@ const PAYMENT_METHODS = {
     click: {
         id: 'click',
         name: 'Click',
-        icon: 'https://click.uz/uploads/20260423/ainvdbe3fa3432d6f1baab5b4972548938571776927939.jpg',
+        icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Click_uz_logo.svg/1200px-Click_uz_logo.svg.png',
         emoji: '📱'
     },
     paynet: {
@@ -36,6 +36,12 @@ const PAYMENT_METHODS = {
         name: 'Payme',
         icon: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Paymeuz_logo.png',
         emoji: '📲'
+    },
+    uzum: {
+        id: 'uzum',
+        name: 'Uzum',
+        icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Uzum_Logo.svg/1200px-Uzum_Logo.svg.png',
+        emoji: '🟣'
     }
 };
 
@@ -458,7 +464,7 @@ function renderProfile(admin) {
 }
 
 // ============================================================
-// TO'LOV TARIXINI RENDER QILISH
+// ⭐ TO'LOV TARIXINI RENDER QILISH (TO'LOV USULI BILAN)
 // ============================================================
 function renderSubscriptionHistory(history) {
     const historyList = document.getElementById('historyList');
@@ -488,6 +494,7 @@ function renderSubscriptionHistory(history) {
         const amount = item.amount || 0;
         const note = item.note ? `<p class="history-dates"><i class="fas fa-sticky-note"></i> ${item.note}</p>` : '';
         const purchaseDate = item.purchaseDate ? formatDate(new Date(item.purchaseDate)) : '-';
+        
         // ⭐ TO'LOV USULINI KO'RSATISH
         const paymentMethod = item.paymentMethod || 'cash';
         const methodInfo = PAYMENT_METHODS[paymentMethod] || PAYMENT_METHODS.cash;
@@ -621,9 +628,15 @@ function initPaymentMethodSelect() {
     
     if (!select || !previewDiv) return;
     
-    select.addEventListener('change', function() {
+    // Eski eventlarni tozalash
+    const newSelect = select.cloneNode(true);
+    select.parentNode.replaceChild(newSelect, select);
+    
+    newSelect.addEventListener('change', function() {
         const methodId = this.value;
         const method = PAYMENT_METHODS[methodId];
+        
+        console.log('💳 Tanlangan to\'lov usuli:', methodId, method);
         
         if (method && methodId !== '') {
             previewDiv.innerHTML = `
@@ -646,8 +659,8 @@ function initPaymentMethodSelect() {
         }
     });
     
-    if (select.value && select.value !== '') {
-        select.dispatchEvent(new Event('change'));
+    if (newSelect.value && newSelect.value !== '') {
+        newSelect.dispatchEvent(new Event('change'));
     }
 }
 
@@ -666,7 +679,11 @@ function initPaymentModal() {
     
     if (!modal || !addBtn) return;
     
-    addBtn.addEventListener('click', () => {
+    // Eski eventlarni tozalash
+    const newAddBtn = addBtn.cloneNode(true);
+    addBtn.parentNode.replaceChild(newAddBtn, addBtn);
+    
+    newAddBtn.addEventListener('click', () => {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
         document.getElementById('paymentType').value = 'monthly';
@@ -732,10 +749,29 @@ function initPaymentModal() {
         }
     });
     
-    if (closeBtn) closeBtn.addEventListener('click', () => { modal.classList.remove('active'); document.body.style.overflow = ''; });
-    if (cancelBtn) cancelBtn.addEventListener('click', () => { modal.classList.remove('active'); document.body.style.overflow = ''; });
-    if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) { modal.classList.remove('active'); document.body.style.overflow = ''; } });
-    if (saveBtn) saveBtn.addEventListener('click', async () => { await savePayment(); });
+    if (closeBtn) {
+        const newCloseBtn = closeBtn.cloneNode(true);
+        closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+        newCloseBtn.addEventListener('click', () => { modal.classList.remove('active'); document.body.style.overflow = ''; });
+    }
+    if (cancelBtn) {
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+        newCancelBtn.addEventListener('click', () => { modal.classList.remove('active'); document.body.style.overflow = ''; });
+    }
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    }
+    if (saveBtn) {
+        const newSaveBtn = saveBtn.cloneNode(true);
+        saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+        newSaveBtn.addEventListener('click', async () => { await savePayment(); });
+    }
 }
 
 function calculatePaymentEndDate() {
@@ -771,7 +807,7 @@ function calculatePaymentEndDate() {
 }
 
 // ============================================================
-// ⭐ TO'LOVNI SAQLASH (paymentMethod bilan)
+// ⭐ TO'LOVNI SAQLASH (paymentMethod BILAN)
 // ============================================================
 async function savePayment() {
     const paymentType = document.getElementById('paymentType').value;
@@ -784,12 +820,15 @@ async function savePayment() {
     const endDate = document.getElementById('paymentEndDate').value;
     const note = document.getElementById('paymentNote').value.trim();
     
+    // ⭐ TO'LOV USULINI OLISH
     const paymentMethodSelect = document.getElementById('paymentMethodSelect');
     const paymentMethod = paymentMethodSelect ? paymentMethodSelect.value : '';
     
+    console.log('💳 Tanlangan to\'lov usuli:', paymentMethod);
+    
     if (!paymentMethod || paymentMethod === '') {
         alert('❌ Iltimos, to\'lov usulini tanlang!');
-        paymentMethodSelect.focus();
+        if (paymentMethodSelect) paymentMethodSelect.focus();
         return;
     }
     
@@ -823,7 +862,7 @@ async function savePayment() {
             endDate: endDateTime ? endDateTime.toISOString() : null,
             startDate: startDateTime ? startDateTime.toISOString() : null,
             note: note || 'Admin tomonidan qo\'shildi',
-            paymentMethod: paymentMethod
+            paymentMethod: paymentMethod // ⭐ To'lov usuli yuboriladi
         });
         if (response.success) {
             const sub = response.data.subscription || {};
@@ -853,7 +892,11 @@ function initSubscriptionModal() {
     const amountGroup = document.getElementById('subscriptionAmountGroup');
     
     if (!modal || !subscriptionBtn) return;
-    subscriptionBtn.addEventListener('click', function(e) {
+    
+    const newSubscriptionBtn = subscriptionBtn.cloneNode(true);
+    subscriptionBtn.parentNode.replaceChild(newSubscriptionBtn, subscriptionBtn);
+    
+    newSubscriptionBtn.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
         modal.classList.add('active');
@@ -874,10 +917,24 @@ function initSubscriptionModal() {
             if (amountGroup) amountGroup.style.display = isCustom ? 'block' : 'none';
         });
     }
-    if (closeBtn) closeBtn.addEventListener('click', function() { modal.classList.remove('active'); document.body.style.overflow = ''; });
-    if (cancelBtn) cancelBtn.addEventListener('click', function() { modal.classList.remove('active'); document.body.style.overflow = ''; });
-    if (modal) modal.addEventListener('click', function(e) { if (e.target === modal) { modal.classList.remove('active'); document.body.style.overflow = ''; } });
-    if (saveBtn) saveBtn.addEventListener('click', async function() { await saveSubscription(); });
+    if (closeBtn) {
+        const newCloseBtn = closeBtn.cloneNode(true);
+        closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+        newCloseBtn.addEventListener('click', function() { modal.classList.remove('active'); document.body.style.overflow = ''; });
+    }
+    if (cancelBtn) {
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+        newCancelBtn.addEventListener('click', function() { modal.classList.remove('active'); document.body.style.overflow = ''; });
+    }
+    if (modal) {
+        modal.addEventListener('click', function(e) { if (e.target === modal) { modal.classList.remove('active'); document.body.style.overflow = ''; } });
+    }
+    if (saveBtn) {
+        const newSaveBtn = saveBtn.cloneNode(true);
+        saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+        newSaveBtn.addEventListener('click', async function() { await saveSubscription(); });
+    }
 }
 
 async function saveSubscription() {
@@ -929,7 +986,9 @@ function initNotificationModal() {
     if (!modal || !sendBtn) return;
     const profileSendBtn = document.getElementById('sendNotificationBtn');
     if (profileSendBtn) {
-        profileSendBtn.addEventListener('click', function(e) {
+        const newProfileSendBtn = profileSendBtn.cloneNode(true);
+        profileSendBtn.parentNode.replaceChild(newProfileSendBtn, profileSendBtn);
+        newProfileSendBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             modal.classList.add('active');
@@ -941,12 +1000,26 @@ function initNotificationModal() {
             if (titleInput) titleInput.focus();
         });
     }
-    if (closeBtn) closeBtn.addEventListener('click', function() { modal.classList.remove('active'); document.body.style.overflow = ''; if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } });
-    if (cancelBtn) cancelBtn.addEventListener('click', function() { modal.classList.remove('active'); document.body.style.overflow = ''; if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } });
-    if (modal) modal.addEventListener('click', function(e) { if (e.target === modal) { modal.classList.remove('active'); document.body.style.overflow = ''; if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } } });
+    if (closeBtn) {
+        const newCloseBtn = closeBtn.cloneNode(true);
+        closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+        newCloseBtn.addEventListener('click', function() { modal.classList.remove('active'); document.body.style.overflow = ''; if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } });
+    }
+    if (cancelBtn) {
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+        newCancelBtn.addEventListener('click', function() { modal.classList.remove('active'); document.body.style.overflow = ''; if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } });
+    }
+    if (modal) {
+        modal.addEventListener('click', function(e) { if (e.target === modal) { modal.classList.remove('active'); document.body.style.overflow = ''; if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } } });
+    }
     document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal && modal.classList.contains('active')) { modal.classList.remove('active'); document.body.style.overflow = ''; if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish'; } } });
     if (messageInput) messageInput.addEventListener('keydown', function(e) { if (e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); sendNotification(); } });
-    if (sendBtn) sendBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); sendNotification(); });
+    if (sendBtn) {
+        const newSendBtn = sendBtn.cloneNode(true);
+        sendBtn.parentNode.replaceChild(newSendBtn, sendBtn);
+        newSendBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); sendNotification(); });
+    }
 }
 
 async function sendNotification() {
@@ -1075,7 +1148,11 @@ function initUnbanModal() {
     const amountGroup = document.getElementById('unbanAmountGroup');
 
     if (!modal || !unbanBtn) return;
-    unbanBtn.addEventListener('click', function(e) {
+    
+    const newUnbanBtn = unbanBtn.cloneNode(true);
+    unbanBtn.parentNode.replaceChild(newUnbanBtn, unbanBtn);
+    
+    newUnbanBtn.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
         if (currentAdmin && currentAdmin.status !== 'blocked') { alert('⚠️ Bu Admin Customer bloklanmagan!'); return; }
@@ -1128,10 +1205,24 @@ function initUnbanModal() {
         }
     });
 
-    if (closeBtn) { closeBtn.addEventListener('click', function() { modal.classList.remove('active'); document.body.style.overflow = ''; }); }
-    if (cancelBtn) { cancelBtn.addEventListener('click', function() { modal.classList.remove('active'); document.body.style.overflow = ''; }); }
-    if (modal) { modal.addEventListener('click', function(e) { if (e.target === modal) { modal.classList.remove('active'); document.body.style.overflow = ''; } }); }
-    if (saveBtn) { saveBtn.addEventListener('click', async function() { await saveUnbanWithPayment(); }); }
+    if (closeBtn) {
+        const newCloseBtn = closeBtn.cloneNode(true);
+        closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+        newCloseBtn.addEventListener('click', function() { modal.classList.remove('active'); document.body.style.overflow = ''; });
+    }
+    if (cancelBtn) {
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+        newCancelBtn.addEventListener('click', function() { modal.classList.remove('active'); document.body.style.overflow = ''; });
+    }
+    if (modal) {
+        modal.addEventListener('click', function(e) { if (e.target === modal) { modal.classList.remove('active'); document.body.style.overflow = ''; } });
+    }
+    if (saveBtn) {
+        const newSaveBtn = saveBtn.cloneNode(true);
+        saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+        newSaveBtn.addEventListener('click', async function() { await saveUnbanWithPayment(); });
+    }
 }
 
 function calculateUnbanEndDate() {
@@ -1208,7 +1299,7 @@ async function saveUnbanWithPayment() {
         let customDuration = null;
         let amountNumber = 0;
         if (paymentType === 'custom') { customDuration = { days: customDays, hours: customHours, minutes: customMinutes, seconds: customSeconds }; amountNumber = parseInt(amount) || 0; }
-        const paymentData = { amount: amountNumber, subscriptionType: paymentType, customDuration: customDuration, startDate: startDate || null, endDate: endDate || null, note: 'Blokdan chiqarishda qo\'shildi', paymentMethod: paymentType === 'none' ? 'cash' : 'cash' };
+        const paymentData = { amount: amountNumber, subscriptionType: paymentType, customDuration: customDuration, startDate: startDate || null, endDate: endDate || null, note: 'Blokdan chiqarishda qo\'shildi', paymentMethod: 'cash' };
         const paymentResult = await API.post(`/admins/${adminId}/payment`, paymentData);
         if (paymentResult.success) {
             alert('✅ Admin Customer blokdan chiqarildi va to\'lov qo\'shildi!');
@@ -1226,7 +1317,11 @@ async function saveUnbanWithPayment() {
 // ============================================================
 function initButtons() {
     const banBtn = document.getElementById('banBtn');
-    if (banBtn) banBtn.addEventListener('click', () => { if (!adminId) return; banAdmin(adminId); });
+    if (banBtn) {
+        const newBanBtn = banBtn.cloneNode(true);
+        banBtn.parentNode.replaceChild(newBanBtn, banBtn);
+        newBanBtn.addEventListener('click', () => { if (!adminId) return; banAdmin(adminId); });
+    }
     
     const unbanBtn = document.getElementById('unbanBtn');
     if (unbanBtn) {
@@ -1244,7 +1339,9 @@ function initButtons() {
     
     const deleteBtn = document.getElementById('deleteBtn');
     if (deleteBtn) {
-        deleteBtn.addEventListener('click', async () => {
+        const newDeleteBtn = deleteBtn.cloneNode(true);
+        deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
+        newDeleteBtn.addEventListener('click', async () => {
             if (!confirm('Haqiqatan ham bu Admin Customerni o\'chirmoqchimisiz?')) return;
             try {
                 const result = await API.delete(`/admins/${adminId}`);

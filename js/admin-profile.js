@@ -1,5 +1,5 @@
 // ============================================================
-// ADMIN PROFILE - ADMIN-MAIN (TO'LIQ)
+// ADMIN PROFILE - ADMIN-MAIN (TO'LIQ TUZATILGAN)
 // ============================================================
 
 let adminId = null;
@@ -8,7 +8,7 @@ let countdownInterval = null;
 let notificationRefreshInterval = null;
 
 // ============================================================
-// ⭐ TO'LOV USULI MA'LUMOTLARI (TO'LIQ TUZATILGAN)
+// ⭐ TO'LOV USULI MA'LUMOTLARI (TO'LIQ)
 // ============================================================
 const PAYMENT_METHODS = {
     cash: {
@@ -21,7 +21,7 @@ const PAYMENT_METHODS = {
     click: {
         id: 'click',
         name: 'Click',
-        icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Click_logo.svg/1200px-Click_logo.svg.png',
+        icon: 'https://api.logobank.uz/media/logos_preview/Click-01_0xvqWH8.png',
         keywords: ['click'],
         emoji: '📱'
     },
@@ -42,14 +42,14 @@ const PAYMENT_METHODS = {
     uzum: {
         id: 'uzum',
         name: 'Uzum',
-        icon: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/e6/37/36/e63736b4-eaad-b8d8-0c7d-6be94529a18e/AppIcon-0-0-1x_U007emarketing-0-11-0-85-220.png/1200x630wa.png',
+        icon: 'https://admin.uzum.com/wp-content/uploads/2024/09/og-image.jpg',
         keywords: ['uzum', 'uzum bank'],
         emoji: '🟣'
     },
     uzcard: {
         id: 'uzcard',
         name: 'Uzcard',
-        icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Uzcard.jpg/500px-Uzcard.jpg',
+        icon: 'https://bank.uz/upload/yp/static/058/0584015c28a78f817d6385b99ed3680a.jpg',
         keywords: ['uzcard', 'uz card'],
         emoji: '💳'
     },
@@ -137,11 +137,10 @@ const PAYMENT_METHODS = {
         keywords: ['american', 'americanexpress', 'american express', 'amex'],
         emoji: '💳'
     },
-    // ⭐ YANGI QO'SHILGANLAR
     tezpay: {
         id: 'tezpay',
         name: 'TezPay',
-        icon: 'https://play-lh.googleusercontent.com/1S7fa2zZf2siANOH1JGrMrhdK2zE9TTZlnS06Vr6zYeXlU6Xb86aO3HwgHONlY4msQ=s180-rw',
+        icon: 'https://static.rustore.ru/imgproxy/c9GvEWTzaNNgKCBIj39zh7MM3hJXu-lExCr0HfkejUc/preset:vk_og_img/plain/https://static.rustore.ru/apk/2063541467/content/ICON/39061c50-35b1-484f-a7b2-4329fa0b9c77.png@webp',
         keywords: ['tezpay', 'tez pay'],
         emoji: '⚡'
     },
@@ -162,13 +161,13 @@ const PAYMENT_METHODS = {
 };
 
 // ============================================================
-// ⭐ TO'LOV USULINI MATN ORQALI AVTOMATIK ANIQLASH (TUZATILGAN)
+// ⭐ TO'LOV USULINI MATN ORQALI AVTOMATIK ANIQLASH
 // ============================================================
 function detectPaymentMethod(text) {
     if (!text) return PAYMENT_METHODS.other;
     const lowerText = text.toLowerCase().trim();
     
-    // ⭐ 1. UZUM - BIRINCHI TEKSHIRILADI (pay dan oldin)
+    // ⭐ 1. UZUM - BIRINCHI TEKSHIRILADI
     if (lowerText.includes('uzum')) {
         return PAYMENT_METHODS.uzum;
     }
@@ -208,7 +207,7 @@ function detectPaymentMethod(text) {
         return PAYMENT_METHODS.americanexpress;
     }
     
-    // ⭐ 9. CLICK (xazna dan oldin)
+    // ⭐ 9. CLICK
     if (lowerText.includes('click')) {
         return PAYMENT_METHODS.click;
     }
@@ -223,7 +222,7 @@ function detectPaymentMethod(text) {
         return PAYMENT_METHODS.xazna;
     }
     
-    // ⭐ 12. PAY (boshqa hech narsa topilmasa Apple Pay chiqaradi)
+    // ⭐ 12. PAY -> APPLE PAY
     if (lowerText.includes('pay') && !lowerText.includes('paypal') && !lowerText.includes('payme') && !lowerText.includes('paynet')) {
         return PAYMENT_METHODS.applepay;
     }
@@ -249,7 +248,7 @@ function formatMoney(amount) {
 }
 
 // ============================================================
-// ⭐ VAQTNI FORMATLASH
+// ⭐ VAQTNI FORMATLASH (TOSHKENT VAQTI BILAN)
 // ============================================================
 function formatDateTimeFull(date) {
     if (!date) return 'Noma\'lum vaqt';
@@ -460,6 +459,7 @@ function renderSubscriptionHistory(history) {
         const note = item.note ? `<p class="history-dates"><i class="fas fa-sticky-note"></i> ${item.note}</p>` : '';
         const purchaseDate = item.purchaseDate ? formatDateTimeFull(item.purchaseDate) : '-';
         
+        // ⭐ TO'LOV USULI - RASM BILAN (CHALKASHMASLIGI UCHUN)
         const paymentMethod = item.paymentMethod || 'cash';
         const methodInfo = PAYMENT_METHODS[paymentMethod] || PAYMENT_METHODS.cash;
         const methodDisplay = methodInfo ? `
@@ -742,7 +742,7 @@ function calculatePaymentEndDate() {
 }
 
 // ============================================================
-// ⭐ TO'LOV USULI SELECT VA RASM (ADMIN-MAIN)
+// ⭐ TO'LOV USULI SELECT VA RASM PREVIEW (ADMIN-MAIN)
 // ============================================================
 function initPaymentMethodSelect() {
     const select = document.getElementById('paymentMethodSelect');
@@ -758,7 +758,9 @@ function initPaymentMethodSelect() {
         if (method && methodId !== '') {
             previewDiv.innerHTML = `
                 <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg-hover);border-radius:8px;border:1px solid var(--border-color);margin-top:8px;">
-                    <img src="${method.icon}" style="width:40px;height:40px;object-fit:contain;border-radius:6px;background:white;padding:4px;" onerror="this.style.display='none'">
+                    <img src="${method.icon}" style="width:40px;height:40px;object-fit:contain;border-radius:6px;background:white;padding:4px;" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="font-size:0.9rem;font-weight:600;display:none;" class="fallback-text">${method.name}</div>
                     <div>
                         <div style="font-weight:600;font-size:0.9rem;">${method.name}</div>
                         <div style="font-size:0.75rem;color:var(--text-muted);">To'lov usuli tanlandi</div>
@@ -773,6 +775,7 @@ function initPaymentMethodSelect() {
         }
     });
     
+    // ⭐ Izoh orqali avtomatik aniqlash
     const noteInput = document.getElementById('paymentNote');
     if (noteInput) {
         noteInput.addEventListener('input', function() {

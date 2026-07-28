@@ -21,7 +21,7 @@ const PAYMENT_METHODS = {
     click: {
         id: 'click',
         name: 'Click',
-        icon: 'https://api.logobank.uz/media/logos_preview/Click-01_0xvqWH8.png',
+        icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Click_logo.svg/1200px-Click_logo.svg.png',
         keywords: ['click'],
         emoji: '📱'
     },
@@ -91,7 +91,7 @@ const PAYMENT_METHODS = {
     xazna: {
         id: 'xazna',
         name: 'Xazna Bank',
-        icon: 'https://api.logobank.uz/media/logos_preview/XAZNA-01.png',
+        icon: 'https://jet-back.bank.uz/uploads/article_blocks/d88f203848c154c40be0e793c10fb9a5.webp',
         keywords: ['xazna', 'xasna', 'xazna bank', 'g\'azna', 'gazna'],
         emoji: '🏦'
     },

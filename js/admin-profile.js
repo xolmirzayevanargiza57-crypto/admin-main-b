@@ -1,7 +1,5 @@
 // ============================================================
-// ADMIN PROFILE - ADMIN-MAIN (TO'LIQ VA ISHLAYDI)
-// Loyiha: Admin-Main Frontend
-// Fayl: js/admin-profile.js
+// ADMIN PROFILE - ADMIN-MAIN (TO'LIQ)
 // ============================================================
 
 let adminId = null;
@@ -104,6 +102,49 @@ const PAYMENT_METHODS = {
         keywords: ['anjir', 'anjir pay', 'anjir bank'],
         emoji: '🍐'
     },
+    // ⭐ YANGI QO'SHILGAN TO'LOV USULLARI
+    hamkorbank: {
+        id: 'hamkorbank',
+        name: 'Hamkor Bank',
+        icon: 'https://img.hhcdn.ru/employer-logo-original-round/6939937.png',
+        keywords: ['hamkor', 'hamkorbank', 'hamkor bank'],
+        emoji: '🏛️'
+    },
+    xalqbanki: {
+        id: 'xalqbanki',
+        name: 'Xalq Banki',
+        icon: 'https://api.onmap.uz/storage/01HYXMSPSC7T0458S4YZV2XJRK.svg',
+        keywords: ['xalq', 'xalqbanki', 'xalq banki', 'xalq bank'],
+        emoji: '🏛️'
+    },
+    paypal: {
+        id: 'paypal',
+        name: 'PayPal',
+        icon: 'https://smartpress.by/upload/iblock/85f/dn546q6c891cflormfosv72ixoo1l4gv/paypal.jpg',
+        keywords: ['paypal', 'pay pal'],
+        emoji: '💳'
+    },
+    mastercard: {
+        id: 'mastercard',
+        name: 'MasterCard',
+        icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/960px-MasterCard_Logo.svg.png',
+        keywords: ['mastercard', 'master card', 'master'],
+        emoji: '💳'
+    },
+    americanexpress: {
+        id: 'americanexpress',
+        name: 'American Express',
+        icon: 'https://live.staticflickr.com/65535/48649342553_8e0daf6313_b.jpg',
+        keywords: ['american', 'americanexpress', 'american express', 'amex'],
+        emoji: '💳'
+    },
+    pay: {
+        id: 'pay',
+        name: 'Pay',
+        icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/PayPal_logo_2014.svg/800px-PayPal_logo_2014.svg.png',
+        keywords: ['pay', 'to\'lov', 'payment'],
+        emoji: '💳'
+    },
     other: {
         id: 'other',
         name: 'Boshqa',
@@ -119,6 +160,28 @@ const PAYMENT_METHODS = {
 function detectPaymentMethod(text) {
     if (!text) return PAYMENT_METHODS.other;
     const lowerText = text.toLowerCase().trim();
+    
+    // ⭐ YANGI USULLAR BIRINCHI TEKSHIRILADI
+    if (lowerText.includes('hamkor') || lowerText.includes('hamkorbank')) {
+        return PAYMENT_METHODS.hamkorbank;
+    }
+    if (lowerText.includes('xalq')) {
+        return PAYMENT_METHODS.xalqbanki;
+    }
+    if (lowerText.includes('paypal') || lowerText.includes('pay pal')) {
+        return PAYMENT_METHODS.paypal;
+    }
+    if (lowerText.includes('mastercard') || lowerText.includes('master card') || lowerText.includes('master')) {
+        return PAYMENT_METHODS.mastercard;
+    }
+    if (lowerText.includes('american') || lowerText.includes('americanexpress') || lowerText.includes('amex')) {
+        return PAYMENT_METHODS.americanexpress;
+    }
+    if (lowerText.includes('pay') && !lowerText.includes('paypal') && !lowerText.includes('payme')) {
+        return PAYMENT_METHODS.pay;
+    }
+    
+    // Eski usullar
     for (const [key, method] of Object.entries(PAYMENT_METHODS)) {
         if (key === 'other') continue;
         if (method.keywords && method.keywords.some(kw => lowerText.includes(kw))) {
@@ -184,7 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadProfile();
     loadNotifications();
     
-    // ⭐ BARCHA FUNKSIYALARNI CHAQIRISH
     initEditModal();
     initPaymentModal();
     initSubscriptionModal();
@@ -249,7 +311,145 @@ async function loadProfile() {
 }
 
 // ============================================================
-// COUNTDOWN
+// ⭐ PROFILNI RENDER QILISH (TO'LIQ)
+// ============================================================
+function renderProfile(admin) {
+    const nameEl = document.getElementById('profileName');
+    const emailEl = document.getElementById('profileEmail');
+    const phoneEl = document.getElementById('profilePhone');
+    const initialEl = document.getElementById('profileInitial');
+    
+    if (nameEl) nameEl.textContent = admin.fullName || '-';
+    if (emailEl) emailEl.textContent = admin.email || '-';
+    if (phoneEl) phoneEl.textContent = admin.phone || '-';
+    if (initialEl) initialEl.textContent = (admin.fullName || 'A').charAt(0).toUpperCase();
+    
+    // STATUS
+    const statusEl = document.getElementById('profileStatus');
+    if (statusEl) {
+        if (admin.status === 'active') {
+            statusEl.textContent = '✅ Faol';
+            statusEl.className = 'status-badge active';
+        } else if (admin.status === 'blocked') {
+            statusEl.textContent = '⛔ Bloklangan';
+            statusEl.className = 'status-badge blocked';
+        } else {
+            statusEl.textContent = '❌ Faol emas';
+            statusEl.className = 'status-badge inactive';
+        }
+    }
+    
+    // ⭐ SUBSCRIPTION
+    const sub = admin.subscription || {};
+    const subLabelEl = document.getElementById('profileSubscription');
+    if (subLabelEl) {
+        const now = new Date();
+        const endDate = sub.endDate ? new Date(sub.endDate) : null;
+        const isExpired = endDate && endDate < now;
+        const isActive = sub.status === 'active' && !isExpired;
+        
+        const typeMap = { 
+            'monthly': 'Oylik', 
+            '6months': '6 oylik', 
+            'yearly': 'Yillik', 
+            'custom': 'Custom',
+            'none': 'Obunasi yo\'q'
+        };
+        
+        if (isActive && sub.type !== 'none') {
+            subLabelEl.textContent = '✅ ' + (typeMap[sub.type] || 'Faol');
+            subLabelEl.className = 'subscription-badge monthly';
+        } else if (isExpired && sub.type !== 'none') {
+            subLabelEl.textContent = '⏰ Muddati tugagan';
+            subLabelEl.className = 'subscription-badge expired';
+        } else {
+            subLabelEl.textContent = '❌ Obunasi yo\'q';
+            subLabelEl.className = 'subscription-badge inactive';
+        }
+    }
+    
+    document.getElementById('profileSubType').textContent = sub.type || 'Yo\'q';
+    document.getElementById('profileSubAmount').textContent = formatMoney(sub.amount || 0);
+    
+    // ⭐ TO'LOV TARIXI
+    const history = admin.paymentHistory || admin.subscriptionHistory || [];
+    renderSubscriptionHistory(history);
+}
+
+// ============================================================
+// ⭐ TO'LOV TARIXINI RENDER QILISH (RASM BILAN)
+// ============================================================
+function renderSubscriptionHistory(history) {
+    const historyList = document.getElementById('historyList');
+    if (!historyList) return;
+    if (!history || history.length === 0) {
+        historyList.innerHTML = '<p class="text-muted">To\'lov tarixi yo\'q</p>';
+        return;
+    }
+    
+    const sortedHistory = [...history].sort((a, b) => {
+        return new Date(b.purchaseDate) - new Date(a.purchaseDate);
+    });
+    
+    historyList.innerHTML = sortedHistory.map((item, index) => {
+        const startDate = item.startDate ? formatDateTimeFull(item.startDate) : '-';
+        const endDate = item.endDate ? formatDateTimeFull(item.endDate) : '-';
+        const now = new Date();
+        const endDateTime = item.endDate ? new Date(item.endDate) : null;
+        const isExpired = endDateTime && endDateTime < now;
+        const isActive = item.status === 'active' && !isExpired;
+        
+        let statusLabel = '❌ Faol emas';
+        let statusClass = 'inactive';
+        let statusColor = '#ff3b30';
+        if (isActive) { statusLabel = '✅ Faol'; statusClass = 'active'; statusColor = '#34c759'; }
+        else if (isExpired) { statusLabel = '⏰ Muddati tugagan'; statusClass = 'expired'; statusColor = '#ff9500'; }
+        
+        const typeLabel = { 
+            'monthly': '📅 Oylik', 
+            '6months': '📅 6 oylik', 
+            'yearly': '📅 Yillik', 
+            'custom': '⚙️ Custom' 
+        }[item.type] || item.type;
+        
+        const amount = item.amount || 0;
+        const note = item.note ? `<p class="history-dates"><i class="fas fa-sticky-note"></i> ${item.note}</p>` : '';
+        const purchaseDate = item.purchaseDate ? formatDateTimeFull(item.purchaseDate) : '-';
+        
+        // ⭐ TO'LOV USULI - RASM BILAN
+        const paymentMethod = item.paymentMethod || 'cash';
+        const methodInfo = PAYMENT_METHODS[paymentMethod] || PAYMENT_METHODS.cash;
+        const methodDisplay = methodInfo ? `
+            <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--text-muted);">
+                <img src="${methodInfo.icon}" style="width: 20px; height: 20px; object-fit: contain; border-radius: 4px; background: white; padding: 2px;" onerror="this.style.display='none'">
+                ${methodInfo.name}
+            </span>
+        ` : '';
+        
+        return `
+            <div class="history-item" style="border-left: 4px solid ${statusColor};">
+                <div class="history-left">
+                    <span class="history-number">#${index + 1}</span>
+                    <div class="history-details">
+                        <p class="history-type">
+                            ${typeLabel} - ${formatMoney(amount)}
+                            <span style="font-size: 0.7rem; margin-left: 8px;">
+                                <span class="status-badge ${statusClass}" style="font-size: 0.7rem; padding: 2px 10px;">${statusLabel}</span>
+                            </span>
+                            ${methodDisplay}
+                        </p>
+                        <p class="history-dates"><i class="fas fa-calendar"></i> ${startDate} → ${endDate}</p>
+                        <p class="history-dates"><i class="fas fa-shopping-cart"></i> Sotib olingan: ${purchaseDate}</p>
+                        ${note}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ============================================================
+// COUNTDOWN - REAL TIME
 // ============================================================
 function startCountdown() {
     if (countdownInterval) {
@@ -361,241 +561,7 @@ function renderNotifications(notifications) {
 }
 
 // ============================================================
-// PROFILNI RENDER QILISH
-// ============================================================
-function renderProfile(admin) {
-    const nameEl = document.getElementById('profileName');
-    const emailEl = document.getElementById('profileEmail');
-    const phoneEl = document.getElementById('profilePhone');
-    const initialEl = document.getElementById('profileInitial');
-    
-    if (nameEl) nameEl.textContent = admin.fullName || '-';
-    if (emailEl) emailEl.textContent = admin.email || '-';
-    if (phoneEl) phoneEl.textContent = admin.phone || '-';
-    if (initialEl) initialEl.textContent = (admin.fullName || 'A').charAt(0).toUpperCase();
-    
-    const statusEl = document.getElementById('profileStatus');
-    if (statusEl) {
-        if (admin.status === 'active') {
-            statusEl.textContent = '✅ Faol';
-            statusEl.className = 'status-badge active';
-        } else if (admin.status === 'blocked') {
-            statusEl.textContent = '⛔ Bloklangan';
-            statusEl.className = 'status-badge blocked';
-        } else {
-            statusEl.textContent = '❌ Faol emas';
-            statusEl.className = 'status-badge inactive';
-        }
-    }
-    
-    const sub = admin.subscription || {};
-    const subLabelEl = document.getElementById('profileSubscription');
-    if (subLabelEl) {
-        const now = new Date();
-        const endDate = sub.endDate ? new Date(sub.endDate) : null;
-        const isExpired = endDate && endDate < now;
-        const isActive = sub.status === 'active' && !isExpired;
-        if (isActive && sub.type !== 'none') {
-            const typeMap = { 'monthly': 'Oylik', '6months': '6 oylik', 'yearly': 'Yillik', 'custom': 'Custom' };
-            subLabelEl.textContent = '✅ ' + (typeMap[sub.type] || 'Faol');
-            subLabelEl.className = 'subscription-badge monthly';
-        } else if (isExpired && sub.type !== 'none') {
-            subLabelEl.textContent = '⏰ Muddati tugagan';
-            subLabelEl.className = 'subscription-badge expired';
-        } else {
-            subLabelEl.textContent = '❌ Obunasi yo\'q';
-            subLabelEl.className = 'subscription-badge inactive';
-        }
-    }
-    
-    document.getElementById('profileSubType').textContent = sub.type || 'Yo\'q';
-    document.getElementById('profileSubAmount').textContent = formatMoney(sub.amount || 0);
-    
-    const history = admin.paymentHistory || admin.subscriptionHistory || [];
-    renderSubscriptionHistory(history);
-}
-
-// ============================================================
-// ⭐ TO'LOV TARIXINI RENDER QILISH (RASM BILAN)
-// ============================================================
-function renderSubscriptionHistory(history) {
-    const historyList = document.getElementById('historyList');
-    if (!historyList) return;
-    if (!history || history.length === 0) {
-        historyList.innerHTML = '<p class="text-muted">To\'lov tarixi yo\'q</p>';
-        return;
-    }
-    
-    const sortedHistory = [...history].sort((a, b) => {
-        return new Date(b.purchaseDate) - new Date(a.purchaseDate);
-    });
-    
-    historyList.innerHTML = sortedHistory.map((item, index) => {
-        const startDate = item.startDate ? formatDateTimeFull(item.startDate) : '-';
-        const endDate = item.endDate ? formatDateTimeFull(item.endDate) : '-';
-        const now = new Date();
-        const endDateTime = item.endDate ? new Date(item.endDate) : null;
-        const isExpired = endDateTime && endDateTime < now;
-        const isActive = item.status === 'active' && !isExpired;
-        
-        let statusLabel = '❌ Faol emas';
-        let statusClass = 'inactive';
-        let statusColor = '#ff3b30';
-        if (isActive) { statusLabel = '✅ Faol'; statusClass = 'active'; statusColor = '#34c759'; }
-        else if (isExpired) { statusLabel = '⏰ Muddati tugagan'; statusClass = 'expired'; statusColor = '#ff9500'; }
-        
-        const typeLabel = { 'monthly': '📅 Oylik', '6months': '📅 6 oylik', 'yearly': '📅 Yillik', 'custom': '⚙️ Custom' }[item.type] || item.type;
-        const amount = item.amount || 0;
-        const note = item.note ? `<p class="history-dates"><i class="fas fa-sticky-note"></i> ${item.note}</p>` : '';
-        const purchaseDate = item.purchaseDate ? formatDateTimeFull(item.purchaseDate) : '-';
-        
-        const paymentMethod = item.paymentMethod || 'cash';
-        const methodInfo = PAYMENT_METHODS[paymentMethod] || PAYMENT_METHODS.cash;
-        const methodDisplay = methodInfo ? `
-            <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--text-muted);">
-                <img src="${methodInfo.icon}" style="width: 20px; height: 20px; object-fit: contain; border-radius: 4px; background: white; padding: 2px;" onerror="this.style.display='none'">
-                ${methodInfo.name}
-            </span>
-        ` : '';
-        
-        return `
-            <div class="history-item" style="border-left: 4px solid ${statusColor};">
-                <div class="history-left">
-                    <span class="history-number">#${index + 1}</span>
-                    <div class="history-details">
-                        <p class="history-type">
-                            ${typeLabel} - ${formatMoney(amount)}
-                            <span style="font-size: 0.7rem; margin-left: 8px;">
-                                <span class="status-badge ${statusClass}" style="font-size: 0.7rem; padding: 2px 10px;">${statusLabel}</span>
-                            </span>
-                            ${methodDisplay}
-                        </p>
-                        <p class="history-dates"><i class="fas fa-calendar"></i> ${startDate} → ${endDate}</p>
-                        <p class="history-dates"><i class="fas fa-shopping-cart"></i> Sotib olingan: ${purchaseDate}</p>
-                        ${note}
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-// ============================================================
-// ⭐ TAHRIRLASH MODAL
-// ============================================================
-function initEditModal() {
-    const modal = document.getElementById('editModal');
-    const editBtn = document.getElementById('editBtn');
-    const closeBtn = document.getElementById('closeEditModal');
-    const cancelBtn = document.getElementById('cancelEditModal');
-    const saveBtn = document.getElementById('saveEditModal');
-    
-    if (!modal) return;
-    
-    // Edit tugmasi
-    if (editBtn) {
-        const newBtn = editBtn.cloneNode(true);
-        editBtn.parentNode.replaceChild(newBtn, editBtn);
-        newBtn.addEventListener('click', function() {
-            if (!currentAdmin) return;
-            openEditModal();
-        });
-    }
-    
-    // Close tugmasi
-    if (closeBtn) {
-        const newBtn = closeBtn.cloneNode(true);
-        closeBtn.parentNode.replaceChild(newBtn, closeBtn);
-        newBtn.addEventListener('click', function() {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-    }
-    
-    // Cancel tugmasi
-    if (cancelBtn) {
-        const newBtn = cancelBtn.cloneNode(true);
-        cancelBtn.parentNode.replaceChild(newBtn, cancelBtn);
-        newBtn.addEventListener('click', function() {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-    }
-    
-    // Modal tashqarisiga bosganda yopish
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-    });
-    
-    // Save tugmasi
-    if (saveBtn) {
-        const newBtn = saveBtn.cloneNode(true);
-        saveBtn.parentNode.replaceChild(newBtn, saveBtn);
-        newBtn.addEventListener('click', async function() {
-            await saveEdit();
-        });
-    }
-}
-
-function openEditModal() {
-    if (!currentAdmin) return;
-    document.getElementById('editFullName').value = currentAdmin.fullName || '';
-    document.getElementById('editEmail').value = currentAdmin.email || '';
-    document.getElementById('editPhone').value = currentAdmin.phone || '';
-    document.getElementById('editStatus').value = currentAdmin.status || 'active';
-    document.getElementById('editPassword').value = '';
-    document.getElementById('editModal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-async function saveEdit() {
-    const fullName = document.getElementById('editFullName').value.trim();
-    const email = document.getElementById('editEmail').value.trim();
-    const phone = document.getElementById('editPhone').value.trim();
-    const status = document.getElementById('editStatus').value;
-    const newPassword = document.getElementById('editPassword').value.trim();
-    
-    if (!fullName || !email) {
-        alert('F.I.SH va Email majburiy!');
-        return;
-    }
-    if (!email.includes('@')) {
-        alert('Email noto\'g\'ri formatda!');
-        return;
-    }
-    
-    try {
-        const updateData = { fullName, email, phone, status: status === 'none' ? 'inactive' : status };
-        if (newPassword && newPassword.length >= 6) {
-            updateData.password = newPassword;
-        } else if (newPassword && newPassword.length < 6) {
-            alert('Yangi parol kamida 6 ta belgi bo\'lishi kerak!');
-            return;
-        }
-        if (status === 'none') {
-            updateData.subscription = { type: 'none', status: 'inactive', startDate: null, endDate: null, amount: 0 };
-        }
-        
-        const response = await API.put(`/admins/${adminId}`, updateData);
-        if (response.success) {
-            alert('✅ Admin muvaffaqiyatli yangilandi!');
-            document.getElementById('editModal').classList.remove('active');
-            document.body.style.overflow = '';
-            document.getElementById('editPassword').value = '';
-            loadProfile();
-        } else {
-            alert('❌ Xatolik: ' + (response.message || 'Noma\'lum xatolik'));
-        }
-    } catch (error) {
-        alert('❌ Xatolik: ' + error.message);
-    }
-}
-
-// ============================================================
-// ⭐ TO'LOV QO'SHISH MODAL
+// ⭐ TO'LOV QO'SHISH MODAL (TO'LIQ)
 // ============================================================
 function initPaymentModal() {
     const modal = document.getElementById('paymentModal');
@@ -609,7 +575,6 @@ function initPaymentModal() {
     
     if (!modal || !addBtn) return;
     
-    // Add tugmasi
     const newAddBtn = addBtn.cloneNode(true);
     addBtn.parentNode.replaceChild(newAddBtn, addBtn);
     newAddBtn.addEventListener('click', function() {
@@ -642,7 +607,6 @@ function initPaymentModal() {
         initPaymentMethodSelect();
     });
     
-    // Close tugmasi
     if (closeBtn) {
         const newBtn = closeBtn.cloneNode(true);
         closeBtn.parentNode.replaceChild(newBtn, closeBtn);
@@ -652,7 +616,6 @@ function initPaymentModal() {
         });
     }
     
-    // Cancel tugmasi
     if (cancelBtn) {
         const newBtn = cancelBtn.cloneNode(true);
         cancelBtn.parentNode.replaceChild(newBtn, cancelBtn);
@@ -662,7 +625,6 @@ function initPaymentModal() {
         });
     }
     
-    // Modal tashqarisiga bosganda yopish
     modal.addEventListener('click', function(e) {
         if (e.target === modal) {
             modal.classList.remove('active');
@@ -670,7 +632,6 @@ function initPaymentModal() {
         }
     });
     
-    // Payment type o'zgarganda
     if (paymentType) {
         paymentType.addEventListener('change', function() {
             const isCustom = this.value === 'custom';
@@ -687,14 +648,12 @@ function initPaymentModal() {
         });
     }
     
-    // Start date o'zgarganda
     const startDateInput = document.getElementById('paymentStartDate');
     if (startDateInput) {
         startDateInput.addEventListener('change', calculatePaymentEndDate);
         startDateInput.addEventListener('input', calculatePaymentEndDate);
     }
     
-    // Custom vaqt o'zgarganda
     ['paymentCustomDays', 'paymentCustomHours', 'paymentCustomMinutes', 'paymentCustomSeconds'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -703,7 +662,6 @@ function initPaymentModal() {
         }
     });
     
-    // Save tugmasi
     if (saveBtn) {
         const newBtn = saveBtn.cloneNode(true);
         saveBtn.parentNode.replaceChild(newBtn, saveBtn);
@@ -771,10 +729,26 @@ function initPaymentMethodSelect() {
             previewDiv.style.display = 'none';
         }
     });
+    
+    // ⭐ IZOH ORQALI AVTOMATIK ANIQLASH
+    const noteInput = document.getElementById('paymentNote');
+    if (noteInput) {
+        noteInput.addEventListener('input', function() {
+            const text = this.value;
+            const detected = detectPaymentMethod(text);
+            if (detected && detected.id !== 'other') {
+                const selectEl = document.getElementById('paymentMethodSelect');
+                if (selectEl) {
+                    selectEl.value = detected.id;
+                    selectEl.dispatchEvent(new Event('change'));
+                }
+            }
+        });
+    }
 }
 
 // ============================================================
-// ⭐ TO'LOVNI SAQLASH
+// ⭐ TO'LOVNI SAQLASH (TO'LIQ)
 // ============================================================
 async function savePayment() {
     const paymentType = document.getElementById('paymentType').value;
@@ -845,7 +819,7 @@ async function savePayment() {
 }
 
 // ============================================================
-// ⭐ OBUNA SOTISH MODAL
+// OBUNA SOTISH MODAL
 // ============================================================
 function initSubscriptionModal() {
     const modal = document.getElementById('subscriptionModal');
@@ -859,7 +833,6 @@ function initSubscriptionModal() {
     
     if (!modal || !subscriptionBtn) return;
     
-    // Subscription tugmasi
     const newBtn = subscriptionBtn.cloneNode(true);
     subscriptionBtn.parentNode.replaceChild(newBtn, subscriptionBtn);
     newBtn.addEventListener('click', function(e) {
@@ -877,7 +850,6 @@ function initSubscriptionModal() {
         if (amountGroup) amountGroup.style.display = 'none';
     });
     
-    // Close tugmasi
     if (closeBtn) {
         const newBtn = closeBtn.cloneNode(true);
         closeBtn.parentNode.replaceChild(newBtn, closeBtn);
@@ -887,7 +859,6 @@ function initSubscriptionModal() {
         });
     }
     
-    // Cancel tugmasi
     if (cancelBtn) {
         const newBtn = cancelBtn.cloneNode(true);
         cancelBtn.parentNode.replaceChild(newBtn, cancelBtn);
@@ -897,7 +868,6 @@ function initSubscriptionModal() {
         });
     }
     
-    // Modal tashqarisiga bosganda yopish
     modal.addEventListener('click', function(e) {
         if (e.target === modal) {
             modal.classList.remove('active');
@@ -905,7 +875,6 @@ function initSubscriptionModal() {
         }
     });
     
-    // Type select o'zgarganda
     if (typeSelect) {
         typeSelect.addEventListener('change', function() {
             const isCustom = this.value === 'custom';
@@ -914,7 +883,6 @@ function initSubscriptionModal() {
         });
     }
     
-    // Save tugmasi
     if (saveBtn) {
         const newBtn = saveBtn.cloneNode(true);
         saveBtn.parentNode.replaceChild(newBtn, saveBtn);
@@ -983,176 +951,7 @@ async function saveSubscription() {
 }
 
 // ============================================================
-// ⭐ XABAR YUBORISH MODAL
-// ============================================================
-function initNotificationModal() {
-    const modal = document.getElementById('notificationModal');
-    const sendBtn = document.getElementById('sendNotificationSubmitBtn');
-    const profileSendBtn = document.getElementById('sendNotificationBtn');
-    const closeBtn = document.getElementById('closeNotificationModal');
-    const cancelBtn = document.getElementById('cancelNotificationModal');
-    const resultDiv = document.getElementById('notificationResult');
-    
-    if (!modal || !sendBtn) return;
-    
-    // Profile dagi send tugmasi
-    if (profileSendBtn) {
-        const newBtn = profileSendBtn.cloneNode(true);
-        profileSendBtn.parentNode.replaceChild(newBtn, profileSendBtn);
-        newBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            document.getElementById('notificationTitle').value = '';
-            document.getElementById('notificationMessage').value = '';
-            if (resultDiv) {
-                resultDiv.style.display = 'none';
-                resultDiv.className = 'form-message';
-            }
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
-            document.getElementById('notificationTitle').focus();
-        });
-    }
-    
-    // Close tugmasi
-    if (closeBtn) {
-        const newBtn = closeBtn.cloneNode(true);
-        closeBtn.parentNode.replaceChild(newBtn, closeBtn);
-        newBtn.addEventListener('click', function() {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
-        });
-    }
-    
-    // Cancel tugmasi
-    if (cancelBtn) {
-        const newBtn = cancelBtn.cloneNode(true);
-        cancelBtn.parentNode.replaceChild(newBtn, cancelBtn);
-        newBtn.addEventListener('click', function() {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
-        });
-    }
-    
-    // Modal tashqarisiga bosganda yopish
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
-        }
-    });
-    
-    // ESC tugmasi
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
-        }
-    });
-    
-    // Send tugmasi
-    const newSendBtn = sendBtn.cloneNode(true);
-    sendBtn.parentNode.replaceChild(newSendBtn, sendBtn);
-    newSendBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        sendNotification();
-    });
-}
-
-async function sendNotification() {
-    const titleInput = document.getElementById('notificationTitle');
-    const messageInput = document.getElementById('notificationMessage');
-    const sendBtn = document.getElementById('sendNotificationSubmitBtn');
-    const resultDiv = document.getElementById('notificationResult');
-    const title = titleInput ? titleInput.value.trim() : '';
-    const message = messageInput ? messageInput.value.trim() : '';
-    
-    if (!title) {
-        showNotificationResult('❌ Iltimos, sarlavhani kiriting!', 'error');
-        titleInput.focus();
-        return;
-    }
-    if (!message) {
-        showNotificationResult('❌ Iltimos, xabar matnini kiriting!', 'error');
-        messageInput.focus();
-        return;
-    }
-    if (!adminId) {
-        showNotificationResult('❌ Admin ID topilmadi!', 'error');
-        return;
-    }
-    
-    sendBtn.disabled = true;
-    sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...';
-    showNotificationResult('⏳ Xabar yuborilmoqda...', 'info');
-    
-    try {
-        const token = localStorage.getItem('adminToken');
-        const response = await fetch('https://admin-main-backend.onrender.com/api/notifications', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                title: title,
-                message: message,
-                type: 'info',
-                recipientId: adminId,
-                recipientRole: 'admin_customer',
-                expiresInDays: 30
-            })
-        });
-        const data = await response.json();
-        if (response.ok && data.success) {
-            showNotificationResult('✅ Xabar muvaffaqiyatli yuborildi!', 'success');
-            titleInput.value = '';
-            messageInput.value = '';
-            loadNotifications();
-            setTimeout(() => {
-                document.getElementById('notificationModal').classList.remove('active');
-                document.body.style.overflow = '';
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
-            }, 2000);
-        } else {
-            showNotificationResult('❌ Xabar yuborishda xatolik: ' + (data.message || 'Noma\'lum xatolik'), 'error');
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
-        }
-    } catch (error) {
-        showNotificationResult('❌ Xabar yuborishda xatolik: ' + error.message, 'error');
-        sendBtn.disabled = false;
-        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
-    }
-}
-
-function showNotificationResult(msg, type) {
-    const resultDiv = document.getElementById('notificationResult');
-    if (!resultDiv) return;
-    resultDiv.textContent = msg;
-    resultDiv.className = 'form-message ' + type;
-    resultDiv.style.display = 'block';
-    setTimeout(() => {
-        if (type !== 'success') {
-            resultDiv.style.display = 'none';
-        }
-    }, 6000);
-}
-
-// ============================================================
-// ⭐ BAN / UNBAN
+// UNBAN MODAL
 // ============================================================
 function initUnbanModal() {
     const modal = document.getElementById('unbanModal');
@@ -1166,7 +965,6 @@ function initUnbanModal() {
     
     if (!modal || !unbanBtn) return;
     
-    // Unban tugmasi
     const newBtn = unbanBtn.cloneNode(true);
     unbanBtn.parentNode.replaceChild(newBtn, unbanBtn);
     newBtn.addEventListener('click', function(e) {
@@ -1192,7 +990,6 @@ function initUnbanModal() {
         document.getElementById('unbanStartDate').value = now.toISOString().slice(0, 16);
     });
     
-    // Close tugmasi
     if (closeBtn) {
         const newBtn = closeBtn.cloneNode(true);
         closeBtn.parentNode.replaceChild(newBtn, closeBtn);
@@ -1202,7 +999,6 @@ function initUnbanModal() {
         });
     }
     
-    // Cancel tugmasi
     if (cancelBtn) {
         const newBtn = cancelBtn.cloneNode(true);
         cancelBtn.parentNode.replaceChild(newBtn, cancelBtn);
@@ -1212,7 +1008,6 @@ function initUnbanModal() {
         });
     }
     
-    // Modal tashqarisiga bosganda yopish
     modal.addEventListener('click', function(e) {
         if (e.target === modal) {
             modal.classList.remove('active');
@@ -1220,7 +1015,6 @@ function initUnbanModal() {
         }
     });
     
-    // Payment type o'zgarganda
     if (paymentType) {
         paymentType.addEventListener('change', function() {
             const isCustom = this.value === 'custom';
@@ -1236,14 +1030,12 @@ function initUnbanModal() {
         });
     }
     
-    // Start date o'zgarganda
     const startDateInput = document.getElementById('unbanStartDate');
     if (startDateInput) {
         startDateInput.addEventListener('change', calculateUnbanEndDate);
         startDateInput.addEventListener('input', calculateUnbanEndDate);
     }
     
-    // Custom vaqt o'zgarganda
     ['unbanCustomDays', 'unbanCustomHours', 'unbanCustomMinutes', 'unbanCustomSeconds'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -1252,7 +1044,6 @@ function initUnbanModal() {
         }
     });
     
-    // Save tugmasi
     if (saveBtn) {
         const newBtn = saveBtn.cloneNode(true);
         saveBtn.parentNode.replaceChild(newBtn, saveBtn);
@@ -1395,30 +1186,7 @@ async function saveUnbanWithPayment() {
 }
 
 // ============================================================
-// ⭐ BAN TUGMASI
-// ============================================================
-async function banAdmin(id) {
-    if (!currentAdmin || currentAdmin.status === 'blocked') {
-        alert('⚠️ Bu Admin Customer allaqachon bloklangan!');
-        return;
-    }
-    const reason = prompt('Bloklash sababini yozing:');
-    if (reason === null) return;
-    try {
-        const result = await API.post(`/admins/${id}/ban`, {
-            reason: reason?.trim() || 'Admin panelda cheklov'
-        });
-        if (result.success) {
-            alert('✅ Admin Customer bloklandi!');
-            loadProfile();
-        }
-    } catch (error) {
-        alert('❌ Xatolik: ' + error.message);
-    }
-}
-
-// ============================================================
-// ⭐ DELETE TUGMASI
+// BAN / DELETE TUGMALARI
 // ============================================================
 function initButtons() {
     const banBtn = document.getElementById('banBtn');
@@ -1450,8 +1218,300 @@ function initButtons() {
     }
 }
 
+async function banAdmin(id) {
+    if (!currentAdmin || currentAdmin.status === 'blocked') {
+        alert('⚠️ Bu Admin Customer allaqachon bloklangan!');
+        return;
+    }
+    const reason = prompt('Bloklash sababini yozing:');
+    if (reason === null) return;
+    try {
+        const result = await API.post(`/admins/${id}/ban`, {
+            reason: reason?.trim() || 'Admin panelda cheklov'
+        });
+        if (result.success) {
+            alert('✅ Admin Customer bloklandi!');
+            loadProfile();
+        }
+    } catch (error) {
+        alert('❌ Xatolik: ' + error.message);
+    }
+}
+
 // ============================================================
-// ⭐ YORDAMCHI FUNKSIYALAR
+// XABAR YUBORISH MODAL
+// ============================================================
+function initNotificationModal() {
+    const modal = document.getElementById('notificationModal');
+    const sendBtn = document.getElementById('sendNotificationSubmitBtn');
+    const profileSendBtn = document.getElementById('sendNotificationBtn');
+    const closeBtn = document.getElementById('closeNotificationModal');
+    const cancelBtn = document.getElementById('cancelNotificationModal');
+    const resultDiv = document.getElementById('notificationResult');
+    
+    if (!modal || !sendBtn) return;
+    
+    if (profileSendBtn) {
+        const newBtn = profileSendBtn.cloneNode(true);
+        profileSendBtn.parentNode.replaceChild(newBtn, profileSendBtn);
+        newBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('notificationTitle').value = '';
+            document.getElementById('notificationMessage').value = '';
+            if (resultDiv) {
+                resultDiv.style.display = 'none';
+                resultDiv.className = 'form-message';
+            }
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+            document.getElementById('notificationTitle').focus();
+        });
+    }
+    
+    if (closeBtn) {
+        const newBtn = closeBtn.cloneNode(true);
+        closeBtn.parentNode.replaceChild(newBtn, closeBtn);
+        newBtn.addEventListener('click', function() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+        });
+    }
+    
+    if (cancelBtn) {
+        const newBtn = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newBtn, cancelBtn);
+        newBtn.addEventListener('click', function() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+        });
+    }
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+        }
+    });
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+        }
+    });
+    
+    const newSendBtn = sendBtn.cloneNode(true);
+    sendBtn.parentNode.replaceChild(newSendBtn, sendBtn);
+    newSendBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        sendNotification();
+    });
+}
+
+async function sendNotification() {
+    const titleInput = document.getElementById('notificationTitle');
+    const messageInput = document.getElementById('notificationMessage');
+    const sendBtn = document.getElementById('sendNotificationSubmitBtn');
+    const resultDiv = document.getElementById('notificationResult');
+    const title = titleInput ? titleInput.value.trim() : '';
+    const message = messageInput ? messageInput.value.trim() : '';
+    
+    if (!title) {
+        showNotificationResult('❌ Iltimos, sarlavhani kiriting!', 'error');
+        titleInput.focus();
+        return;
+    }
+    if (!message) {
+        showNotificationResult('❌ Iltimos, xabar matnini kiriting!', 'error');
+        messageInput.focus();
+        return;
+    }
+    if (!adminId) {
+        showNotificationResult('❌ Admin ID topilmadi!', 'error');
+        return;
+    }
+    
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...';
+    showNotificationResult('⏳ Xabar yuborilmoqda...', 'info');
+    
+    try {
+        const token = localStorage.getItem('adminToken');
+        const response = await fetch('https://admin-main-backend.onrender.com/api/notifications', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                title: title,
+                message: message,
+                type: 'info',
+                recipientId: adminId,
+                recipientRole: 'admin_customer',
+                expiresInDays: 30
+            })
+        });
+        const data = await response.json();
+        if (response.ok && data.success) {
+            showNotificationResult('✅ Xabar muvaffaqiyatli yuborildi!', 'success');
+            titleInput.value = '';
+            messageInput.value = '';
+            loadNotifications();
+            setTimeout(() => {
+                document.getElementById('notificationModal').classList.remove('active');
+                document.body.style.overflow = '';
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+            }, 2000);
+        } else {
+            showNotificationResult('❌ Xabar yuborishda xatolik: ' + (data.message || 'Noma\'lum xatolik'), 'error');
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+        }
+    } catch (error) {
+        showNotificationResult('❌ Xabar yuborishda xatolik: ' + error.message, 'error');
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Yuborish';
+    }
+}
+
+function showNotificationResult(msg, type) {
+    const resultDiv = document.getElementById('notificationResult');
+    if (!resultDiv) return;
+    resultDiv.textContent = msg;
+    resultDiv.className = 'form-message ' + type;
+    resultDiv.style.display = 'block';
+    setTimeout(() => {
+        if (type !== 'success') {
+            resultDiv.style.display = 'none';
+        }
+    }, 6000);
+}
+
+// ============================================================
+// TAHRIRLASH MODAL
+// ============================================================
+function initEditModal() {
+    const modal = document.getElementById('editModal');
+    const editBtn = document.getElementById('editBtn');
+    const closeBtn = document.getElementById('closeEditModal');
+    const cancelBtn = document.getElementById('cancelEditModal');
+    const saveBtn = document.getElementById('saveEditModal');
+    
+    if (!modal) return;
+    
+    if (editBtn) {
+        const newBtn = editBtn.cloneNode(true);
+        editBtn.parentNode.replaceChild(newBtn, editBtn);
+        newBtn.addEventListener('click', function() {
+            if (!currentAdmin) return;
+            openEditModal();
+        });
+    }
+    
+    if (closeBtn) {
+        const newBtn = closeBtn.cloneNode(true);
+        closeBtn.parentNode.replaceChild(newBtn, closeBtn);
+        newBtn.addEventListener('click', function() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
+    
+    if (cancelBtn) {
+        const newBtn = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newBtn, cancelBtn);
+        newBtn.addEventListener('click', function() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+    
+    if (saveBtn) {
+        const newBtn = saveBtn.cloneNode(true);
+        saveBtn.parentNode.replaceChild(newBtn, saveBtn);
+        newBtn.addEventListener('click', async function() {
+            await saveEdit();
+        });
+    }
+}
+
+function openEditModal() {
+    if (!currentAdmin) return;
+    document.getElementById('editFullName').value = currentAdmin.fullName || '';
+    document.getElementById('editEmail').value = currentAdmin.email || '';
+    document.getElementById('editPhone').value = currentAdmin.phone || '';
+    document.getElementById('editStatus').value = currentAdmin.status || 'active';
+    document.getElementById('editPassword').value = '';
+    document.getElementById('editModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+async function saveEdit() {
+    const fullName = document.getElementById('editFullName').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    const phone = document.getElementById('editPhone').value.trim();
+    const status = document.getElementById('editStatus').value;
+    const newPassword = document.getElementById('editPassword').value.trim();
+    
+    if (!fullName || !email) {
+        alert('F.I.SH va Email majburiy!');
+        return;
+    }
+    if (!email.includes('@')) {
+        alert('Email noto\'g\'ri formatda!');
+        return;
+    }
+    
+    try {
+        const updateData = { fullName, email, phone, status: status === 'none' ? 'inactive' : status };
+        if (newPassword && newPassword.length >= 6) {
+            updateData.password = newPassword;
+        } else if (newPassword && newPassword.length < 6) {
+            alert('Yangi parol kamida 6 ta belgi bo\'lishi kerak!');
+            return;
+        }
+        if (status === 'none') {
+            updateData.subscription = { type: 'none', status: 'inactive', startDate: null, endDate: null, amount: 0 };
+        }
+        
+        const response = await API.put(`/admins/${adminId}`, updateData);
+        if (response.success) {
+            alert('✅ Admin muvaffaqiyatli yangilandi!');
+            document.getElementById('editModal').classList.remove('active');
+            document.body.style.overflow = '';
+            document.getElementById('editPassword').value = '';
+            loadProfile();
+        } else {
+            alert('❌ Xatolik: ' + (response.message || 'Noma\'lum xatolik'));
+        }
+    } catch (error) {
+        alert('❌ Xatolik: ' + error.message);
+    }
+}
+
+// ============================================================
+// YORDAMCHI FUNKSIYALAR
 // ============================================================
 function showError(message) {
     console.error('⚠️ Xatolik:', message);

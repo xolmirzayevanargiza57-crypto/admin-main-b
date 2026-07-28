@@ -21,7 +21,7 @@ const PAYMENT_METHODS = {
     click: {
         id: 'click',
         name: 'Click',
-        icon: 'https://allpit.shop/core/template/images/resource/click.png',
+        icon: 'https://api.logobank.uz/media/logos_preview/Click-01_0xvqWH8.png',
         keywords: ['click'],
         emoji: '📱'
     },

@@ -8,7 +8,7 @@ let countdownInterval = null;
 let notificationRefreshInterval = null;
 
 // ============================================================
-// ⭐ TO'LOV USULI MA'LUMOTLARI (TO'LIQ)
+// ⭐ TO'LOV USULI MA'LUMOTLARI (TO'LIQ TUZATILGAN)
 // ============================================================
 const PAYMENT_METHODS = {
     cash: {
@@ -21,7 +21,7 @@ const PAYMENT_METHODS = {
     click: {
         id: 'click',
         name: 'Click',
-        icon: 'https://api.logobank.uz/media/logos_preview/Click-01_0xvqWH8.png',
+        icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Click_logo.svg/1200px-Click_logo.svg.png',
         keywords: ['click'],
         emoji: '📱'
     },
@@ -102,7 +102,6 @@ const PAYMENT_METHODS = {
         keywords: ['anjir', 'anjir pay', 'anjir bank'],
         emoji: '🍐'
     },
-    // ⭐ YANGI QO'SHILGAN TO'LOV USULLARI
     hamkorbank: {
         id: 'hamkorbank',
         name: 'Hamkor Bank',
@@ -138,12 +137,20 @@ const PAYMENT_METHODS = {
         keywords: ['american', 'americanexpress', 'american express', 'amex'],
         emoji: '💳'
     },
-    pay: {
-        id: 'pay',
-        name: 'Pay',
-        icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/PayPal_logo_2014.svg/800px-PayPal_logo_2014.svg.png',
-        keywords: ['pay', 'to\'lov', 'payment'],
-        emoji: '💳'
+    // ⭐ YANGI QO'SHILGANLAR
+    tezpay: {
+        id: 'tezpay',
+        name: 'TezPay',
+        icon: 'https://play-lh.googleusercontent.com/1S7fa2zZf2siANOH1JGrMrhdK2zE9TTZlnS06Vr6zYeXlU6Xb86aO3HwgHONlY4msQ=s180-rw',
+        keywords: ['tezpay', 'tez pay'],
+        emoji: '⚡'
+    },
+    applepay: {
+        id: 'applepay',
+        name: 'Apple Pay',
+        icon: 'https://cdn-icons-png.flaticon.com/512/5968/5968230.png',
+        keywords: ['apple pay', 'applepay', 'apple'],
+        emoji: '🍎'
     },
     other: {
         id: 'other',
@@ -155,30 +162,70 @@ const PAYMENT_METHODS = {
 };
 
 // ============================================================
-// ⭐ TO'LOV USULINI MATN ORQALI AVTOMATIK ANIQLASH
+// ⭐ TO'LOV USULINI MATN ORQALI AVTOMATIK ANIQLASH (TUZATILGAN)
 // ============================================================
 function detectPaymentMethod(text) {
     if (!text) return PAYMENT_METHODS.other;
     const lowerText = text.toLowerCase().trim();
     
-    // ⭐ YANGI USULLAR BIRINCHI TEKSHIRILADI
+    // ⭐ 1. UZUM - BIRINCHI TEKSHIRILADI (pay dan oldin)
+    if (lowerText.includes('uzum')) {
+        return PAYMENT_METHODS.uzum;
+    }
+    
+    // ⭐ 2. TEZPAY
+    if (lowerText.includes('tezpay') || lowerText.includes('tez pay')) {
+        return PAYMENT_METHODS.tezpay;
+    }
+    
+    // ⭐ 3. APPLE PAY
+    if (lowerText.includes('apple pay') || lowerText.includes('applepay') || lowerText.includes('apple')) {
+        return PAYMENT_METHODS.applepay;
+    }
+    
+    // ⭐ 4. HAMKOR BANK
     if (lowerText.includes('hamkor') || lowerText.includes('hamkorbank')) {
         return PAYMENT_METHODS.hamkorbank;
     }
+    
+    // ⭐ 5. XALQ BANKI
     if (lowerText.includes('xalq')) {
         return PAYMENT_METHODS.xalqbanki;
     }
+    
+    // ⭐ 6. PAYPAL
     if (lowerText.includes('paypal') || lowerText.includes('pay pal')) {
         return PAYMENT_METHODS.paypal;
     }
+    
+    // ⭐ 7. MASTERCARD
     if (lowerText.includes('mastercard') || lowerText.includes('master card') || lowerText.includes('master')) {
         return PAYMENT_METHODS.mastercard;
     }
+    
+    // ⭐ 8. AMERICAN EXPRESS
     if (lowerText.includes('american') || lowerText.includes('americanexpress') || lowerText.includes('amex')) {
         return PAYMENT_METHODS.americanexpress;
     }
-    if (lowerText.includes('pay') && !lowerText.includes('paypal') && !lowerText.includes('payme')) {
-        return PAYMENT_METHODS.pay;
+    
+    // ⭐ 9. CLICK (xazna dan oldin)
+    if (lowerText.includes('click')) {
+        return PAYMENT_METHODS.click;
+    }
+    
+    // ⭐ 10. UZCARD
+    if (lowerText.includes('uzcard') || lowerText.includes('uz card')) {
+        return PAYMENT_METHODS.uzcard;
+    }
+    
+    // ⭐ 11. XAZNA
+    if (lowerText.includes('xazna') || lowerText.includes('g\'azna') || lowerText.includes('gazna')) {
+        return PAYMENT_METHODS.xazna;
+    }
+    
+    // ⭐ 12. PAY (boshqa hech narsa topilmasa Apple Pay chiqaradi)
+    if (lowerText.includes('pay') && !lowerText.includes('paypal') && !lowerText.includes('payme') && !lowerText.includes('paynet')) {
+        return PAYMENT_METHODS.applepay;
     }
     
     // Eski usullar
@@ -311,7 +358,7 @@ async function loadProfile() {
 }
 
 // ============================================================
-// ⭐ PROFILNI RENDER QILISH (TO'LIQ)
+// ⭐ PROFILNI RENDER QILISH
 // ============================================================
 function renderProfile(admin) {
     const nameEl = document.getElementById('profileName');
@@ -324,7 +371,6 @@ function renderProfile(admin) {
     if (phoneEl) phoneEl.textContent = admin.phone || '-';
     if (initialEl) initialEl.textContent = (admin.fullName || 'A').charAt(0).toUpperCase();
     
-    // STATUS
     const statusEl = document.getElementById('profileStatus');
     if (statusEl) {
         if (admin.status === 'active') {
@@ -339,7 +385,6 @@ function renderProfile(admin) {
         }
     }
     
-    // ⭐ SUBSCRIPTION
     const sub = admin.subscription || {};
     const subLabelEl = document.getElementById('profileSubscription');
     if (subLabelEl) {
@@ -371,7 +416,6 @@ function renderProfile(admin) {
     document.getElementById('profileSubType').textContent = sub.type || 'Yo\'q';
     document.getElementById('profileSubAmount').textContent = formatMoney(sub.amount || 0);
     
-    // ⭐ TO'LOV TARIXI
     const history = admin.paymentHistory || admin.subscriptionHistory || [];
     renderSubscriptionHistory(history);
 }
@@ -416,7 +460,6 @@ function renderSubscriptionHistory(history) {
         const note = item.note ? `<p class="history-dates"><i class="fas fa-sticky-note"></i> ${item.note}</p>` : '';
         const purchaseDate = item.purchaseDate ? formatDateTimeFull(item.purchaseDate) : '-';
         
-        // ⭐ TO'LOV USULI - RASM BILAN
         const paymentMethod = item.paymentMethod || 'cash';
         const methodInfo = PAYMENT_METHODS[paymentMethod] || PAYMENT_METHODS.cash;
         const methodDisplay = methodInfo ? `
@@ -561,7 +604,7 @@ function renderNotifications(notifications) {
 }
 
 // ============================================================
-// ⭐ TO'LOV QO'SHISH MODAL (TO'LIQ)
+// ⭐ TO'LOV QO'SHISH MODAL (ADMIN-MAIN)
 // ============================================================
 function initPaymentModal() {
     const modal = document.getElementById('paymentModal');
@@ -699,7 +742,7 @@ function calculatePaymentEndDate() {
 }
 
 // ============================================================
-// ⭐ TO'LOV USULI SELECT VA RASM
+// ⭐ TO'LOV USULI SELECT VA RASM (ADMIN-MAIN)
 // ============================================================
 function initPaymentMethodSelect() {
     const select = document.getElementById('paymentMethodSelect');
@@ -730,7 +773,6 @@ function initPaymentMethodSelect() {
         }
     });
     
-    // ⭐ IZOH ORQALI AVTOMATIK ANIQLASH
     const noteInput = document.getElementById('paymentNote');
     if (noteInput) {
         noteInput.addEventListener('input', function() {
@@ -748,7 +790,7 @@ function initPaymentMethodSelect() {
 }
 
 // ============================================================
-// ⭐ TO'LOVNI SAQLASH (TO'LIQ)
+// ⭐ TO'LOVNI SAQLASH (ADMIN-MAIN)
 // ============================================================
 async function savePayment() {
     const paymentType = document.getElementById('paymentType').value;
@@ -819,7 +861,7 @@ async function savePayment() {
 }
 
 // ============================================================
-// OBUNA SOTISH MODAL
+// OBUNA SOTISH MODAL (ADMIN-MAIN)
 // ============================================================
 function initSubscriptionModal() {
     const modal = document.getElementById('subscriptionModal');
@@ -951,7 +993,7 @@ async function saveSubscription() {
 }
 
 // ============================================================
-// UNBAN MODAL
+// UNBAN MODAL (ADMIN-MAIN)
 // ============================================================
 function initUnbanModal() {
     const modal = document.getElementById('unbanModal');
@@ -1186,7 +1228,7 @@ async function saveUnbanWithPayment() {
 }
 
 // ============================================================
-// BAN / DELETE TUGMALARI
+// BAN / DELETE TUGMALARI (ADMIN-MAIN)
 // ============================================================
 function initButtons() {
     const banBtn = document.getElementById('banBtn');
@@ -1239,7 +1281,7 @@ async function banAdmin(id) {
 }
 
 // ============================================================
-// XABAR YUBORISH MODAL
+// XABAR YUBORISH MODAL (ADMIN-MAIN)
 // ============================================================
 function initNotificationModal() {
     const modal = document.getElementById('notificationModal');
@@ -1402,7 +1444,7 @@ function showNotificationResult(msg, type) {
 }
 
 // ============================================================
-// TAHRIRLASH MODAL
+// TAHRIRLASH MODAL (ADMIN-MAIN)
 // ============================================================
 function initEditModal() {
     const modal = document.getElementById('editModal');
@@ -1531,9 +1573,6 @@ function showSuccess(message) {
     setTimeout(() => div.remove(), 3000);
 }
 
-// ============================================================
-// CLEANUP
-// ============================================================
 window.addEventListener('beforeunload', function() {
     if (countdownInterval) {
         clearInterval(countdownInterval);

@@ -201,27 +201,11 @@
             .profile-avatar.large { width: 72px; height: 72px; font-size: 1.75rem; }
             .profile-info h2 { font-size: 1.1rem; }
         }
-
-        /* ============================================================
-           UNBAN MODAL STYLES
-           ============================================================ */
-        #unbanCustomDurationGroup,
-        #unbanAmountGroup {
-            transition: all 0.3s ease;
-        }
-
-        #unbanEndDate:disabled,
-        #unbanStartDate:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- ============================================================
-             SIDEBAR
-             ============================================================ -->
+        <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
                 <div class="brand-icon"><i class="fas fa-crown"></i></div>
@@ -239,16 +223,10 @@
             </div>
         </aside>
 
-        <!-- ============================================================
-             SIDEBAR OVERLAY
-             ============================================================ -->
+        <!-- SIDEBAR OVERLAY -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-        <!-- ============================================================
-             MAIN CONTENT
-             ============================================================ -->
         <main class="main-content">
-            <!-- HEADER -->
             <header class="top-header">
                 <div class="header-left">
                     <button id="menuToggle" class="menu-toggle"><i class="fas fa-bars"></i></button>
@@ -263,7 +241,6 @@
                 </div>
             </header>
 
-            <!-- PROFILE CONTENT -->
             <section class="profile-container">
                 <!-- Profile Header -->
                 <div class="profile-header">
@@ -334,7 +311,7 @@
     </div>
 
     <!-- ============================================================
-         ⭐ UNBAN MODAL (ADMIN-MAIN)
+         ⭐ UNBAN MODAL
          ============================================================ -->
     <div class="modal-overlay" id="unbanModal">
         <div class="modal" style="max-width: 580px;">
@@ -344,7 +321,6 @@
             </div>
             <div class="modal-body">
                 <form id="unbanForm">
-                    <!-- ⭐ TO'LOV TURI -->
                     <div class="form-group">
                         <label><i class="fas fa-tag"></i> To'lov turi</label>
                         <div class="input-wrapper">
@@ -358,7 +334,6 @@
                         </div>
                     </div>
 
-                    <!-- ⭐ CUSTOM VAQT -->
                     <div id="unbanCustomDurationGroup" style="display: none;">
                         <div class="form-group">
                             <label><i class="fas fa-clock"></i> Vaqtni belgilang</label>
@@ -380,7 +355,6 @@
                         </div>
                     </div>
 
-                    <!-- ⭐ TO'LOV MIQDORI (FAQAT CUSTOM UCHUN) -->
                     <div id="unbanAmountGroup" style="display: none;">
                         <div class="form-group">
                             <label><i class="fas fa-money-bill"></i> To'lov miqdori (so'm)</label>
@@ -391,7 +365,6 @@
                         </div>
                     </div>
 
-                    <!-- ⭐ BOSHLANISH SANASI -->
                     <div class="form-group">
                         <label><i class="fas fa-calendar-day"></i> Boshlanish sanasi</label>
                         <div class="input-wrapper">
@@ -400,13 +373,12 @@
                         <small class="text-muted">💡 Bo'sh qoldirilsa, hozirgi vaqt olinadi</small>
                     </div>
 
-                    <!-- ⭐ TUGASH SANASI -->
                     <div class="form-group">
                         <label><i class="fas fa-calendar-day"></i> Tugash sanasi</label>
                         <div class="input-wrapper">
-                            <input type="datetime-local" id="unbanEndDate" readonly style="background: var(--bg-hover);" />
+                            <input type="datetime-local" id="unbanEndDate" />
                         </div>
-                        <small class="text-muted">💡 Avtomatik hisoblanadi</small>
+                        <small class="text-muted">💡 Bo'sh qoldirilsa, avtomatik hisoblanadi</small>
                     </div>
                 </form>
             </div>
@@ -610,6 +582,7 @@
                                 <option value="other">💳 Boshqa</option>
                             </select>
                         </div>
+                        <!-- ⭐ TANLANGAN TO'LOV USULI RASMI -->
                         <div id="paymentMethodPreview" style="display: none; margin-top: 8px;"></div>
                         <small class="text-muted">💡 Izohga to'lov usulini yozsangiz, avtomatik aniqlanadi</small>
                     </div>
@@ -714,16 +687,11 @@
         </div>
     </div>
 
-    <!-- ============================================================
-         THEME TOGGLE
-         ============================================================ -->
+    <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
         <i class="fas fa-moon moon"></i>
     </button>
 
-    <!-- ============================================================
-         SCRIPTS
-         ============================================================ -->
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/theme.js"></script>

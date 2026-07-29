@@ -1,7 +1,5 @@
 // ============================================================
 // ADMIN PROFILE - ADMIN-MAIN (TO'LIQ TUZATILGAN)
-// Loyiha: Admin-Main Frontend
-// Fayl: js/admin-profile.js
 // ============================================================
 
 let adminId = null;
@@ -23,7 +21,7 @@ const PAYMENT_METHODS = {
     click: {
         id: 'click',
         name: 'Click',
-        icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Click_logo.svg/1200px-Click_logo.svg.png',
+        icon: 'https://minora.uz/images/logo/click-logo.png',
         keywords: ['click'],
         emoji: '📱'
     },
@@ -93,7 +91,7 @@ const PAYMENT_METHODS = {
     xazna: {
         id: 'xazna',
         name: 'Xazna Bank',
-        icon: 'https://cbu.uz/upload/iblock/1a8/1a8f3d8e6f9b4c0a0b2c3d4e5f6a7b8c/logo.png',
+        icon: 'https://jet-back.bank.uz/uploads/article_blocks/d88f203848c154c40be0e793c10fb9a5.webp',
         keywords: ['xazna', 'xasna', 'xazna bank', 'g\'azna', 'gazna'],
         emoji: '🏦'
     },
@@ -169,66 +167,67 @@ function detectPaymentMethod(text) {
     if (!text) return PAYMENT_METHODS.other;
     const lowerText = text.toLowerCase().trim();
     
-    // ⭐ UZUM - BIRINCHI TEKSHIRILADI
+    // ⭐ 1. UZUM - BIRINCHI TEKSHIRILADI
     if (lowerText.includes('uzum')) {
         return PAYMENT_METHODS.uzum;
     }
     
-    // ⭐ TEZPAY
+    // ⭐ 2. TEZPAY
     if (lowerText.includes('tezpay') || lowerText.includes('tez pay')) {
         return PAYMENT_METHODS.tezpay;
     }
     
-    // ⭐ APPLE PAY
+    // ⭐ 3. APPLE PAY
     if (lowerText.includes('apple pay') || lowerText.includes('applepay') || lowerText.includes('apple')) {
         return PAYMENT_METHODS.applepay;
     }
     
-    // ⭐ HAMKOR BANK
+    // ⭐ 4. HAMKOR BANK
     if (lowerText.includes('hamkor') || lowerText.includes('hamkorbank')) {
         return PAYMENT_METHODS.hamkorbank;
     }
     
-    // ⭐ XALQ BANKI
+    // ⭐ 5. XALQ BANKI
     if (lowerText.includes('xalq')) {
         return PAYMENT_METHODS.xalqbanki;
     }
     
-    // ⭐ PAYPAL
+    // ⭐ 6. PAYPAL
     if (lowerText.includes('paypal') || lowerText.includes('pay pal')) {
         return PAYMENT_METHODS.paypal;
     }
     
-    // ⭐ MASTERCARD
+    // ⭐ 7. MASTERCARD
     if (lowerText.includes('mastercard') || lowerText.includes('master card') || lowerText.includes('master')) {
         return PAYMENT_METHODS.mastercard;
     }
     
-    // ⭐ AMERICAN EXPRESS
+    // ⭐ 8. AMERICAN EXPRESS
     if (lowerText.includes('american') || lowerText.includes('americanexpress') || lowerText.includes('amex')) {
         return PAYMENT_METHODS.americanexpress;
     }
     
-    // ⭐ CLICK
+    // ⭐ 9. CLICK
     if (lowerText.includes('click')) {
         return PAYMENT_METHODS.click;
     }
     
-    // ⭐ UZCARD
+    // ⭐ 10. UZCARD
     if (lowerText.includes('uzcard') || lowerText.includes('uz card')) {
         return PAYMENT_METHODS.uzcard;
     }
     
-    // ⭐ XAZNA
+    // ⭐ 11. XAZNA
     if (lowerText.includes('xazna') || lowerText.includes('g\'azna') || lowerText.includes('gazna')) {
         return PAYMENT_METHODS.xazna;
     }
     
-    // ⭐ PAY -> APPLE PAY
+    // ⭐ 12. PAY -> APPLE PAY
     if (lowerText.includes('pay') && !lowerText.includes('paypal') && !lowerText.includes('payme') && !lowerText.includes('paynet')) {
         return PAYMENT_METHODS.applepay;
     }
     
+    // Eski usullar
     for (const [key, method] of Object.entries(PAYMENT_METHODS)) {
         if (key === 'other') continue;
         if (method.keywords && method.keywords.some(kw => lowerText.includes(kw))) {
@@ -371,7 +370,6 @@ function renderProfile(admin) {
     if (phoneEl) phoneEl.textContent = admin.phone || '-';
     if (initialEl) initialEl.textContent = (admin.fullName || 'A').charAt(0).toUpperCase();
     
-    // STATUS
     const statusEl = document.getElementById('profileStatus');
     if (statusEl) {
         if (admin.status === 'active') {
@@ -386,7 +384,6 @@ function renderProfile(admin) {
         }
     }
     
-    // ⭐ SUBSCRIPTION
     const sub = admin.subscription || {};
     const subLabelEl = document.getElementById('profileSubscription');
     if (subLabelEl) {
@@ -418,7 +415,6 @@ function renderProfile(admin) {
     document.getElementById('profileSubType').textContent = sub.type || 'Yo\'q';
     document.getElementById('profileSubAmount').textContent = formatMoney(sub.amount || 0);
     
-    // ⭐ TO'LOV TARIXI
     const history = admin.paymentHistory || admin.subscriptionHistory || [];
     renderSubscriptionHistory(history);
 }
@@ -463,7 +459,7 @@ function renderSubscriptionHistory(history) {
         const note = item.note ? `<p class="history-dates"><i class="fas fa-sticky-note"></i> ${item.note}</p>` : '';
         const purchaseDate = item.purchaseDate ? formatDateTimeFull(item.purchaseDate) : '-';
         
-        // ⭐ TO'LOV USULI - RASM BILAN
+        // ⭐ TO'LOV USULI - RASM BILAN (CHALKASHMASLIGI UCHUN)
         const paymentMethod = item.paymentMethod || 'cash';
         const methodInfo = PAYMENT_METHODS[paymentMethod] || PAYMENT_METHODS.cash;
         const methodDisplay = methodInfo ? `
@@ -779,6 +775,7 @@ function initPaymentMethodSelect() {
         }
     });
     
+    // ⭐ Izoh orqali avtomatik aniqlash
     const noteInput = document.getElementById('paymentNote');
     if (noteInput) {
         noteInput.addEventListener('input', function() {
@@ -857,7 +854,7 @@ async function savePayment() {
         });
         if (response.success) {
             const methodName = PAYMENT_METHODS[paymentMethod]?.name || paymentMethod;
-            alert(`✅ To'lov muvaffaqiyatli qo\'shildi!\n💳 To'lov usuli: ${methodName}`);
+            alert(`✅ To\'lov muvaffaqiyatli qo\'shildi!\n💳 To\'lov usuli: ${methodName}`);
             document.getElementById('paymentModal').classList.remove('active');
             document.body.style.overflow = '';
             loadProfile();
@@ -999,7 +996,7 @@ async function saveSubscription() {
 }
 
 // ============================================================
-// ⭐ UNBAN MODAL (ADMIN-MAIN) - TO'LIQ TUZATILGAN
+// UNBAN MODAL (ADMIN-MAIN)
 // ============================================================
 function initUnbanModal() {
     const modal = document.getElementById('unbanModal');
@@ -1010,8 +1007,6 @@ function initUnbanModal() {
     const paymentType = document.getElementById('unbanPaymentType');
     const customGroup = document.getElementById('unbanCustomDurationGroup');
     const amountGroup = document.getElementById('unbanAmountGroup');
-    const startDateInput = document.getElementById('unbanStartDate');
-    const endDateInput = document.getElementById('unbanEndDate');
     
     if (!modal || !unbanBtn) return;
     
@@ -1026,7 +1021,6 @@ function initUnbanModal() {
         }
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
-        
         document.getElementById('unbanPaymentType').value = 'monthly';
         document.getElementById('unbanCustomDays').value = '0';
         document.getElementById('unbanCustomHours').value = '0';
@@ -1035,15 +1029,10 @@ function initUnbanModal() {
         document.getElementById('unbanStartDate').value = '';
         document.getElementById('unbanEndDate').value = '';
         document.getElementById('unbanAmount').value = '';
-        
         if (customGroup) customGroup.style.display = 'none';
         if (amountGroup) amountGroup.style.display = 'none';
-        
         const now = new Date();
-        const formattedDate = now.toISOString().slice(0, 16);
-        document.getElementById('unbanStartDate').value = formattedDate;
-        
-        calculateUnbanEndDate();
+        document.getElementById('unbanStartDate').value = now.toISOString().slice(0, 16);
     });
     
     if (closeBtn) {
@@ -1071,63 +1060,32 @@ function initUnbanModal() {
         }
     });
     
-    // ⭐ TO'LOV TURI O'ZGARGANDA
     if (paymentType) {
-        const newPaymentType = paymentType.cloneNode(true);
-        paymentType.parentNode.replaceChild(newPaymentType, paymentType);
-        
-        newPaymentType.addEventListener('change', function() {
-            const value = this.value;
-            console.log('📌 To\'lov turi o\'zgartirildi:', value);
-            
-            if (customGroup) {
-                customGroup.style.display = value === 'custom' ? 'block' : 'none';
-            }
-            
-            if (amountGroup) {
-                amountGroup.style.display = value === 'custom' ? 'block' : 'none';
-            }
-            
-            const startDate = document.getElementById('unbanStartDate');
-            const endDate = document.getElementById('unbanEndDate');
-            if (value === 'none') {
-                if (startDate) startDate.disabled = true;
-                if (endDate) endDate.disabled = true;
-                if (endDate) endDate.value = '';
+        paymentType.addEventListener('change', function() {
+            const isCustom = this.value === 'custom';
+            if (customGroup) customGroup.style.display = isCustom ? 'block' : 'none';
+            if (amountGroup) amountGroup.style.display = isCustom ? 'block' : 'none';
+            if (this.value === 'none') {
+                document.getElementById('unbanStartDate').disabled = true;
+                document.getElementById('unbanEndDate').disabled = true;
             } else {
-                if (startDate) startDate.disabled = false;
-                if (endDate) endDate.disabled = false;
-                calculateUnbanEndDate();
-            }
-            
-            const amountInput = document.getElementById('unbanAmount');
-            if (amountInput && value !== 'custom' && value !== 'none') {
-                const amounts = {
-                    'monthly': 299999,
-                    '6months': 1899999,
-                    'yearly': 3599999
-                };
-                amountInput.value = amounts[value] || '';
+                document.getElementById('unbanStartDate').disabled = false;
+                document.getElementById('unbanEndDate').disabled = false;
             }
         });
     }
     
-    // ⭐ START DATE O'ZGARGANDA
+    const startDateInput = document.getElementById('unbanStartDate');
     if (startDateInput) {
-        const newStartDate = startDateInput.cloneNode(true);
-        startDateInput.parentNode.replaceChild(newStartDate, startDateInput);
-        newStartDate.addEventListener('change', calculateUnbanEndDate);
-        newStartDate.addEventListener('input', calculateUnbanEndDate);
+        startDateInput.addEventListener('change', calculateUnbanEndDate);
+        startDateInput.addEventListener('input', calculateUnbanEndDate);
     }
     
-    // ⭐ CUSTOM VAQT O'ZGARGANDA
     ['unbanCustomDays', 'unbanCustomHours', 'unbanCustomMinutes', 'unbanCustomSeconds'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-            const newEl = el.cloneNode(true);
-            el.parentNode.replaceChild(newEl, el);
-            newEl.addEventListener('change', calculateUnbanEndDate);
-            newEl.addEventListener('input', calculateUnbanEndDate);
+            el.addEventListener('change', calculateUnbanEndDate);
+            el.addEventListener('input', calculateUnbanEndDate);
         }
     });
     
@@ -1140,73 +1098,45 @@ function initUnbanModal() {
     }
 }
 
-// ============================================================
-// ⭐ TUGASH SANASINI HISOBLASH (UNBAN - ADMIN-MAIN)
-// ============================================================
 function calculateUnbanEndDate() {
-    const paymentType = document.getElementById('unbanPaymentType');
-    const startDate = document.getElementById('unbanStartDate');
+    const paymentType = document.getElementById('unbanPaymentType').value;
+    const startDate = document.getElementById('unbanStartDate').value;
     const endDateInput = document.getElementById('unbanEndDate');
-    
-    if (!paymentType || !startDate || !endDateInput) return;
-    
-    const type = paymentType.value;
-    const start = startDate.value;
-    
-    if (!start || type === 'none') {
+    if (!startDate || paymentType === 'none') {
         endDateInput.value = '';
         return;
     }
-    
-    const startDateObj = new Date(start);
-    if (isNaN(startDateObj.getTime())) {
+    const start = new Date(startDate);
+    if (isNaN(start.getTime())) {
         endDateInput.value = '';
         return;
     }
-    
-    const endDateObj = new Date(startDateObj);
-    
-    if (type === 'custom') {
-        const days = parseInt(document.getElementById('unbanCustomDays')?.value) || 0;
-        const hours = parseInt(document.getElementById('unbanCustomHours')?.value) || 0;
-        const minutes = parseInt(document.getElementById('unbanCustomMinutes')?.value) || 0;
-        const seconds = parseInt(document.getElementById('unbanCustomSeconds')?.value) || 0;
-        
+    const end = new Date(start);
+    if (paymentType === 'custom') {
+        const days = parseInt(document.getElementById('unbanCustomDays').value) || 0;
+        const hours = parseInt(document.getElementById('unbanCustomHours').value) || 0;
+        const minutes = parseInt(document.getElementById('unbanCustomMinutes').value) || 0;
+        const seconds = parseInt(document.getElementById('unbanCustomSeconds').value) || 0;
         if (days === 0 && hours === 0 && minutes === 0 && seconds === 0) {
             endDateInput.value = '';
             return;
         }
-        
-        endDateObj.setDate(endDateObj.getDate() + days);
-        endDateObj.setHours(endDateObj.getHours() + hours);
-        endDateObj.setMinutes(endDateObj.getMinutes() + minutes);
-        endDateObj.setSeconds(endDateObj.getSeconds() + seconds);
+        end.setDate(end.getDate() + days);
+        end.setHours(end.getHours() + hours);
+        end.setMinutes(end.getMinutes() + minutes);
+        end.setSeconds(end.getSeconds() + seconds);
     } else {
-        const durationMap = {
-            'monthly': 30,
-            '6months': 180,
-            'yearly': 365
-        };
-        const days = durationMap[type] || 0;
+        const durationMap = { 'monthly': 30, '6months': 180, 'yearly': 365 };
+        const days = durationMap[paymentType] || 0;
         if (days === 0) {
             endDateInput.value = '';
             return;
         }
-        endDateObj.setDate(endDateObj.getDate() + days);
+        end.setDate(end.getDate() + days);
     }
-    
-    const year = endDateObj.getFullYear();
-    const month = String(endDateObj.getMonth() + 1).padStart(2, '0');
-    const day = String(endDateObj.getDate()).padStart(2, '0');
-    const hours = String(endDateObj.getHours()).padStart(2, '0');
-    const minutes = String(endDateObj.getMinutes()).padStart(2, '0');
-    
-    endDateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    endDateInput.value = end.toISOString().slice(0, 16);
 }
 
-// ============================================================
-// ⭐ UNBAN VA TO'LOVNI SAQLASH (ADMIN-MAIN)
-// ============================================================
 async function saveUnbanWithPayment() {
     const paymentType = document.getElementById('unbanPaymentType').value;
     const customDays = parseInt(document.getElementById('unbanCustomDays').value) || 0;
@@ -1216,17 +1146,6 @@ async function saveUnbanWithPayment() {
     const startDate = document.getElementById('unbanStartDate').value;
     const endDate = document.getElementById('unbanEndDate').value;
     const amount = document.getElementById('unbanAmount').value.trim();
-
-    console.log('📌 Unban ma\'lumotlari:', {
-        paymentType,
-        customDays,
-        customHours,
-        customMinutes,
-        customSeconds,
-        startDate,
-        endDate,
-        amount
-    });
 
     if (paymentType === 'none') {
         if (!confirm('Haqiqatan ham bu Admin Customerni blokdan chiqarmoqchimisiz (obunasiz)?')) return;
@@ -1260,7 +1179,6 @@ async function saveUnbanWithPayment() {
             return;
         }
     }
-    
     if (!startDate) {
         alert('❌ Iltimos, boshlanish sanasini tanlang!');
         document.getElementById('unbanStartDate').focus();
@@ -1270,7 +1188,6 @@ async function saveUnbanWithPayment() {
     const saveBtn = document.getElementById('saveUnbanModal');
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saqlanmoqda...';
-    
     try {
         const unbanResult = await API.post(`/admins/${adminId}/unban`);
         if (!unbanResult.success) {
@@ -1283,22 +1200,9 @@ async function saveUnbanWithPayment() {
         let customDuration = null;
         let amountNumber = 0;
         if (paymentType === 'custom') {
-            customDuration = {
-                days: customDays,
-                hours: customHours,
-                minutes: customMinutes,
-                seconds: customSeconds
-            };
+            customDuration = { days: customDays, hours: customHours, minutes: customMinutes, seconds: customSeconds };
             amountNumber = parseInt(amount) || 0;
-        } else {
-            const amounts = {
-                'monthly': 299999,
-                '6months': 1899999,
-                'yearly': 3599999
-            };
-            amountNumber = amounts[paymentType] || 0;
         }
-        
         const paymentData = {
             amount: amountNumber,
             subscriptionType: paymentType,
@@ -1308,20 +1212,14 @@ async function saveUnbanWithPayment() {
             note: 'Blokdan chiqarishda qo\'shildi',
             paymentMethod: 'cash'
         };
-        
-        console.log('📤 To\'lov ma\'lumotlari:', paymentData);
-        
         const paymentResult = await API.post(`/admins/${adminId}/payment`, paymentData);
         if (paymentResult.success) {
-            const msg = paymentType === 'monthly' ? 'Oylik' : 
-                       paymentType === '6months' ? '6 oylik' : 
-                       paymentType === 'yearly' ? 'Yillik' : 'Custom';
-            alert(`✅ Admin Customer blokdan chiqarildi va ${msg} to'lov qo'shildi!`);
+            alert('✅ Admin Customer blokdan chiqarildi va to\'lov qo\'shildi!');
             document.getElementById('unbanModal').classList.remove('active');
             document.body.style.overflow = '';
             loadProfile();
         } else {
-            alert('❌ To\'lov qo\'shishda xatolik: ' + (paymentResult.message || 'Noma\'lum xatolik'));
+            alert('❌ To\'lov qo\'shishda xatolik');
         }
     } catch (error) {
         console.error('❌ Xatolik:', error);
@@ -1678,9 +1576,6 @@ function showSuccess(message) {
     setTimeout(() => div.remove(), 3000);
 }
 
-// ============================================================
-// CLEANUP
-// ============================================================
 window.addEventListener('beforeunload', function() {
     if (countdownInterval) {
         clearInterval(countdownInterval);

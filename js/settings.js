@@ -2,7 +2,7 @@
 // SETTINGS - SOZLAMALAR (Admin-Main)
 // ============================================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     if (!Auth.isAuthenticated()) {
         window.location.href = 'index.html';
         return;
@@ -14,20 +14,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================
     // PASSWORD TOGGLE
     // ============================================
-    document.querySelectorAll('.password-toggle').forEach(btn => {
+    document.querySelectorAll('.password-toggle').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
-            const targetId = this.getAttribute('data-target');
-            const input = document.getElementById(targetId);
+            var targetId = this.getAttribute('data-target');
+            var input = document.getElementById(targetId);
             
             if (!input) return;
             
-            const type = input.type === 'password' ? 'text' : 'password';
+            var type = input.type === 'password' ? 'text' : 'password';
             input.type = type;
             
-            const icon = this.querySelector('i');
+            var icon = this.querySelector('i');
             if (icon) {
                 icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
             }
@@ -37,130 +37,142 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================
     // PASSWORD CHANGE
     // ============================================
-    const passwordForm = document.getElementById('passwordForm');
-    const oldPasswordInput = document.getElementById('oldPassword');
-    const newPasswordInput = document.getElementById('newPassword');
-    const confirmPasswordInput = document.getElementById('confirmPassword');
-    const passwordMessage = document.getElementById('passwordMessage');
+    var passwordForm = document.getElementById('passwordForm');
+    var oldPasswordInput = document.getElementById('oldPassword');
+    var newPasswordInput = document.getElementById('newPassword');
+    var confirmPasswordInput = document.getElementById('confirmPassword');
+    var passwordMessage = document.getElementById('passwordMessage');
     
-    newPasswordInput.addEventListener('input', () => {
-        const isValid = newPasswordInput.value.length >= 6;
-        newPasswordInput.classList.toggle('error', !isValid && newPasswordInput.value.length > 0);
-        newPasswordInput.classList.toggle('success', isValid);
-    });
+    if (newPasswordInput) {
+        newPasswordInput.addEventListener('input', function() {
+            var isValid = this.value.length >= 6;
+            this.classList.toggle('error', !isValid && this.value.length > 0);
+            this.classList.toggle('success', isValid);
+        });
+    }
     
-    confirmPasswordInput.addEventListener('input', () => {
-        const isMatch = confirmPasswordInput.value === newPasswordInput.value;
-        confirmPasswordInput.classList.toggle('error', !isMatch && confirmPasswordInput.value.length > 0);
-        confirmPasswordInput.classList.toggle('success', isMatch && confirmPasswordInput.value.length > 0);
-    });
+    if (confirmPasswordInput) {
+        confirmPasswordInput.addEventListener('input', function() {
+            var isMatch = this.value === newPasswordInput.value;
+            this.classList.toggle('error', !isMatch && this.value.length > 0);
+            this.classList.toggle('success', isMatch && this.value.length > 0);
+        });
+    }
     
-    passwordForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const oldPassword = oldPasswordInput.value;
-        const newPassword = newPasswordInput.value;
-        const confirmPassword = confirmPasswordInput.value;
-        
-        passwordMessage.className = 'form-message';
-        passwordMessage.style.display = 'none';
-        
-        if (!oldPassword || !newPassword || !confirmPassword) {
-            showPasswordMessage('Barcha maydonlarni to\'ldiring!', 'error');
-            return;
-        }
-        
-        if (newPassword !== confirmPassword) {
-            showPasswordMessage('Yangi parol va tasdiqlash mos kelmadi!', 'error');
-            return;
-        }
-        
-        if (newPassword.length < 6) {
-            showPasswordMessage('Yangi parol kamida 6 ta belgidan iborat bo\'lishi kerak!', 'error');
-            return;
-        }
-        
-        const btn = passwordForm.querySelector('button[type="submit"]');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Kutilmoqda...';
-        
-        try {
-            const response = await API.post('/auth/change-password', {
-                oldPassword,
-                newPassword
-            });
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            if (response.success) {
-                showPasswordMessage('✅ Parol muvaffaqiyatli yangilandi!', 'success');
-                oldPasswordInput.value = '';
-                newPasswordInput.value = '';
-                confirmPasswordInput.value = '';
-                oldPasswordInput.classList.remove('success', 'error');
-                newPasswordInput.classList.remove('success', 'error');
-                confirmPasswordInput.classList.remove('success', 'error');
+            var oldPassword = oldPasswordInput.value;
+            var newPassword = newPasswordInput.value;
+            var confirmPassword = confirmPasswordInput.value;
+            
+            passwordMessage.className = 'form-message';
+            passwordMessage.style.display = 'none';
+            
+            if (!oldPassword || !newPassword || !confirmPassword) {
+                showPasswordMessage('Barcha maydonlarni to\'ldiring!', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showPasswordMessage('Yangi parol va tasdiqlash mos kelmadi!', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showPasswordMessage('Yangi parol kamida 6 ta belgidan iborat bo\'lishi kerak!', 'error');
+                return;
+            }
+            
+            var btn = passwordForm.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Kutilmoqda...';
+            
+            try {
+                var response = await API.post('/auth/change-password', {
+                    oldPassword: oldPassword,
+                    newPassword: newPassword
+                });
                 
-                // ⭐ PAROL O'ZGARGANDA BARCHA QURILMALARNI YANGILASH UCHUN
-                // Serverga yuborilgan parol o'zgarganligi haqida xabar
-                // Admin-Customer larga xabar yuboriladi (backendda)
+                if (response.success) {
+                    showPasswordMessage('✅ Parol muvaffaqiyatli yangilandi!', 'success');
+                    oldPasswordInput.value = '';
+                    newPasswordInput.value = '';
+                    confirmPasswordInput.value = '';
+                    oldPasswordInput.classList.remove('success', 'error');
+                    newPasswordInput.classList.remove('success', 'error');
+                    confirmPasswordInput.classList.remove('success', 'error');
+                }
+            } catch (error) {
+                if (error.message && error.message.includes('Eski parol noto\'g\'ri')) {
+                    oldPasswordInput.classList.add('error');
+                    showPasswordMessage('Eski parol noto\'g\'ri!', 'error');
+                } else {
+                    showPasswordMessage(error.message || 'Xatolik yuz berdi!', 'error');
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-key"></i> Parolni yangilash';
             }
-        } catch (error) {
-            if (error.message.includes('Eski parol noto\'g\'ri')) {
-                oldPasswordInput.classList.add('error');
-                showPasswordMessage('Eski parol noto\'g\'ri!', 'error');
-            } else {
-                showPasswordMessage(error.message || 'Xatolik yuz berdi!', 'error');
-            }
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-key"></i> Parolni yangilash';
-        }
-    });
+        });
+    }
     
     // ============================================
     // PROFILE UPDATE
     // ============================================
-    document.getElementById('profileForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await updateProfile();
-    });
+    var profileForm = document.getElementById('profileForm');
+    if (profileForm) {
+        profileForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await updateProfile();
+        });
+    }
     
     // ============================================
     // LOGOUT
     // ============================================
-    document.getElementById('settingsLogout').addEventListener('click', () => {
-        if (confirm('Haqiqatan ham chiqmoqchimisiz?')) {
-            Auth.logout();
-        }
-    });
+    var settingsLogout = document.getElementById('settingsLogout');
+    if (settingsLogout) {
+        settingsLogout.addEventListener('click', function() {
+            if (confirm('Haqiqatan ham chiqmoqchimisiz?')) {
+                Auth.logout();
+            }
+        });
+    }
 
     // ============================================
     // ⭐ REAL-TIME PROFILE SYNC (HAR 10 SONIYADA)
     // ============================================
-    setInterval(async () => {
-        await syncProfileFromServer();
+    setInterval(function() {
+        syncProfileFromServer();
     }, 10000);
 
     // ============================================
     // ⭐ SAHIFA YUKLANGANDA PROFILNI YANGILASH
     // ============================================
-    await syncProfileFromServer();
+    syncProfileFromServer();
 });
 
 // ============================================
 // LOAD SETTINGS
 // ============================================
 function loadSettings() {
-    const user = Auth.getUser();
+    var user = Auth.getUser();
     if (!user) return;
     
-    document.getElementById('settingsName').value = user.fullName || '';
-    document.getElementById('settingsEmail').value = user.email || '';
-    document.getElementById('settingsPhone').value = user.phone || '';
+    var nameInput = document.getElementById('settingsName');
+    var emailInput = document.getElementById('settingsEmail');
+    var phoneInput = document.getElementById('settingsPhone');
+    
+    if (nameInput) nameInput.value = user.fullName || '';
+    if (emailInput) emailInput.value = user.email || '';
+    if (phoneInput) phoneInput.value = user.phone || '';
     
     // ⭐ User ma'lumotlarini ekranda ko'rsatish
-    const nameDisplay = document.getElementById('profileNameDisplay');
-    const emailDisplay = document.getElementById('profileEmailDisplay');
-    const phoneDisplay = document.getElementById('profilePhoneDisplay');
+    var nameDisplay = document.getElementById('profileNameDisplay');
+    var emailDisplay = document.getElementById('profileEmailDisplay');
+    var phoneDisplay = document.getElementById('profilePhoneDisplay');
     
     if (nameDisplay) nameDisplay.textContent = user.fullName || '-';
     if (emailDisplay) emailDisplay.textContent = user.email || '-';
@@ -172,17 +184,17 @@ function loadSettings() {
 // ============================================
 async function syncProfileFromServer() {
     try {
-        const token = Auth.getToken();
+        var token = Auth.getToken();
         if (!token) return;
         
-        const response = await API.get('/auth/profile');
+        var response = await API.get('/auth/profile');
         
         if (response.success && response.user) {
-            const serverUser = response.user;
-            const localUser = Auth.getUser();
+            var serverUser = response.user;
+            var localUser = Auth.getUser();
             
             // ⭐ Serverdagi ma'lumotlar bilan localni solishtirish
-            let changed = false;
+            var changed = false;
             
             if (localUser) {
                 if (localUser.fullName !== serverUser.fullName) {
@@ -204,11 +216,15 @@ async function syncProfileFromServer() {
                 console.log('🔄 Profil yangilanmoqda...');
                 
                 // ⭐ LocalStorage ni yangilash
-                const updatedUser = {
-                    ...serverUser,
-                    id: serverUser._id || serverUser.id
+                var updatedUser = {
+                    id: serverUser._id || serverUser.id,
+                    fullName: serverUser.fullName,
+                    email: serverUser.email,
+                    phone: serverUser.phone || '',
+                    role: serverUser.role,
+                    status: serverUser.status,
+                    subscription: serverUser.subscription
                 };
-                delete updatedUser._id;
                 
                 localStorage.setItem('adminUser', JSON.stringify(updatedUser));
                 sessionStorage.setItem('adminUser', JSON.stringify(updatedUser));
@@ -218,8 +234,8 @@ async function syncProfileFromServer() {
                 loadSettings();
                 
                 // ⭐ User name va initial ni yangilash
-                const userName = document.getElementById('userName');
-                const userInitial = document.getElementById('userInitial');
+                var userName = document.getElementById('userName');
+                var userInitial = document.getElementById('userInitial');
                 if (userName) userName.textContent = serverUser.fullName || 'Admin';
                 if (userInitial) userInitial.textContent = (serverUser.fullName || 'A').charAt(0).toUpperCase();
                 
@@ -235,37 +251,39 @@ async function syncProfileFromServer() {
 // UPDATE PROFILE
 // ============================================
 async function updateProfile() {
-    const user = Auth.getUser();
+    var user = Auth.getUser();
     if (!user) return;
     
-    const fullName = document.getElementById('settingsName').value.trim();
-    const email = document.getElementById('settingsEmail').value.trim();
-    const phone = document.getElementById('settingsPhone').value.trim();
+    var fullName = document.getElementById('settingsName').value.trim();
+    var email = document.getElementById('settingsEmail').value.trim();
+    var phone = document.getElementById('settingsPhone').value.trim();
     
     if (!fullName || !email) {
         alert('F.I.SH va Email majburiy!');
         return;
     }
     
-    const btn = document.querySelector('#profileForm button[type="submit"]');
+    var btn = document.querySelector('#profileForm button[type="submit"]');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yangilanmoqda...';
     
     try {
-        const data = await API.put('/auth/profile', {
-            fullName,
-            email,
-            phone
+        var data = await API.put('/auth/profile', {
+            fullName: fullName,
+            email: email,
+            phone: phone
         });
         
         if (data.success) {
             // ⭐ Local ma'lumotlarni yangilash
-            const updatedUser = { 
-                ...user, 
-                fullName, 
-                email, 
-                phone,
-                id: user.id || user._id
+            var updatedUser = { 
+                id: user.id || user._id,
+                fullName: fullName,
+                email: email,
+                phone: phone,
+                role: user.role,
+                status: user.status,
+                subscription: user.subscription
             };
             localStorage.setItem('adminUser', JSON.stringify(updatedUser));
             sessionStorage.setItem('adminUser', JSON.stringify(updatedUser));
@@ -275,15 +293,12 @@ async function updateProfile() {
             loadSettings();
             
             // ⭐ Header dagi ism va initialni yangilash
-            const userName = document.getElementById('userName');
-            const userInitial = document.getElementById('userInitial');
+            var userName = document.getElementById('userName');
+            var userInitial = document.getElementById('userInitial');
             if (userName) userName.textContent = fullName;
             if (userInitial) userInitial.textContent = fullName.charAt(0).toUpperCase();
             
             showSuccess('✅ Profil muvaffaqiyatli yangilandi!');
-            
-            // ⭐ BARCHA QURILMALARGA XABAR YUBORISH (Admin-Customer larga)
-            // Bu backendda avtomatik yuboriladi
         }
     } catch (error) {
         alert('❌ Xatolik: ' + error.message);
@@ -297,24 +312,24 @@ async function updateProfile() {
 // UPDATE THEME UI
 // ============================================
 function updateThemeUI() {
-    const currentTheme = localStorage.getItem('theme') || 'system';
-    document.querySelectorAll('.theme-option').forEach(btn => {
+    var currentTheme = localStorage.getItem('theme') || 'system';
+    document.querySelectorAll('.theme-option').forEach(function(btn) {
         btn.classList.toggle('active', btn.dataset.theme === currentTheme);
     });
 
-    const statusText = document.getElementById('themeStatus');
+    var statusText = document.getElementById('themeStatus');
     if (!statusText) return;
 
-    const actualTheme = currentTheme === 'system'
+    var actualTheme = currentTheme === 'system'
         ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Qorong\'u' : 'Yorug\'')
         : currentTheme === 'dark'
             ? 'Qorong\'u'
             : 'Yorug\'';
 
     if (currentTheme === 'system') {
-        statusText.textContent = `Hozirgi holat: Avtomatik (${actualTheme})`;
+        statusText.textContent = 'Hozirgi holat: Avtomatik (' + actualTheme + ')';
     } else {
-        statusText.textContent = `Hozirgi holat: ${actualTheme}`;
+        statusText.textContent = 'Hozirgi holat: ' + actualTheme;
     }
 }
 
@@ -322,11 +337,11 @@ function updateThemeUI() {
 // PASSWORD MESSAGE
 // ============================================
 function showPasswordMessage(msg, type) {
-    const passwordMessage = document.getElementById('passwordMessage');
+    var passwordMessage = document.getElementById('passwordMessage');
     passwordMessage.textContent = msg;
-    passwordMessage.className = `form-message ${type}`;
+    passwordMessage.className = 'form-message ' + type;
     passwordMessage.style.display = 'block';
-    setTimeout(() => {
+    setTimeout(function() {
         passwordMessage.style.display = 'none';
     }, 5000);
 }
@@ -336,20 +351,20 @@ function showPasswordMessage(msg, type) {
 // ============================================
 function showError(msg) {
     console.error('⚠️ Xatolik:', msg);
-    const div = document.createElement('div');
-    div.style.cssText = `position:fixed;top:20px;right:20px;z-index:9999;padding:14px 18px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;color:#dc2626;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.1);display:flex;align-items:center;gap:10px;font-size:0.85rem;`;
-    div.innerHTML = `<i class="fas fa-exclamation-circle"></i><span>${msg}</span><button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;color:#dc2626;cursor:pointer;font-size:1.1rem;">×</button>`;
+    var div = document.createElement('div');
+    div.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;padding:14px 18px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;color:#dc2626;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.1);display:flex;align-items:center;gap:10px;font-size:0.85rem;';
+    div.innerHTML = '<i class="fas fa-exclamation-circle"></i><span>' + msg + '</span><button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;color:#dc2626;cursor:pointer;font-size:1.1rem;">×</button>';
     document.body.appendChild(div);
-    setTimeout(() => div.remove(), 5000);
+    setTimeout(function() { if (div.parentElement) div.remove(); }, 5000);
 }
 
 function showSuccess(msg) {
     console.log('✅ Muvaffaqiyat:', msg);
-    const div = document.createElement('div');
-    div.style.cssText = `position:fixed;top:20px;right:20px;z-index:9999;padding:14px 18px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;color:#065f46;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.1);display:flex;align-items:center;gap:10px;font-size:0.85rem;`;
-    div.innerHTML = `<i class="fas fa-check-circle"></i><span>${msg}</span><button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;color:#065f46;cursor:pointer;font-size:1.1rem;">×</button>`;
+    var div = document.createElement('div');
+    div.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;padding:14px 18px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;color:#065f46;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.1);display:flex;align-items:center;gap:10px;font-size:0.85rem;';
+    div.innerHTML = '<i class="fas fa-check-circle"></i><span>' + msg + '</span><button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;color:#065f46;cursor:pointer;font-size:1.1rem;">×</button>';
     document.body.appendChild(div);
-    setTimeout(() => div.remove(), 3000);
+    setTimeout(function() { if (div.parentElement) div.remove(); }, 3000);
 }
 
 console.log('✅ settings.js yuklandi (Admin-Main)');

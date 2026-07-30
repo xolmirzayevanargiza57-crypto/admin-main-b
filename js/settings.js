@@ -1,5 +1,5 @@
 // ============================================
-// SETTINGS - TO'LIQ
+// SETTINGS - SOZLAMALAR (Admin-Main)
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -98,6 +98,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 oldPasswordInput.classList.remove('success', 'error');
                 newPasswordInput.classList.remove('success', 'error');
                 confirmPasswordInput.classList.remove('success', 'error');
+                
+                // ⭐ PAROL O'ZGARGANDA BARCHA QURILMALARNI YANGILASH UCHUN
+                // Serverga yuborilgan parol o'zgarganligi haqida xabar
+                // Admin-Customer larga xabar yuboriladi (backendda)
             }
         } catch (error) {
             if (error.message.includes('Eski parol noto\'g\'ri')) {
@@ -111,15 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.innerHTML = '<i class="fas fa-key"></i> Parolni yangilash';
         }
     });
-    
-    function showPasswordMessage(msg, type) {
-        passwordMessage.textContent = msg;
-        passwordMessage.className = `form-message ${type}`;
-        passwordMessage.style.display = 'block';
-        setTimeout(() => {
-            passwordMessage.style.display = 'none';
-        }, 5000);
-    }
     
     // ============================================
     // PROFILE UPDATE
@@ -137,6 +132,18 @@ document.addEventListener('DOMContentLoaded', () => {
             Auth.logout();
         }
     });
+
+    // ============================================
+    // ⭐ REAL-TIME PROFILE SYNC (HAR 10 SONIYADA)
+    // ============================================
+    setInterval(async () => {
+        await syncProfileFromServer();
+    }, 10000);
+
+    // ============================================
+    // ⭐ SAHIFA YUKLANGANDA PROFILNI YANGILASH
+    // ============================================
+    await syncProfileFromServer();
 });
 
 // ============================================
@@ -149,6 +156,141 @@ function loadSettings() {
     document.getElementById('settingsName').value = user.fullName || '';
     document.getElementById('settingsEmail').value = user.email || '';
     document.getElementById('settingsPhone').value = user.phone || '';
+    
+    // ⭐ User ma'lumotlarini ekranda ko'rsatish
+    const nameDisplay = document.getElementById('profileNameDisplay');
+    const emailDisplay = document.getElementById('profileEmailDisplay');
+    const phoneDisplay = document.getElementById('profilePhoneDisplay');
+    
+    if (nameDisplay) nameDisplay.textContent = user.fullName || '-';
+    if (emailDisplay) emailDisplay.textContent = user.email || '-';
+    if (phoneDisplay) phoneDisplay.textContent = user.phone || '-';
+}
+
+// ============================================
+// ⭐ PROFILNI SERVERDAN YANGILASH (BARCHA QURILMALAR UCHUN)
+// ============================================
+async function syncProfileFromServer() {
+    try {
+        const token = Auth.getToken();
+        if (!token) return;
+        
+        const response = await API.get('/auth/profile');
+        
+        if (response.success && response.user) {
+            const serverUser = response.user;
+            const localUser = Auth.getUser();
+            
+            // ⭐ Serverdagi ma'lumotlar bilan localni solishtirish
+            let changed = false;
+            
+            if (localUser) {
+                if (localUser.fullName !== serverUser.fullName) {
+                    console.log('📝 Ism o\'zgargan:', localUser.fullName, '→', serverUser.fullName);
+                    changed = true;
+                }
+                if (localUser.email !== serverUser.email) {
+                    console.log('📝 Email o\'zgargan:', localUser.email, '→', serverUser.email);
+                    changed = true;
+                }
+                if (localUser.phone !== serverUser.phone) {
+                    console.log('📝 Telefon o\'zgargan:', localUser.phone, '→', serverUser.phone);
+                    changed = true;
+                }
+            }
+            
+            // ⭐ Agar o'zgarish bo'lsa, localni yangilash
+            if (changed || !localUser) {
+                console.log('🔄 Profil yangilanmoqda...');
+                
+                // ⭐ LocalStorage ni yangilash
+                const updatedUser = {
+                    ...serverUser,
+                    id: serverUser._id || serverUser.id
+                };
+                delete updatedUser._id;
+                
+                localStorage.setItem('adminUser', JSON.stringify(updatedUser));
+                sessionStorage.setItem('adminUser', JSON.stringify(updatedUser));
+                localStorage.setItem('adminLastAuth', Date.now().toString());
+                
+                // ⭐ UI ni yangilash
+                loadSettings();
+                
+                // ⭐ User name va initial ni yangilash
+                const userName = document.getElementById('userName');
+                const userInitial = document.getElementById('userInitial');
+                if (userName) userName.textContent = serverUser.fullName || 'Admin';
+                if (userInitial) userInitial.textContent = (serverUser.fullName || 'A').charAt(0).toUpperCase();
+                
+                showSuccess('✅ Profil yangilandi!');
+            }
+        }
+    } catch (error) {
+        console.error('❌ Profil sinxronlash xatosi:', error);
+    }
+}
+
+// ============================================
+// UPDATE PROFILE
+// ============================================
+async function updateProfile() {
+    const user = Auth.getUser();
+    if (!user) return;
+    
+    const fullName = document.getElementById('settingsName').value.trim();
+    const email = document.getElementById('settingsEmail').value.trim();
+    const phone = document.getElementById('settingsPhone').value.trim();
+    
+    if (!fullName || !email) {
+        alert('F.I.SH va Email majburiy!');
+        return;
+    }
+    
+    const btn = document.querySelector('#profileForm button[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yangilanmoqda...';
+    
+    try {
+        const data = await API.put('/auth/profile', {
+            fullName,
+            email,
+            phone
+        });
+        
+        if (data.success) {
+            // ⭐ Local ma'lumotlarni yangilash
+            const updatedUser = { 
+                ...user, 
+                fullName, 
+                email, 
+                phone,
+                id: user.id || user._id
+            };
+            localStorage.setItem('adminUser', JSON.stringify(updatedUser));
+            sessionStorage.setItem('adminUser', JSON.stringify(updatedUser));
+            localStorage.setItem('adminLastAuth', Date.now().toString());
+            
+            // ⭐ UI ni yangilash
+            loadSettings();
+            
+            // ⭐ Header dagi ism va initialni yangilash
+            const userName = document.getElementById('userName');
+            const userInitial = document.getElementById('userInitial');
+            if (userName) userName.textContent = fullName;
+            if (userInitial) userInitial.textContent = fullName.charAt(0).toUpperCase();
+            
+            showSuccess('✅ Profil muvaffaqiyatli yangilandi!');
+            
+            // ⭐ BARCHA QURILMALARGA XABAR YUBORISH (Admin-Customer larga)
+            // Bu backendda avtomatik yuboriladi
+        }
+    } catch (error) {
+        alert('❌ Xatolik: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> Yangilash';
+    }
 }
 
 // ============================================
@@ -177,35 +319,37 @@ function updateThemeUI() {
 }
 
 // ============================================
-// UPDATE PROFILE
+// PASSWORD MESSAGE
 // ============================================
-async function updateProfile() {
-    const user = Auth.getUser();
-    if (!user) return;
-    
-    const fullName = document.getElementById('settingsName').value.trim();
-    const email = document.getElementById('settingsEmail').value.trim();
-    const phone = document.getElementById('settingsPhone').value.trim();
-    
-    if (!fullName || !email) {
-        alert('F.I.SH va Email majburiy!');
-        return;
-    }
-    
-    try {
-        const data = await API.put('/auth/profile', {
-            fullName,
-            email,
-            phone
-        });
-        
-        if (data.success) {
-            const updatedUser = { ...user, fullName, email, phone };
-            localStorage.setItem('adminUser', JSON.stringify(updatedUser));
-            alert('✅ Profil yangilandi!');
-            loadSettings();
-        }
-    } catch (error) {
-        alert('❌ Xatolik: ' + error.message);
-    }
+function showPasswordMessage(msg, type) {
+    const passwordMessage = document.getElementById('passwordMessage');
+    passwordMessage.textContent = msg;
+    passwordMessage.className = `form-message ${type}`;
+    passwordMessage.style.display = 'block';
+    setTimeout(() => {
+        passwordMessage.style.display = 'none';
+    }, 5000);
 }
+
+// ============================================
+// XATOLIK VA MUVAFFAQIYAT XABARLARI
+// ============================================
+function showError(msg) {
+    console.error('⚠️ Xatolik:', msg);
+    const div = document.createElement('div');
+    div.style.cssText = `position:fixed;top:20px;right:20px;z-index:9999;padding:14px 18px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;color:#dc2626;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.1);display:flex;align-items:center;gap:10px;font-size:0.85rem;`;
+    div.innerHTML = `<i class="fas fa-exclamation-circle"></i><span>${msg}</span><button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;color:#dc2626;cursor:pointer;font-size:1.1rem;">×</button>`;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 5000);
+}
+
+function showSuccess(msg) {
+    console.log('✅ Muvaffaqiyat:', msg);
+    const div = document.createElement('div');
+    div.style.cssText = `position:fixed;top:20px;right:20px;z-index:9999;padding:14px 18px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;color:#065f46;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.1);display:flex;align-items:center;gap:10px;font-size:0.85rem;`;
+    div.innerHTML = `<i class="fas fa-check-circle"></i><span>${msg}</span><button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;color:#065f46;cursor:pointer;font-size:1.1rem;">×</button>`;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 3000);
+}
+
+console.log('✅ settings.js yuklandi (Admin-Main)');

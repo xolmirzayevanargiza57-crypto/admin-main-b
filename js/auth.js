@@ -1,8 +1,11 @@
 // ============================================================
-// AUTH - ADMIN MAIN (TO'LIQ)
+// AUTH - ADMIN MAIN (TO'LIQ TUZATILGAN)
 // ============================================================
 
 const Auth = {
+    // ============================================================
+    // LOGIN
+    // ============================================================
     async login(email, password) {
         try {
             const data = await API.post('/auth/login', { email, password });
@@ -20,6 +23,9 @@ const Auth = {
         }
     },
 
+    // ============================================================
+    // LOGOUT
+    // ============================================================
     logout() {
         localStorage.removeItem('adminToken');
         localStorage.removeItem('adminUser');
@@ -30,10 +36,23 @@ const Auth = {
         window.location.replace('index.html');
     },
 
+    // ============================================================
+    // AUTHENTICATED TEKSHIRISH
+    // ============================================================
     isAuthenticated() {
         return !!(localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken'));
     },
 
+    // ============================================================
+    // ⭐ TOKEN OLISH (YANGI QO'SHILDI)
+    // ============================================================
+    getToken() {
+        return localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
+    },
+
+    // ============================================================
+    // USER MA'LUMOTLARI
+    // ============================================================
     getUser() {
         const u = localStorage.getItem('adminUser') || sessionStorage.getItem('adminUser');
         return u ? JSON.parse(u) : null;
@@ -53,9 +72,11 @@ const Auth = {
         return last ? Date.now() - parseInt(last) : Infinity;
     },
 
-    // ⭐ PROFIL O'ZGARISHINI TEKSHIRISH (HAR 10 SONIYADA)
+    // ============================================================
+    // ⭐ PROFIL O'ZGARISHINI TEKSHIRISH
+    // ============================================================
     async checkAuth() {
-        const token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
+        const token = this.getToken();
         if (!token) return false;
 
         const CACHE = 10 * 60 * 1000; // 10 daqiqa
@@ -87,7 +108,6 @@ const Auth = {
             }
 
             if (data.success && data.user) {
-                // ⭐ LOCAL VA SERVER USERLARNI SOLISHTIRISH
                 const localUser = this.getUser();
                 const serverUser = data.user;
                 
@@ -95,13 +115,10 @@ const Auth = {
                     // ⭐ Email o'zgarganmi?
                     if (localUser.email !== serverUser.email) {
                         console.log('📧 Email o\'zgargan:', localUser.email, '→', serverUser.email);
-                        // ⭐ Localni yangilash
                         const updatedUser = { ...localUser, email: serverUser.email };
                         localStorage.setItem('adminUser', JSON.stringify(updatedUser));
                         sessionStorage.setItem('adminUser', JSON.stringify(updatedUser));
                         localStorage.setItem('adminLastAuth', Date.now().toString());
-                        
-                        // ⭐ UI ni yangilash uchun event dispatch
                         document.dispatchEvent(new CustomEvent('profileUpdated', { 
                             detail: { user: updatedUser } 
                         }));
@@ -114,7 +131,6 @@ const Auth = {
                         localStorage.setItem('adminUser', JSON.stringify(updatedUser));
                         sessionStorage.setItem('adminUser', JSON.stringify(updatedUser));
                         localStorage.setItem('adminLastAuth', Date.now().toString());
-                        
                         document.dispatchEvent(new CustomEvent('profileUpdated', { 
                             detail: { user: updatedUser } 
                         }));
@@ -127,7 +143,6 @@ const Auth = {
                         localStorage.setItem('adminUser', JSON.stringify(updatedUser));
                         sessionStorage.setItem('adminUser', JSON.stringify(updatedUser));
                         localStorage.setItem('adminLastAuth', Date.now().toString());
-                        
                         document.dispatchEvent(new CustomEvent('profileUpdated', { 
                             detail: { user: updatedUser } 
                         }));
@@ -145,11 +160,14 @@ const Auth = {
             return true;
 
         } catch (error) {
-            console.warn('⚠️ checkAuth exception:', error.message, '— sahifada qolindi');
+            console.warn('⚠️ checkAuth exception:', error.message);
             return true;
         }
     },
 
+    // ============================================================
+    // ⭐ INIT
+    // ============================================================
     init() {
         const path = window.location.pathname;
         const isLoginPage = path.includes('index.html') || path === '/' || path.endsWith('/');
@@ -176,7 +194,6 @@ document.addEventListener('profileUpdated', function(e) {
     const user = e.detail?.user;
     if (user) {
         console.log('🔄 Profil yangilandi event:', user);
-        // ⭐ settings.js dagi loadSettings() funksiyasi chaqiriladi
         if (typeof loadSettings === 'function') {
             loadSettings();
         }

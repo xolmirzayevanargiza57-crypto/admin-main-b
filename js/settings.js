@@ -1,20 +1,51 @@
 // ============================================
 // SETTINGS - SOZLAMALAR (Admin-Main)
+// TELEFON UCHUN TUZATILGAN
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔧 Settings sahifasi yuklanmoqda...');
+    
+    // ⭐ Auth tekshirish
     if (!Auth.isAuthenticated()) {
+        console.warn('⚠️ Auth topilmadi, login sahifasiga o\'tish');
         window.location.href = 'index.html';
         return;
     }
     
-    loadSettings();
-    updateThemeUI();
-    
-    // ============================================
-    // PASSWORD TOGGLE
-    // ============================================
-    document.querySelectorAll('.password-toggle').forEach(function(btn) {
+    try {
+        // ⭐ Profil ma'lumotlarini yuklash
+        loadSettings();
+        updateThemeUI();
+        initPasswordToggle();
+        initPasswordForm();
+        initProfileForm();
+        initLogoutButton();
+        initThemeOptions();
+        
+        // ⭐ REAL-TIME PROFILE SYNC (HAR 10 SONIYADA)
+        setInterval(function() {
+            syncProfileFromServer();
+        }, 10000);
+        
+        // ⭐ SAHIFA YUKLANGANDA PROFILNI YANGILASH
+        setTimeout(function() {
+            syncProfileFromServer();
+        }, 2000);
+        
+        console.log('✅ Settings sahifasi yuklandi!');
+    } catch (error) {
+        console.error('❌ Settings yuklash xatosi:', error);
+        showError('Sozlamalar yuklanmadi: ' + error.message);
+    }
+});
+
+// ============================================
+// PASSWORD TOGGLE
+// ============================================
+function initPasswordToggle() {
+    var toggles = document.querySelectorAll('.password-toggle');
+    toggles.forEach(function(btn) {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -33,11 +64,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
-    // ============================================
-    // PASSWORD CHANGE
-    // ============================================
+}
+
+// ============================================
+// PASSWORD FORM
+// ============================================
+function initPasswordForm() {
     var passwordForm = document.getElementById('passwordForm');
+    if (!passwordForm) return;
+    
     var oldPasswordInput = document.getElementById('oldPassword');
     var newPasswordInput = document.getElementById('newPassword');
     var confirmPasswordInput = document.getElementById('confirmPassword');
@@ -59,79 +94,86 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    if (passwordForm) {
-        passwordForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            var oldPassword = oldPasswordInput.value;
-            var newPassword = newPasswordInput.value;
-            var confirmPassword = confirmPasswordInput.value;
-            
+    passwordForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        var oldPassword = oldPasswordInput.value;
+        var newPassword = newPasswordInput.value;
+        var confirmPassword = confirmPasswordInput.value;
+        
+        if (passwordMessage) {
             passwordMessage.className = 'form-message';
             passwordMessage.style.display = 'none';
+        }
+        
+        if (!oldPassword || !newPassword || !confirmPassword) {
+            showPasswordMessage('Barcha maydonlarni to\'ldiring!', 'error');
+            return;
+        }
+        
+        if (newPassword !== confirmPassword) {
+            showPasswordMessage('Yangi parol va tasdiqlash mos kelmadi!', 'error');
+            return;
+        }
+        
+        if (newPassword.length < 6) {
+            showPasswordMessage('Yangi parol kamida 6 ta belgidan iborat bo\'lishi kerak!', 'error');
+            return;
+        }
+        
+        var btn = passwordForm.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Kutilmoqda...';
+        
+        try {
+            var response = await API.post('/auth/change-password', {
+                oldPassword: oldPassword,
+                newPassword: newPassword
+            });
             
-            if (!oldPassword || !newPassword || !confirmPassword) {
-                showPasswordMessage('Barcha maydonlarni to\'ldiring!', 'error');
-                return;
+            if (response.success) {
+                showPasswordMessage('✅ Parol muvaffaqiyatli yangilandi!', 'success');
+                oldPasswordInput.value = '';
+                newPasswordInput.value = '';
+                confirmPasswordInput.value = '';
+                oldPasswordInput.classList.remove('success', 'error');
+                newPasswordInput.classList.remove('success', 'error');
+                confirmPasswordInput.classList.remove('success', 'error');
+            } else {
+                showPasswordMessage(response.message || 'Xatolik yuz berdi!', 'error');
             }
-            
-            if (newPassword !== confirmPassword) {
-                showPasswordMessage('Yangi parol va tasdiqlash mos kelmadi!', 'error');
-                return;
+        } catch (error) {
+            console.error('❌ Parol o\'zgartirish xatosi:', error);
+            if (error.message && error.message.includes('Eski parol noto\'g\'ri')) {
+                oldPasswordInput.classList.add('error');
+                showPasswordMessage('Eski parol noto\'g\'ri!', 'error');
+            } else {
+                showPasswordMessage(error.message || 'Tarmoq xatosi!', 'error');
             }
-            
-            if (newPassword.length < 6) {
-                showPasswordMessage('Yangi parol kamida 6 ta belgidan iborat bo\'lishi kerak!', 'error');
-                return;
-            }
-            
-            var btn = passwordForm.querySelector('button[type="submit"]');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Kutilmoqda...';
-            
-            try {
-                var response = await API.post('/auth/change-password', {
-                    oldPassword: oldPassword,
-                    newPassword: newPassword
-                });
-                
-                if (response.success) {
-                    showPasswordMessage('✅ Parol muvaffaqiyatli yangilandi!', 'success');
-                    oldPasswordInput.value = '';
-                    newPasswordInput.value = '';
-                    confirmPasswordInput.value = '';
-                    oldPasswordInput.classList.remove('success', 'error');
-                    newPasswordInput.classList.remove('success', 'error');
-                    confirmPasswordInput.classList.remove('success', 'error');
-                }
-            } catch (error) {
-                if (error.message && error.message.includes('Eski parol noto\'g\'ri')) {
-                    oldPasswordInput.classList.add('error');
-                    showPasswordMessage('Eski parol noto\'g\'ri!', 'error');
-                } else {
-                    showPasswordMessage(error.message || 'Xatolik yuz berdi!', 'error');
-                }
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-key"></i> Parolni yangilash';
-            }
-        });
-    }
-    
-    // ============================================
-    // PROFILE UPDATE
-    // ============================================
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-key"></i> Parolni yangilash';
+        }
+    });
+}
+
+// ============================================
+// PROFILE FORM
+// ============================================
+function initProfileForm() {
     var profileForm = document.getElementById('profileForm');
-    if (profileForm) {
-        profileForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            await updateProfile();
-        });
-    }
+    if (!profileForm) return;
     
-    // ============================================
-    // LOGOUT
-    // ============================================
+    profileForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        await updateProfile();
+    });
+}
+
+// ============================================
+// LOGOUT BUTTON
+// ============================================
+function initLogoutButton() {
     var settingsLogout = document.getElementById('settingsLogout');
     if (settingsLogout) {
         settingsLogout.addEventListener('click', function() {
@@ -140,43 +182,62 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+}
 
-    // ============================================
-    // ⭐ REAL-TIME PROFILE SYNC (HAR 10 SONIYADA)
-    // ============================================
-    setInterval(function() {
-        syncProfileFromServer();
-    }, 10000);
-
-    // ============================================
-    // ⭐ SAHIFA YUKLANGANDA PROFILNI YANGILASH
-    // ============================================
-    syncProfileFromServer();
-});
+// ============================================
+// THEME OPTIONS
+// ============================================
+function initThemeOptions() {
+    document.querySelectorAll('.theme-option').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var theme = this.dataset.theme;
+            if (theme) {
+                Theme.applyTheme(theme);
+            }
+        });
+    });
+}
 
 // ============================================
 // LOAD SETTINGS
 // ============================================
 function loadSettings() {
-    var user = Auth.getUser();
-    if (!user) return;
-    
-    var nameInput = document.getElementById('settingsName');
-    var emailInput = document.getElementById('settingsEmail');
-    var phoneInput = document.getElementById('settingsPhone');
-    
-    if (nameInput) nameInput.value = user.fullName || '';
-    if (emailInput) emailInput.value = user.email || '';
-    if (phoneInput) phoneInput.value = user.phone || '';
-    
-    // ⭐ User ma'lumotlarini ekranda ko'rsatish
-    var nameDisplay = document.getElementById('profileNameDisplay');
-    var emailDisplay = document.getElementById('profileEmailDisplay');
-    var phoneDisplay = document.getElementById('profilePhoneDisplay');
-    
-    if (nameDisplay) nameDisplay.textContent = user.fullName || '-';
-    if (emailDisplay) emailDisplay.textContent = user.email || '-';
-    if (phoneDisplay) phoneDisplay.textContent = user.phone || '-';
+    try {
+        var user = Auth.getUser();
+        if (!user) {
+            console.warn('⚠️ User topilmadi');
+            return;
+        }
+        
+        console.log('👤 User ma\'lumotlari:', user);
+        
+        var nameInput = document.getElementById('settingsName');
+        var emailInput = document.getElementById('settingsEmail');
+        var phoneInput = document.getElementById('settingsPhone');
+        
+        if (nameInput) nameInput.value = user.fullName || '';
+        if (emailInput) emailInput.value = user.email || '';
+        if (phoneInput) phoneInput.value = user.phone || '';
+        
+        // ⭐ User ma'lumotlarini ekranda ko'rsatish
+        var nameDisplay = document.getElementById('profileNameDisplay');
+        var emailDisplay = document.getElementById('profileEmailDisplay');
+        var phoneDisplay = document.getElementById('profilePhoneDisplay');
+        
+        if (nameDisplay) nameDisplay.textContent = user.fullName || '-';
+        if (emailDisplay) emailDisplay.textContent = user.email || '-';
+        if (phoneDisplay) phoneDisplay.textContent = user.phone || '-';
+        
+        // ⭐ Header ma'lumotlarini yangilash
+        var userName = document.getElementById('userName');
+        var userInitial = document.getElementById('userInitial');
+        if (userName) userName.textContent = user.fullName || 'Admin';
+        if (userInitial) userInitial.textContent = (user.fullName || 'A').charAt(0).toUpperCase();
+        
+        console.log('✅ Settings yuklandi');
+    } catch (error) {
+        console.error('❌ loadSettings xatosi:', error);
+    }
 }
 
 // ============================================
@@ -185,7 +246,12 @@ function loadSettings() {
 async function syncProfileFromServer() {
     try {
         var token = Auth.getToken();
-        if (!token) return;
+        if (!token) {
+            console.warn('⚠️ Token topilmadi, sinxronlash o\'tkazib yuborildi');
+            return;
+        }
+        
+        console.log('🔄 Profil sinxronlash...');
         
         var response = await API.get('/auth/profile');
         
@@ -226,9 +292,13 @@ async function syncProfileFromServer() {
                     subscription: serverUser.subscription
                 };
                 
-                localStorage.setItem('adminUser', JSON.stringify(updatedUser));
-                sessionStorage.setItem('adminUser', JSON.stringify(updatedUser));
-                localStorage.setItem('adminLastAuth', Date.now().toString());
+                try {
+                    localStorage.setItem('adminUser', JSON.stringify(updatedUser));
+                    sessionStorage.setItem('adminUser', JSON.stringify(updatedUser));
+                    localStorage.setItem('adminLastAuth', Date.now().toString());
+                } catch (e) {
+                    console.warn('⚠️ Storage yozish xatosi:', e);
+                }
                 
                 // ⭐ UI ni yangilash
                 loadSettings();
@@ -252,7 +322,10 @@ async function syncProfileFromServer() {
 // ============================================
 async function updateProfile() {
     var user = Auth.getUser();
-    if (!user) return;
+    if (!user) {
+        alert('Foydalanuvchi topilmadi!');
+        return;
+    }
     
     var fullName = document.getElementById('settingsName').value.trim();
     var email = document.getElementById('settingsEmail').value.trim();
@@ -285,9 +358,14 @@ async function updateProfile() {
                 status: user.status,
                 subscription: user.subscription
             };
-            localStorage.setItem('adminUser', JSON.stringify(updatedUser));
-            sessionStorage.setItem('adminUser', JSON.stringify(updatedUser));
-            localStorage.setItem('adminLastAuth', Date.now().toString());
+            
+            try {
+                localStorage.setItem('adminUser', JSON.stringify(updatedUser));
+                sessionStorage.setItem('adminUser', JSON.stringify(updatedUser));
+                localStorage.setItem('adminLastAuth', Date.now().toString());
+            } catch (e) {
+                console.warn('⚠️ Storage yozish xatosi:', e);
+            }
             
             // ⭐ UI ni yangilash
             loadSettings();
@@ -299,8 +377,11 @@ async function updateProfile() {
             if (userInitial) userInitial.textContent = fullName.charAt(0).toUpperCase();
             
             showSuccess('✅ Profil muvaffaqiyatli yangilandi!');
+        } else {
+            alert('❌ Xatolik: ' + (data.message || 'Noma\'lum xatolik'));
         }
     } catch (error) {
+        console.error('❌ Profil yangilash xatosi:', error);
         alert('❌ Xatolik: ' + error.message);
     } finally {
         btn.disabled = false;
@@ -312,24 +393,28 @@ async function updateProfile() {
 // UPDATE THEME UI
 // ============================================
 function updateThemeUI() {
-    var currentTheme = localStorage.getItem('theme') || 'system';
-    document.querySelectorAll('.theme-option').forEach(function(btn) {
-        btn.classList.toggle('active', btn.dataset.theme === currentTheme);
-    });
+    try {
+        var currentTheme = localStorage.getItem('theme') || 'system';
+        document.querySelectorAll('.theme-option').forEach(function(btn) {
+            btn.classList.toggle('active', btn.dataset.theme === currentTheme);
+        });
 
-    var statusText = document.getElementById('themeStatus');
-    if (!statusText) return;
+        var statusText = document.getElementById('themeStatus');
+        if (!statusText) return;
 
-    var actualTheme = currentTheme === 'system'
-        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Qorong\'u' : 'Yorug\'')
-        : currentTheme === 'dark'
-            ? 'Qorong\'u'
-            : 'Yorug\'';
+        var actualTheme = currentTheme === 'system'
+            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Qorong\'u' : 'Yorug\'')
+            : currentTheme === 'dark'
+                ? 'Qorong\'u'
+                : 'Yorug\'';
 
-    if (currentTheme === 'system') {
-        statusText.textContent = 'Hozirgi holat: Avtomatik (' + actualTheme + ')';
-    } else {
-        statusText.textContent = 'Hozirgi holat: ' + actualTheme;
+        if (currentTheme === 'system') {
+            statusText.textContent = 'Hozirgi holat: Avtomatik (' + actualTheme + ')';
+        } else {
+            statusText.textContent = 'Hozirgi holat: ' + actualTheme;
+        }
+    } catch (error) {
+        console.warn('⚠️ Theme UI yangilash xatosi:', error);
     }
 }
 
@@ -338,6 +423,7 @@ function updateThemeUI() {
 // ============================================
 function showPasswordMessage(msg, type) {
     var passwordMessage = document.getElementById('passwordMessage');
+    if (!passwordMessage) return;
     passwordMessage.textContent = msg;
     passwordMessage.className = 'form-message ' + type;
     passwordMessage.style.display = 'block';
@@ -352,7 +438,7 @@ function showPasswordMessage(msg, type) {
 function showError(msg) {
     console.error('⚠️ Xatolik:', msg);
     var div = document.createElement('div');
-    div.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;padding:14px 18px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;color:#dc2626;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.1);display:flex;align-items:center;gap:10px;font-size:0.85rem;';
+    div.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;padding:14px 18px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;color:#dc2626;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.1);display:flex;align-items:center;gap:10px;font-size:0.85rem;z-index:10000;';
     div.innerHTML = '<i class="fas fa-exclamation-circle"></i><span>' + msg + '</span><button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;color:#dc2626;cursor:pointer;font-size:1.1rem;">×</button>';
     document.body.appendChild(div);
     setTimeout(function() { if (div.parentElement) div.remove(); }, 5000);
@@ -361,7 +447,7 @@ function showError(msg) {
 function showSuccess(msg) {
     console.log('✅ Muvaffaqiyat:', msg);
     var div = document.createElement('div');
-    div.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;padding:14px 18px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;color:#065f46;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.1);display:flex;align-items:center;gap:10px;font-size:0.85rem;';
+    div.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;padding:14px 18px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;color:#065f46;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.1);display:flex;align-items:center;gap:10px;font-size:0.85rem;z-index:10000;';
     div.innerHTML = '<i class="fas fa-check-circle"></i><span>' + msg + '</span><button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;color:#065f46;cursor:pointer;font-size:1.1rem;">×</button>';
     document.body.appendChild(div);
     setTimeout(function() { if (div.parentElement) div.remove(); }, 3000);

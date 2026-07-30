@@ -195,6 +195,114 @@
             .profile-avatar.large { width: 72px; height: 72px; font-size: 1.75rem; }
             .profile-info h2 { font-size: 1.1rem; }
         }
+
+        /* ⭐ UNBAN MODAL STYLES */
+        #unbanCustomDurationGroup,
+        #unbanAmountGroup {
+            transition: all 0.3s ease;
+        }
+
+        #unbanEndDate:disabled,
+        #unbanStartDate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            max-width: 580px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .modal-header h3 i {
+            margin-right: 8px;
+            color: var(--text-muted);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 20px 24px;
+        }
+
+        .modal-body .form-group {
+            margin-bottom: 16px;
+        }
+
+        .modal-body .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            justify-content: flex-end;
+        }
+
+        .modal-footer .btn-primary,
+        .modal-footer .btn-secondary {
+            padding: 10px 24px;
+        }
     </style>
 </head>
 <body>
@@ -298,7 +406,7 @@
     </div>
 
     <!-- ============================================================
-         ⭐ UNBAN MODAL
+         ⭐ UNBAN MODAL (TO'LIQ TUZATILGAN)
          ============================================================ -->
     <div class="modal-overlay" id="unbanModal">
         <div class="modal" style="max-width: 580px;">
@@ -308,6 +416,7 @@
             </div>
             <div class="modal-body">
                 <form id="unbanForm">
+                    <!-- ⭐ TO'LOV TURI -->
                     <div class="form-group">
                         <label><i class="fas fa-tag"></i> To'lov turi</label>
                         <div class="input-wrapper">
@@ -321,7 +430,7 @@
                         </div>
                     </div>
 
-                    <!-- ⭐ TO'LOV USULI SELECT -->
+                    <!-- ⭐ TO'LOV USULI SELECT (YANGI QO'SHILDI) -->
                     <div class="form-group">
                         <label><i class="fas fa-wallet"></i> To'lov usuli</label>
                         <div class="input-wrapper">
@@ -354,6 +463,7 @@
                         <small class="text-muted">💡 Izohga to'lov usulini yozsangiz, avtomatik aniqlanadi</small>
                     </div>
 
+                    <!-- ⭐ CUSTOM VAQT -->
                     <div id="unbanCustomDurationGroup" style="display: none;">
                         <div class="form-group">
                             <label><i class="fas fa-clock"></i> Vaqtni belgilang</label>
@@ -375,6 +485,7 @@
                         </div>
                     </div>
 
+                    <!-- ⭐ TO'LOV MIQDORI (FAQAT CUSTOM UCHUN) -->
                     <div id="unbanAmountGroup" style="display: none;">
                         <div class="form-group">
                             <label><i class="fas fa-money-bill"></i> To'lov miqdori (so'm)</label>
@@ -385,6 +496,7 @@
                         </div>
                     </div>
 
+                    <!-- ⭐ BOSHLANISH SANASI -->
                     <div class="form-group">
                         <label><i class="fas fa-calendar-day"></i> Boshlanish sanasi</label>
                         <div class="input-wrapper">
@@ -393,6 +505,7 @@
                         <small class="text-muted">💡 Bo'sh qoldirilsa, hozirgi vaqt olinadi</small>
                     </div>
 
+                    <!-- ⭐ TUGASH SANASI -->
                     <div class="form-group">
                         <label><i class="fas fa-calendar-day"></i> Tugash sanasi</label>
                         <div class="input-wrapper">
@@ -401,6 +514,7 @@
                         <small class="text-muted">💡 Avtomatik hisoblanadi</small>
                     </div>
 
+                    <!-- ⭐ IZOH -->
                     <div class="form-group">
                         <label><i class="fas fa-sticky-note"></i> Izoh (ixtiyoriy)</label>
                         <div class="input-wrapper">

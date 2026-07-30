@@ -1,12 +1,10 @@
 // ============================================
 // SETTINGS - SOZLAMALAR (Admin-Main)
-// TELEFON UCHUN TUZATILGAN
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🔧 Settings sahifasi yuklanmoqda...');
     
-    // ⭐ Auth tekshirish
     if (!Auth.isAuthenticated()) {
         console.warn('⚠️ Auth topilmadi, login sahifasiga o\'tish');
         window.location.href = 'index.html';
@@ -14,7 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     try {
-        // ⭐ Profil ma'lumotlarini yuklash
         loadSettings();
         updateThemeUI();
         initPasswordToggle();
@@ -219,7 +216,6 @@ function loadSettings() {
         if (emailInput) emailInput.value = user.email || '';
         if (phoneInput) phoneInput.value = user.phone || '';
         
-        // ⭐ User ma'lumotlarini ekranda ko'rsatish
         var nameDisplay = document.getElementById('profileNameDisplay');
         var emailDisplay = document.getElementById('profileEmailDisplay');
         var phoneDisplay = document.getElementById('profilePhoneDisplay');
@@ -228,7 +224,6 @@ function loadSettings() {
         if (emailDisplay) emailDisplay.textContent = user.email || '-';
         if (phoneDisplay) phoneDisplay.textContent = user.phone || '-';
         
-        // ⭐ Header ma'lumotlarini yangilash
         var userName = document.getElementById('userName');
         var userInitial = document.getElementById('userInitial');
         if (userName) userName.textContent = user.fullName || 'Admin';
@@ -241,10 +236,16 @@ function loadSettings() {
 }
 
 // ============================================
-// ⭐ PROFILNI SERVERDAN YANGILASH (BARCHA QURILMALAR UCHUN)
+// ⭐ PROFILNI SERVERDAN YANGILASH
 // ============================================
 async function syncProfileFromServer() {
     try {
+        // ⭐ Auth.getToken() funksiyasi mavjudligini tekshirish
+        if (typeof Auth.getToken !== 'function') {
+            console.warn('⚠️ Auth.getToken funksiyasi topilmadi');
+            return;
+        }
+        
         var token = Auth.getToken();
         if (!token) {
             console.warn('⚠️ Token topilmadi, sinxronlash o\'tkazib yuborildi');
@@ -259,7 +260,6 @@ async function syncProfileFromServer() {
             var serverUser = response.user;
             var localUser = Auth.getUser();
             
-            // ⭐ Serverdagi ma'lumotlar bilan localni solishtirish
             var changed = false;
             
             if (localUser) {
@@ -277,11 +277,9 @@ async function syncProfileFromServer() {
                 }
             }
             
-            // ⭐ Agar o'zgarish bo'lsa, localni yangilash
             if (changed || !localUser) {
                 console.log('🔄 Profil yangilanmoqda...');
                 
-                // ⭐ LocalStorage ni yangilash
                 var updatedUser = {
                     id: serverUser._id || serverUser.id,
                     fullName: serverUser.fullName,
@@ -300,10 +298,8 @@ async function syncProfileFromServer() {
                     console.warn('⚠️ Storage yozish xatosi:', e);
                 }
                 
-                // ⭐ UI ni yangilash
                 loadSettings();
                 
-                // ⭐ User name va initial ni yangilash
                 var userName = document.getElementById('userName');
                 var userInitial = document.getElementById('userInitial');
                 if (userName) userName.textContent = serverUser.fullName || 'Admin';
@@ -348,7 +344,6 @@ async function updateProfile() {
         });
         
         if (data.success) {
-            // ⭐ Local ma'lumotlarni yangilash
             var updatedUser = { 
                 id: user.id || user._id,
                 fullName: fullName,
@@ -367,10 +362,8 @@ async function updateProfile() {
                 console.warn('⚠️ Storage yozish xatosi:', e);
             }
             
-            // ⭐ UI ni yangilash
             loadSettings();
             
-            // ⭐ Header dagi ism va initialni yangilash
             var userName = document.getElementById('userName');
             var userInitial = document.getElementById('userInitial');
             if (userName) userName.textContent = fullName;

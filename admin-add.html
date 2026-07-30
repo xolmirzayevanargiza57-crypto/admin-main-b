@@ -31,9 +31,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ============================================
-           FORM CONTAINER - SCROLL QILISH UCHUN
-           ============================================ */
         .main-content {
             display: flex;
             flex-direction: column;
@@ -133,9 +130,6 @@
             border-color: #ff3b30;
         }
 
-        /* ============================================
-           MOBIL RESPONSIVE
-           ============================================ */
         @media (max-width: 768px) {
             .top-header {
                 padding: 12px 16px;
@@ -300,9 +294,6 @@
             }
         }
 
-        /* ============================================
-           DARK THEME
-           ============================================ */
         [data-theme="dark"] .app-form {
             background: var(--bg-card);
             border-color: var(--border-color);
@@ -346,7 +337,6 @@
         </aside>
 
         <main class="main-content">
-            <!-- Header - FIKSLANGAN -->
             <header class="top-header">
                 <div class="header-left">
                     <button id="menuToggle" class="menu-toggle"><i class="fas fa-bars"></i></button>
@@ -361,7 +351,6 @@
                 </div>
             </header>
 
-            <!-- Form Container - SCROLL QILINADI -->
             <section class="form-container-scroll">
                 <div class="form-wrapper">
                     <form id="addAdminForm" class="app-form">
@@ -421,7 +410,7 @@
                             </div>
                         </div>
 
-                        <!-- ⭐ TO'LOV USULI SELECT (YANGI QO'SHILDI) -->
+                        <!-- ⭐ TO'LOV USULI SELECT -->
                         <div class="form-group">
                             <label><i class="fas fa-wallet"></i> To'lov usuli</label>
                             <div class="input-wrapper">
@@ -524,7 +513,6 @@
         </main>
     </div>
 
-    <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
         <i class="fas fa-moon moon"></i>
     </button>

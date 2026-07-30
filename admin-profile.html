@@ -16,9 +16,6 @@
     <link rel="stylesheet" href="css/responsive.css" />
 
     <style>
-        /* ============================================================
-           TO'LOV USULI PREVIEW
-           ============================================================ */
         #paymentMethodPreview {
             animation: fadeIn 0.3s ease;
         }
@@ -34,9 +31,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ============================================================
-           PROFILE PAGE STYLES
-           ============================================================ */
         .profile-container {
             padding: 24px 32px;
             max-width: 800px;
@@ -205,7 +199,6 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
                 <div class="brand-icon"><i class="fas fa-crown"></i></div>
@@ -223,7 +216,6 @@
             </div>
         </aside>
 
-        <!-- SIDEBAR OVERLAY -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
         <main class="main-content">
@@ -242,7 +234,6 @@
             </header>
 
             <section class="profile-container">
-                <!-- Profile Header -->
                 <div class="profile-header">
                     <div class="profile-avatar large">
                         <span id="profileInitial">A</span>
@@ -260,7 +251,6 @@
                     </div>
                 </div>
 
-                <!-- Profile Stats -->
                 <div class="profile-stats">
                     <div class="stat-item">
                         <p class="stat-label"><i class="fas fa-calendar"></i> Obuna turi</p>
@@ -276,7 +266,6 @@
                     </div>
                 </div>
 
-                <!-- To'lov Tarixi -->
                 <div class="subscription-history">
                     <h3><i class="fas fa-history"></i> To'lov Tarixi</h3>
                     <div id="historyList" class="history-list">
@@ -284,7 +273,6 @@
                     </div>
                 </div>
 
-                <!-- Xabarlar Ro'yxati -->
                 <div class="subscription-history" style="margin-top: 16px;">
                     <h3><i class="fas fa-bell"></i> Xabarlar
                         <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted); margin-left: 8px;">
@@ -296,7 +284,6 @@
                     </div>
                 </div>
 
-                <!-- TUGMALAR -->
                 <div class="profile-actions">
                     <button id="editBtn" class="btn-primary"><i class="fas fa-edit"></i> Tahrirlash</button>
                     <button id="subscriptionBtn" class="btn-warning"><i class="fas fa-calendar-plus"></i> Obuna sotish</button>
@@ -332,6 +319,39 @@
                                 <option value="none">Obuna qo'shmaslik</option>
                             </select>
                         </div>
+                    </div>
+
+                    <!-- ⭐ TO'LOV USULI SELECT -->
+                    <div class="form-group">
+                        <label><i class="fas fa-wallet"></i> To'lov usuli</label>
+                        <div class="input-wrapper">
+                            <select id="unbanPaymentMethodSelect">
+                                <option value="">To'lov usulini tanlang...</option>
+                                <option value="cash">💵 Naqd pul</option>
+                                <option value="click">📱 Click</option>
+                                <option value="paynet">💳 Paynet</option>
+                                <option value="payme">📲 Payme</option>
+                                <option value="uzum">🟣 Uzum</option>
+                                <option value="uzcard">💳 Uzcard</option>
+                                <option value="humo">🟠 Humo</option>
+                                <option value="visa">💳 Visa</option>
+                                <option value="agrobank">🌾 Agrobank</option>
+                                <option value="tbc">🔷 TBC Bank</option>
+                                <option value="anorbank">🍊 Anorbank</option>
+                                <option value="xazna">🏦 Xazna</option>
+                                <option value="anjir">🍐 Anjir Pay</option>
+                                <option value="hamkorbank">🏛️ Hamkor Bank</option>
+                                <option value="xalqbanki">🏛️ Xalq Banki</option>
+                                <option value="paypal">💳 PayPal</option>
+                                <option value="mastercard">💳 MasterCard</option>
+                                <option value="americanexpress">💳 American Express</option>
+                                <option value="tezpay">⚡ TezPay</option>
+                                <option value="applepay">🍎 Apple Pay</option>
+                                <option value="other">💳 Boshqa</option>
+                            </select>
+                        </div>
+                        <div id="unbanPaymentMethodPreview" style="display: none; margin-top: 8px;"></div>
+                        <small class="text-muted">💡 Izohga to'lov usulini yozsangiz, avtomatik aniqlanadi</small>
                     </div>
 
                     <div id="unbanCustomDurationGroup" style="display: none;">
@@ -376,9 +396,17 @@
                     <div class="form-group">
                         <label><i class="fas fa-calendar-day"></i> Tugash sanasi</label>
                         <div class="input-wrapper">
-                            <input type="datetime-local" id="unbanEndDate" />
+                            <input type="datetime-local" id="unbanEndDate" readonly style="background: var(--bg-hover);" />
                         </div>
-                        <small class="text-muted">💡 Bo'sh qoldirilsa, avtomatik hisoblanadi</small>
+                        <small class="text-muted">💡 Avtomatik hisoblanadi</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-sticky-note"></i> Izoh (ixtiyoriy)</label>
+                        <div class="input-wrapper">
+                            <textarea id="unbanNote" placeholder="To'lov haqida izoh..." rows="2"></textarea>
+                        </div>
+                        <small class="text-muted">💡 Izohga to'lov usulini yozsangiz, avtomatik aniqlanadi</small>
                     </div>
                 </form>
             </div>
@@ -415,6 +443,39 @@
                         </div>
                     </div>
 
+                    <!-- ⭐ TO'LOV USULI SELECT -->
+                    <div class="form-group">
+                        <label><i class="fas fa-wallet"></i> To'lov usuli</label>
+                        <div class="input-wrapper">
+                            <select id="subscriptionPaymentMethodSelect">
+                                <option value="">To'lov usulini tanlang...</option>
+                                <option value="cash">💵 Naqd pul</option>
+                                <option value="click">📱 Click</option>
+                                <option value="paynet">💳 Paynet</option>
+                                <option value="payme">📲 Payme</option>
+                                <option value="uzum">🟣 Uzum</option>
+                                <option value="uzcard">💳 Uzcard</option>
+                                <option value="humo">🟠 Humo</option>
+                                <option value="visa">💳 Visa</option>
+                                <option value="agrobank">🌾 Agrobank</option>
+                                <option value="tbc">🔷 TBC Bank</option>
+                                <option value="anorbank">🍊 Anorbank</option>
+                                <option value="xazna">🏦 Xazna</option>
+                                <option value="anjir">🍐 Anjir Pay</option>
+                                <option value="hamkorbank">🏛️ Hamkor Bank</option>
+                                <option value="xalqbanki">🏛️ Xalq Banki</option>
+                                <option value="paypal">💳 PayPal</option>
+                                <option value="mastercard">💳 MasterCard</option>
+                                <option value="americanexpress">💳 American Express</option>
+                                <option value="tezpay">⚡ TezPay</option>
+                                <option value="applepay">🍎 Apple Pay</option>
+                                <option value="other">💳 Boshqa</option>
+                            </select>
+                        </div>
+                        <div id="subscriptionPaymentMethodPreview" style="display: none; margin-top: 8px;"></div>
+                        <small class="text-muted">💡 Izohga to'lov usulini yozsangiz, avtomatik aniqlanadi</small>
+                    </div>
+
                     <div id="subscriptionCustomDurationGroup" style="display: none;">
                         <div class="form-group">
                             <label><i class="fas fa-clock"></i> Vaqtni belgilang</label>
@@ -444,6 +505,14 @@
                             </div>
                             <small class="text-muted">💡 Faqat Custom tanlanganda ko'rinadi</small>
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-sticky-note"></i> Izoh (ixtiyoriy)</label>
+                        <div class="input-wrapper">
+                            <textarea id="subscriptionNote" placeholder="To'lov haqida izoh..." rows="2"></textarea>
+                        </div>
+                        <small class="text-muted">💡 Izohga to'lov usulini yozsangiz, avtomatik aniqlanadi</small>
                     </div>
                 </form>
             </div>
@@ -531,7 +600,7 @@
     </div>
 
     <!-- ============================================================
-         ⭐ TO'LOV QO'SHISH MODAL (paymentMethod SELECT BILAN)
+         ⭐ TO'LOV QO'SHISH MODAL
          ============================================================ -->
     <div class="modal-overlay" id="paymentModal">
         <div class="modal" style="max-width: 560px;">
@@ -582,7 +651,6 @@
                                 <option value="other">💳 Boshqa</option>
                             </select>
                         </div>
-                        <!-- ⭐ TANLANGAN TO'LOV USULI RASMI -->
                         <div id="paymentMethodPreview" style="display: none; margin-top: 8px;"></div>
                         <small class="text-muted">💡 Izohga to'lov usulini yozsangiz, avtomatik aniqlanadi</small>
                     </div>
@@ -687,7 +755,6 @@
         </div>
     </div>
 
-    <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
         <i class="fas fa-moon moon"></i>
     </button>

@@ -16,6 +16,9 @@
     <link rel="stylesheet" href="css/responsive.css" />
 
     <style>
+        /* ============================================================
+           TO'LOV USULI PREVIEW
+           ============================================================ */
         #paymentMethodPreview {
             animation: fadeIn 0.3s ease;
         }
@@ -31,6 +34,9 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* ============================================================
+           PROFILE PAGE STYLES
+           ============================================================ */
         .profile-container {
             padding: 24px 32px;
             max-width: 800px;
@@ -196,7 +202,9 @@
             .profile-info h2 { font-size: 1.1rem; }
         }
 
-        /* ⭐ UNBAN MODAL STYLES */
+        /* ============================================================
+           UNBAN MODAL STYLES
+           ============================================================ */
         #unbanCustomDurationGroup,
         #unbanAmountGroup {
             transition: all 0.3s ease;
@@ -207,106 +215,11 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: var(--bg-card);
-            border-radius: var(--radius);
-            max-width: 580px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            animation: modalSlideIn 0.3s ease;
-        }
-
-        @keyframes modalSlideIn {
-            from { opacity: 0; transform: translateY(30px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .modal-header h3 {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .modal-header h3 i {
-            margin-right: 8px;
-            color: var(--text-muted);
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-
-        .modal-close:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-        }
-
-        .modal-body {
-            padding: 20px 24px;
-        }
-
-        .modal-body .form-group {
-            margin-bottom: 16px;
-        }
-
-        .modal-body .form-group:last-child {
-            margin-bottom: 0;
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: 12px;
-            padding: 16px 24px;
-            border-top: 1px solid var(--border-color);
-            justify-content: flex-end;
-        }
-
-        .modal-footer .btn-primary,
-        .modal-footer .btn-secondary {
-            padding: 10px 24px;
-        }
     </style>
 </head>
 <body>
     <div class="app-container">
+        <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
                 <div class="brand-icon"><i class="fas fa-crown"></i></div>
@@ -324,6 +237,7 @@
             </div>
         </aside>
 
+        <!-- SIDEBAR OVERLAY -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
         <main class="main-content">
@@ -342,6 +256,7 @@
             </header>
 
             <section class="profile-container">
+                <!-- Profile Header -->
                 <div class="profile-header">
                     <div class="profile-avatar large">
                         <span id="profileInitial">A</span>
@@ -359,6 +274,7 @@
                     </div>
                 </div>
 
+                <!-- Profile Stats -->
                 <div class="profile-stats">
                     <div class="stat-item">
                         <p class="stat-label"><i class="fas fa-calendar"></i> Obuna turi</p>
@@ -374,6 +290,7 @@
                     </div>
                 </div>
 
+                <!-- To'lov Tarixi -->
                 <div class="subscription-history">
                     <h3><i class="fas fa-history"></i> To'lov Tarixi</h3>
                     <div id="historyList" class="history-list">
@@ -381,6 +298,7 @@
                     </div>
                 </div>
 
+                <!-- Xabarlar Ro'yxati -->
                 <div class="subscription-history" style="margin-top: 16px;">
                     <h3><i class="fas fa-bell"></i> Xabarlar
                         <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted); margin-left: 8px;">
@@ -392,6 +310,7 @@
                     </div>
                 </div>
 
+                <!-- TUGMALAR -->
                 <div class="profile-actions">
                     <button id="editBtn" class="btn-primary"><i class="fas fa-edit"></i> Tahrirlash</button>
                     <button id="subscriptionBtn" class="btn-warning"><i class="fas fa-calendar-plus"></i> Obuna sotish</button>
@@ -406,7 +325,7 @@
     </div>
 
     <!-- ============================================================
-         ⭐ UNBAN MODAL (TO'LIQ TUZATILGAN)
+         ⭐ UNBAN MODAL
          ============================================================ -->
     <div class="modal-overlay" id="unbanModal">
         <div class="modal" style="max-width: 580px;">
@@ -430,7 +349,7 @@
                         </div>
                     </div>
 
-                    <!-- ⭐ TO'LOV USULI SELECT (YANGI QO'SHILDI) -->
+                    <!-- ⭐ TO'LOV USULI SELECT -->
                     <div class="form-group">
                         <label><i class="fas fa-wallet"></i> To'lov usuli</label>
                         <div class="input-wrapper">
@@ -640,7 +559,7 @@
     </div>
 
     <!-- ============================================================
-         ⭐ TAHRIRLASH MODAL
+         ⭐ TAHRIRLASH MODAL (EDIT MODAL)
          ============================================================ -->
     <div class="modal-overlay" id="editModal">
         <div class="modal">
@@ -669,24 +588,12 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="currentPasswordDisplay"><i class="fas fa-key"></i> Joriy parol</label>
-                        <div class="input-wrapper">
-                            <input type="password" id="currentPasswordDisplay" readonly
-                                   style="background: var(--bg-hover); cursor: not-allowed; font-size: 1.2rem; letter-spacing: 2px;"
-                                   value="••••••••••" />
-                            <button type="button" class="password-toggle" id="currentPasswordToggle" style="right: 12px;">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                        <small class="text-muted">💡 Parol xavfsizlik uchun yashirilgan.</small>
-                    </div>
-
+                    <!-- ⭐ PAROL MAYDONI - TO'G'RI FORMAT -->
                     <div class="form-group">
                         <label for="editPassword"><i class="fas fa-lock"></i> Yangi parol (ixtiyoriy)</label>
                         <div class="input-wrapper">
                             <input type="password" id="editPassword" placeholder="Yangi parol (ixtiyoriy)" minlength="6" />
-                            <button type="button" class="password-toggle" id="editPasswordToggle">
+                            <button type="button" class="password-toggle" data-target="editPassword">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
@@ -869,6 +776,7 @@
         </div>
     </div>
 
+    <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
         <i class="fas fa-moon moon"></i>
     </button>

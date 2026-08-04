@@ -8,6 +8,7 @@ let adminId = null;
 let currentAdmin = null;
 let countdownInterval = null;
 let notificationRefreshInterval = null;
+let lastUnreadCount = 0;
 let audioContext = null;
 
 // ============================================================
@@ -29,6 +30,7 @@ function createNotificationSound() {
         
         var now = audioContext.currentTime;
         
+        // 1-OVOZ: 880 Hz
         var osc1 = audioContext.createOscillator();
         var gain1 = audioContext.createGain();
         osc1.connect(gain1);
@@ -40,6 +42,7 @@ function createNotificationSound() {
         osc1.start(now);
         osc1.stop(now + 0.2);
         
+        // 2-OVOZ: 1100 Hz
         var osc2 = audioContext.createOscillator();
         var gain2 = audioContext.createGain();
         osc2.connect(gain2);
@@ -51,15 +54,18 @@ function createNotificationSound() {
         osc2.start(now + 0.15);
         osc2.stop(now + 0.35);
         
+        console.log('🔔 Ovoz chiqdi (Admin-Profile)');
         return true;
     } catch (error) {
+        console.warn('⚠️ Ovoz xatosi:', error);
         return false;
     }
 }
 
 function playNotificationSound() {
-    if (createNotificationSound()) return;
-    setTimeout(function() { createNotificationSound(); }, 100);
+    try {
+        createNotificationSound();
+    } catch (e) {}
 }
 
 function initAudio() {
@@ -69,7 +75,10 @@ function initAudio() {
         if (audioContext.state === 'suspended') {
             audioContext.resume();
         }
-    } catch (e) {}
+        console.log('✅ AudioContext tayyor (Admin-Profile)');
+    } catch (e) {
+        console.warn('⚠️ AudioContext xatosi:', e);
+    }
 }
 
 // ============================================================
@@ -102,6 +111,7 @@ const PAYMENT_METHODS = {
 function detectPaymentMethod(text) {
     if (!text) return PAYMENT_METHODS.other;
     var lowerText = text.toLowerCase().trim();
+    
     var keywords = {
         'uzum': 'uzum',
         'tezpay': 'tezpay',
@@ -118,6 +128,7 @@ function detectPaymentMethod(text) {
         'payme': 'payme',
         'paynet': 'paynet'
     };
+    
     for (var key in keywords) {
         if (lowerText.includes(key)) {
             return PAYMENT_METHODS[keywords[key]] || PAYMENT_METHODS.other;
@@ -207,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', initAudioOnce);
     document.addEventListener('touchstart', initAudioOnce);
     document.addEventListener('keydown', initAudioOnce);
-    setTimeout(function() { initAudio(); }, 5000);
+    setTimeout(initAudio, 3000);
     
     loadProfile();
     loadNotifications();
@@ -221,6 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initSidebar();
     initPasswordToggles();
     
+    // ⭐ HAR 3 SONIYADA XABARLARNI YANGILASH (REAL TIME)
     notificationRefreshInterval = setInterval(function() {
         loadNotifications();
     }, 3000);
@@ -234,6 +246,7 @@ function initSidebar() {
     var sidebar = document.getElementById('sidebar');
     var overlay = document.getElementById('sidebarOverlay');
     if (!menuToggle || !sidebar) return;
+    
     var newToggle = menuToggle.cloneNode(true);
     menuToggle.parentNode.replaceChild(newToggle, menuToggle);
     newToggle.addEventListener('click', function(e) {
@@ -241,6 +254,7 @@ function initSidebar() {
         sidebar.classList.toggle('open');
         if (overlay) overlay.classList.toggle('show');
     });
+    
     if (overlay) {
         var newOverlay = overlay.cloneNode(true);
         overlay.parentNode.replaceChild(newOverlay, overlay);
@@ -332,9 +346,11 @@ function renderSubscriptionHistory(history) {
         historyList.innerHTML = '<p class="text-muted">To\'lov tarixi yo\'q</p>';
         return;
     }
+    
     var sortedHistory = history.slice().sort(function(a, b) {
         return new Date(b.purchaseDate) - new Date(a.purchaseDate);
     });
+    
     var html = '';
     sortedHistory.forEach(function(item, index) {
         var startDate = item.startDate ? formatDateTimeFull(item.startDate) : '-';
@@ -343,11 +359,13 @@ function renderSubscriptionHistory(history) {
         var endDateTime = item.endDate ? new Date(item.endDate) : null;
         var isExpired = endDateTime && endDateTime < now;
         var isActive = item.status === 'active' && !isExpired;
+        
         var statusLabel = '❌ Faol emas';
         var statusClass = 'inactive';
         var statusColor = '#ff3b30';
         if (isActive) { statusLabel = '✅ Faol'; statusClass = 'active'; statusColor = '#34c759'; }
         else if (isExpired) { statusLabel = '⏰ Muddati tugagan'; statusClass = 'expired'; statusColor = '#ff9500'; }
+        
         var typeLabel = { monthly: '📅 Oylik', '6months': '📅 6 oylik', yearly: '📅 Yillik', custom: '⚙️ Custom' }[item.type] || item.type;
         var amount = item.amount || 0;
         var note = item.note ? '<p class="history-dates"><i class="fas fa-sticky-note"></i> ' + item.note + '</p>' : '';
@@ -359,6 +377,7 @@ function renderSubscriptionHistory(history) {
                 '<img src="' + methodInfo.icon + '" style="width: 20px; height: 20px; object-fit: contain; border-radius: 4px; background: white; padding: 2px;" onerror="this.style.display=\'none\'">' +
                 methodInfo.name +
             '</span>' : '';
+        
         html += 
             '<div class="history-item" style="border-left: 4px solid ' + statusColor + ';">' +
                 '<div class="history-left">' +
@@ -417,29 +436,59 @@ function updateCountdown() {
 }
 
 // ============================================================
-// ⭐ XABARLARNI YUKLASH VA RENDER QILISH (TUZATILGAN)
+// ⭐ XABARLARNI YUKLASH (REAL TIME)
 // ============================================================
 async function loadNotifications() {
     try {
-        var data = await API.get('/notifications');
-        if (data.success && data.data) {
-            renderNotifications(data.data);
+        var token = Auth.getToken();
+        if (!token) return;
+
+        // ⭐ TIMEOUT BILAN (5 sekund)
+        var controller = new AbortController();
+        var timeoutId = setTimeout(function() { controller.abort(); }, 5000);
+
+        try {
+            var response = await fetch(API.baseURL + '/api/notifications', {
+                headers: API.getHeaders(),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            var data = await response.json();
+
+            if (data.success && data.data) {
+                // ⭐ YANGI XABAR KELGANDA OVOZ
+                var oldUnread = getUnreadCount(data.data);
+                renderNotifications(data.data);
+                var newUnread = getUnreadCount(data.data);
+                
+                if (newUnread > lastUnreadCount && lastUnreadCount > 0) {
+                    playNotificationSound();
+                    var diff = newUnread - lastUnreadCount;
+                    showNotificationToast('🔔 ' + diff + ' ta yangi xabar keldi!');
+                }
+                lastUnreadCount = newUnread;
+            }
+        } catch (fetchError) {
+            if (fetchError.name === 'AbortError') {
+                console.log('⏱️ Notifications timeout (Admin-Profile)');
+            } else {
+                console.error('❌ Xatolik:', fetchError);
+            }
         }
     } catch (error) {
         console.error('❌ Xabarlarni yuklash xatosi:', error);
-        var container = document.getElementById('notificationsList');
-        if (container) {
-            container.innerHTML = 
-                '<div class="notifications-empty">' +
-                    '<i class="fas fa-exclamation-circle"></i>' +
-                    '<p>Xabarlar yuklanmadi: ' + (error.message || 'Tarmoq xatosi') + '</p>' +
-                '</div>';
-        }
     }
 }
 
+function getUnreadCount(notifications) {
+    var filtered = notifications.filter(function(n) {
+        return String(n.recipientId) === String(adminId);
+    });
+    return filtered.filter(function(n) { return !n.isRead; }).length;
+}
+
 // ============================================================
-// ⭐ XABARLARNI RENDER QILISH - TEPADA, SCROLL, HOLATLAR BILAN
+// ⭐ XABARLARNI RENDER QILISH
 // ============================================================
 function renderNotifications(notifications) {
     var container = document.getElementById('notificationsList');
@@ -523,7 +572,39 @@ function renderNotifications(notifications) {
 }
 
 // ============================================================
-// ⭐ XABAR YUBORISH (OVOZ BILAN)
+// ⭐ TOAST XABAR
+// ============================================================
+function showNotificationToast(message) {
+    var existing = document.querySelector('.notification-toast');
+    if (existing) existing.remove();
+
+    var toast = document.createElement('div');
+    toast.className = 'notification-toast';
+    toast.innerHTML = 
+        '<i class="fas fa-bell" style="font-size:1.2rem;"></i>' +
+        '<span>' + message + '</span>' +
+        '<button onclick="this.parentElement.remove()">×</button>';
+    toast.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'BUTTON') {
+            window.location.href = 'notifications.html';
+        }
+    });
+
+    document.body.appendChild(toast);
+
+    setTimeout(function() {
+        if (toast.parentElement) {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.5s';
+            setTimeout(function() {
+                if (toast.parentElement) toast.remove();
+            }, 500);
+        }
+    }, 5000);
+}
+
+// ============================================================
+// ⭐ XABAR YUBORISH
 // ============================================================
 async function sendNotification() {
     var titleInput = document.getElementById('notificationTitle');
@@ -554,7 +635,7 @@ async function sendNotification() {
     
     try {
         var token = localStorage.getItem('adminToken');
-        var response = await fetch('https://admin-main-backend.onrender.com/api/notifications', {
+        var response = await fetch(API.baseURL + '/api/notifications', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -571,7 +652,6 @@ async function sendNotification() {
         });
         var data = await response.json();
         if (response.ok && data.success) {
-            // ⭐ OVOZ CHIQARISH
             playNotificationSound();
             showNotificationResult('✅ Xabar muvaffaqiyatli yuborildi!', 'success');
             titleInput.value = '';
@@ -609,7 +689,7 @@ function showNotificationResult(msg, type) {
 }
 
 // ============================================================
-// ⭐ TO'LOV QO'SHISH MODAL (ADMIN-MAIN)
+// ⭐ TO'LOV QO'SHISH MODAL
 // ============================================================
 function initPaymentModal() {
     var modal = document.getElementById('paymentModal');
@@ -852,7 +932,7 @@ async function savePayment() {
 }
 
 // ============================================================
-// OBUNA SOTISH MODAL (ADMIN-MAIN)
+// OBUNA SOTISH MODAL
 // ============================================================
 function initSubscriptionModal() {
     var modal = document.getElementById('subscriptionModal');
@@ -1033,7 +1113,7 @@ async function saveSubscription() {
 }
 
 // ============================================================
-// UNBAN MODAL (ADMIN-MAIN)
+// UNBAN MODAL
 // ============================================================
 function initUnbanModal() {
     var modal = document.getElementById('unbanModal');
@@ -1369,6 +1449,7 @@ function initButtons() {
             try {
                 var result = await API.delete('/admins/' + adminId);
                 if (result.success) {
+                    playNotificationSound();
                     alert('✅ Admin Customer o\'chirildi!');
                     window.location.href = 'admins.html';
                 }
@@ -1476,7 +1557,7 @@ function initNotificationModal() {
 }
 
 // ============================================================
-// TAHRIRLASH MODAL (EDIT MODAL)
+// TAHRIRLASH MODAL
 // ============================================================
 function initEditModal() {
     var modal = document.getElementById('editModal');

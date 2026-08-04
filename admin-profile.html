@@ -39,7 +39,8 @@
            ============================================================ */
         .profile-container {
             padding: 24px 32px;
-            max-width: 800px;
+            max-width: 900px;
+            margin: 0 auto;
         }
         .profile-header {
             display: flex;
@@ -221,19 +222,78 @@
         }
 
         /* ============================================================
-           ⭐ XABARLAR KONTEYNERI - TEPADA VA QIMIRLAMASLIK
+           ⭐ XABARLAR KONTEYNERI - TEPADA, SCROLL QILMASLIK, CARD ICHIDA SCROLL
            ============================================================ */
+        .notifications-wrapper {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 24px 32px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            overflow: hidden;
+            max-height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notifications-wrapper h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .notifications-wrapper h3 i {
+            margin-right: 4px;
+            color: var(--text-muted);
+        }
+
+        .notifications-wrapper h3 .sub-text {
+            font-size: 0.7rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+
+        /* ⭐ SCROLL QILADIGAN KONTEYNER */
         #notificationsList {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            padding: 4px 0;
-            max-height: none;
-            overflow: visible;
+            padding: 4px 6px 4px 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex: 1;
+            min-height: 0;
+            max-height: 400px;
             width: 100%;
         }
 
-        .notification-item-wrapper {
+        #notificationsList::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #notificationsList::-webkit-scrollbar-track {
+            background: var(--bg-hover);
+            border-radius: 10px;
+        }
+
+        #notificationsList::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 10px;
+        }
+
+        #notificationsList::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* ⭐ XABAR CARD - O'LCHAMI O'ZGARMAS, ICHIDA SCROLL */
+        .notification-card {
             display: flex;
             flex-direction: column;
             gap: 4px;
@@ -241,23 +301,135 @@
             background: var(--bg-card);
             border-radius: 8px;
             border: 1px solid var(--border-color);
-            margin-bottom: 8px;
             transition: all 0.2s ease;
+            flex-shrink: 0;
+            max-width: 100%;
+            overflow: hidden;
         }
 
-        .notification-item-wrapper.unread {
+        .notification-card.unread {
             border-left: 3px solid #007aff;
         }
 
-        .notification-item-wrapper.read {
+        .notification-card.read {
             border-left: 3px solid var(--border-color);
         }
 
-        .notification-item-wrapper:hover {
+        .notification-card:hover {
             border-color: var(--text-muted);
         }
 
-        .delete-notification-btn {
+        /* ⭐ CARD ICHIDAGI MATN - SCROLL QILADI */
+        .notification-card .card-body {
+            max-height: 80px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 4px;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .notification-card .card-body::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .notification-card .card-body::-webkit-scrollbar-track {
+            background: var(--bg-hover);
+            border-radius: 10px;
+        }
+
+        .notification-card .card-body::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 10px;
+        }
+
+        /* ⭐ CARD TOP - Sarlavha va holat */
+        .notification-card .card-top {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .notification-card .card-top .left {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            min-width: 0;
+        }
+
+        .notification-card .card-top .left .title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            word-break: break-word;
+            max-width: 100%;
+        }
+
+        .notification-card .card-top .left .badge-status {
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .notification-card .card-top .left .badge-status.read {
+            background: #e8f5e9;
+            color: #34c759;
+        }
+
+        .notification-card .card-top .left .badge-status.unread {
+            background: #fff3e0;
+            color: #ff9500;
+        }
+
+        [data-theme="dark"] .notification-card .card-top .left .badge-status.read {
+            background: #1a3a2a;
+            color: #4ac759;
+        }
+
+        [data-theme="dark"] .notification-card .card-top .left .badge-status.unread {
+            background: #3a2a1a;
+            color: #ff9a4a;
+        }
+
+        .notification-card .card-top .left .sender {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .notification-card .card-top .date {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* ⭐ CARD MATNI */
+        .notification-card .card-message {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            word-wrap: break-word;
+            word-break: break-word;
+            line-height: 1.5;
+            padding: 2px 0;
+        }
+
+        /* ⭐ CARD FOOTER - TUGMALAR */
+        .notification-card .card-footer {
+            display: flex;
+            gap: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .notification-card .card-footer .btn-delete {
             background: none;
             border: 1px solid #ff3b30;
             color: #ff3b30;
@@ -266,21 +438,120 @@
             padding: 4px 12px;
             border-radius: 6px;
             transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .delete-notification-btn:hover {
+        .notification-card .card-footer .btn-delete:hover {
             background: #ff3b30;
             color: #fff;
         }
 
-        [data-theme="dark"] .delete-notification-btn {
+        .notification-card .card-footer .status-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .notification-card .card-footer .status-label.read {
+            color: var(--color-success);
+        }
+
+        .notification-card .card-footer .status-label.unread {
+            color: var(--color-warning);
+        }
+
+        [data-theme="dark"] .notification-card .card-footer .btn-delete {
             border-color: #ff3b30;
             color: #ff3b30;
         }
 
-        [data-theme="dark"] .delete-notification-btn:hover {
+        [data-theme="dark"] .notification-card .card-footer .btn-delete:hover {
             background: #ff3b30;
             color: #fff;
+        }
+
+        /* ⭐ EMPTY STATE */
+        .notifications-empty {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--text-muted);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notifications-empty i {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+
+        /* ⭐ RESPONSIVE */
+        @media (max-width: 768px) {
+            .notifications-wrapper {
+                padding: 16px;
+                max-height: 400px;
+            }
+
+            #notificationsList {
+                max-height: 300px;
+            }
+
+            .notification-card .card-top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+
+            .notification-card .card-top .left {
+                width: 100%;
+            }
+
+            .notification-card .card-top .date {
+                width: 100%;
+                text-align: left;
+            }
+
+            .notification-card .card-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .notification-card .card-footer .btn-delete {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .notifications-wrapper {
+                padding: 12px;
+                max-height: 350px;
+            }
+
+            #notificationsList {
+                max-height: 250px;
+                gap: 6px;
+            }
+
+            .notification-card {
+                padding: 10px 12px;
+            }
+
+            .notification-card .card-top .left .title {
+                font-size: 0.8rem;
+            }
+
+            .notification-card .card-message {
+                font-size: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -365,25 +636,22 @@
                     </div>
                 </div>
 
-                <!-- ⭐ XABARLAR RO'YXATI - TEPADA VA QIMIRLAMASLIK (Admin Main) -->
-                <div class="subscription-history" style="margin-top: 16px; overflow: visible;">
-                    <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:1rem;font-weight:600;">
+                <!-- ============================================================
+                     ⭐ XABARLAR - TEPADA, HEIGHT O'ZGARMAS, ICHIDA SCROLL
+                     ============================================================ -->
+                <div class="notifications-wrapper">
+                    <h3>
                         <i class="fas fa-bell"></i> Xabarlar
-                        <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted); margin-left: 8px;">
+                        <span class="sub-text">
                             (Admin-Main o'chira oladi, Admin-Customer o'qilgan deb belgilay oladi)
                         </span>
                     </h3>
-                    <!-- ⭐ MAXSUS KONTEYNER - SCROLL QILMAYDI, TEPADA TURADI -->
-                    <div id="notificationsList" style="
-                        display: flex;
-                        flex-direction: column;
-                        gap: 8px;
-                        padding: 4px 0;
-                        max-height: none;
-                        overflow: visible;
-                        width: 100%;
-                    ">
-                        <p class="text-muted" style="text-align: center; padding: 20px;">Xabarlar yo'q</p>
+                    <!-- ⭐ SCROLL QILADIGAN KONTEYNER -->
+                    <div id="notificationsList">
+                        <div class="notifications-empty">
+                            <i class="fas fa-bell-slash"></i>
+                            <p>Xabarlar yo'q</p>
+                        </div>
                     </div>
                 </div>
 

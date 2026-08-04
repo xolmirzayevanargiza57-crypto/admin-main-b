@@ -35,7 +35,7 @@
         }
 
         /* ============================================================
-           PROFILE PAGE STYLES
+           PROFILE PAGE STYLES - ADMIN MAIN
            ============================================================ */
         .profile-container {
             padding: 24px 32px;
@@ -142,7 +142,11 @@
         }
         .subscription-history h3 i { margin-right: 8px; color: var(--text-muted); }
 
-        .history-list { display: flex; flex-direction: column; gap: 12px; }
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
         .history-item {
             display: flex;
             justify-content: space-between;
@@ -214,6 +218,69 @@
         #unbanStartDate:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        /* ============================================================
+           ⭐ XABARLAR KONTEYNERI - TEPADA VA QIMIRLAMASLIK
+           ============================================================ */
+        #notificationsList {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 4px 0;
+            max-height: none;
+            overflow: visible;
+            width: 100%;
+        }
+
+        .notification-item-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .notification-item-wrapper.unread {
+            border-left: 3px solid #007aff;
+        }
+
+        .notification-item-wrapper.read {
+            border-left: 3px solid var(--border-color);
+        }
+
+        .notification-item-wrapper:hover {
+            border-color: var(--text-muted);
+        }
+
+        .delete-notification-btn {
+            background: none;
+            border: 1px solid #ff3b30;
+            color: #ff3b30;
+            font-size: 0.65rem;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .delete-notification-btn:hover {
+            background: #ff3b30;
+            color: #fff;
+        }
+
+        [data-theme="dark"] .delete-notification-btn {
+            border-color: #ff3b30;
+            color: #ff3b30;
+        }
+
+        [data-theme="dark"] .delete-notification-btn:hover {
+            background: #ff3b30;
+            color: #fff;
         }
     </style>
 </head>
@@ -298,14 +365,24 @@
                     </div>
                 </div>
 
-                <!-- Xabarlar Ro'yxati -->
-                <div class="subscription-history" style="margin-top: 16px;">
-                    <h3><i class="fas fa-bell"></i> Xabarlar
+                <!-- ⭐ XABARLAR RO'YXATI - TEPADA VA QIMIRLAMASLIK (Admin Main) -->
+                <div class="subscription-history" style="margin-top: 16px; overflow: visible;">
+                    <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:1rem;font-weight:600;">
+                        <i class="fas fa-bell"></i> Xabarlar
                         <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted); margin-left: 8px;">
                             (Admin-Main o'chira oladi, Admin-Customer o'qilgan deb belgilay oladi)
                         </span>
                     </h3>
-                    <div id="notificationsList" class="history-list" style="max-height: 400px; overflow-y: auto; overflow-x: hidden; padding-right: 8px; display: flex; flex-direction: column; gap: 8px;">
+                    <!-- ⭐ MAXSUS KONTEYNER - SCROLL QILMAYDI, TEPADA TURADI -->
+                    <div id="notificationsList" style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                        padding: 4px 0;
+                        max-height: none;
+                        overflow: visible;
+                        width: 100%;
+                    ">
                         <p class="text-muted" style="text-align: center; padding: 20px;">Xabarlar yo'q</p>
                     </div>
                 </div>
@@ -325,7 +402,7 @@
     </div>
 
     <!-- ============================================================
-         ⭐ UNBAN MODAL
+         ⭐ UNBAN MODAL (Admin Main)
          ============================================================ -->
     <div class="modal-overlay" id="unbanModal">
         <div class="modal" style="max-width: 580px;">
@@ -453,7 +530,7 @@
     </div>
 
     <!-- ============================================================
-         ⭐ OBUNA SOTISH MODAL
+         ⭐ OBUNA SOTISH MODAL (Admin Main)
          ============================================================ -->
     <div class="modal-overlay" id="subscriptionModal">
         <div class="modal" style="max-width: 500px;">
@@ -559,7 +636,7 @@
     </div>
 
     <!-- ============================================================
-         ⭐ TAHRIRLASH MODAL (EDIT MODAL)
+         ⭐ TAHRIRLASH MODAL (EDIT MODAL) - Admin Main
          ============================================================ -->
     <div class="modal-overlay" id="editModal">
         <div class="modal">
@@ -588,7 +665,7 @@
                         </div>
                     </div>
 
-                    <!-- ⭐ PAROL MAYDONI - TO'G'RI FORMAT -->
+                    <!-- ⭐ PAROL MAYDONI -->
                     <div class="form-group">
                         <label for="editPassword"><i class="fas fa-lock"></i> Yangi parol (ixtiyoriy)</label>
                         <div class="input-wrapper">
@@ -621,7 +698,7 @@
     </div>
 
     <!-- ============================================================
-         ⭐ TO'LOV QO'SHISH MODAL
+         ⭐ TO'LOV QO'SHISH MODAL (Admin Main)
          ============================================================ -->
     <div class="modal-overlay" id="paymentModal">
         <div class="modal" style="max-width: 560px;">
@@ -742,7 +819,7 @@
     </div>
 
     <!-- ============================================================
-         ⭐ XABAR YUBORISH MODAL
+         ⭐ XABAR YUBORISH MODAL (Admin Main)
          ============================================================ -->
     <div class="modal-overlay" id="notificationModal">
         <div class="modal" style="max-width: 500px;">

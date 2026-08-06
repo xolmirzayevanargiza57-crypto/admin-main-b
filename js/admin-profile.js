@@ -204,10 +204,10 @@ document.addEventListener('DOMContentLoaded', function() {
     initSidebar();
     initPasswordToggles();
     
-    // ⭐ HAR 3 SONIYADA XABARLARNI YANGILASH (REAL TIME)
+    // ⭐ HAR 0.5 SONIYADA XABARLARNI YANGILASH (REAL TIME)
     notificationRefreshInterval = setInterval(function() {
         loadNotifications();
-    }, 3000);
+    }, 500);
 });
 
 // ============================================================
@@ -405,10 +405,10 @@ async function loadNotifications() {
         if (!token) return;
         
         var controller = new AbortController();
-        var timeoutId = setTimeout(function() { controller.abort(); }, 5000);
+        var timeoutId = setTimeout(function() { controller.abort(); }, 3000);
         
         try {
-            // ⭐ TO'G'RI URL - API.baseURL da allaqachon /api bor
+            // ⭐ TO'G'RI URL - /api/notifications
             var response = await fetch(API.baseURL + '/api/notifications', {
                 headers: API.getHeaders(),
                 signal: controller.signal,
@@ -599,7 +599,7 @@ async function sendNotification() {
     try {
         var token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
         
-        // ⭐ TO'G'RI URL - API.baseURL ga /api qo'shish kerak
+        // ⭐ TO'G'RI URL - /api/notifications
         var response = await fetch(API.baseURL + '/api/notifications', {
             method: 'POST',
             headers: {

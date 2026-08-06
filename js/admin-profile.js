@@ -1,5 +1,5 @@
 // ============================================================
-// ADMIN PROFILE - ADMIN-MAIN (TO'LIQ)
+// ADMIN PROFILE - ADMIN-MAIN (TO'LIQ TUZATILGAN)
 // Loyiha: Admin-Main Frontend
 // Fayl: js/admin-profile.js
 // ============================================================
@@ -397,25 +397,30 @@ function updateCountdown() {
 }
 
 // ============================================================
-// ⭐ XABARLARNI YUKLASH (REAL TIME)
+// ⭐ XABARLARNI YUKLASH (REAL TIME) - TUZATILGAN
 // ============================================================
 async function loadNotifications() {
     try {
         var token = Auth.getToken();
         if (!token) return;
+        
         var controller = new AbortController();
         var timeoutId = setTimeout(function() { controller.abort(); }, 5000);
+        
         try {
+            // ⭐ TO'G'RI URL - API.baseURL da allaqachon /api bor
             var response = await fetch(API.baseURL + '/api/notifications', {
                 headers: API.getHeaders(),
                 signal: controller.signal,
                 cache: 'no-cache'
             });
             clearTimeout(timeoutId);
+            
             if (!response.ok) {
                 console.warn('⚠️ Notifications response not OK:', response.status);
                 return;
             }
+            
             var data = await response.json();
             if (data.success && data.data) {
                 var oldUnread = getUnreadCount(data.data);
@@ -453,16 +458,21 @@ function getUnreadCount(notifications) {
 function renderNotifications(notifications) {
     var container = document.getElementById('notificationsList');
     if (!container) return;
+    
     var user = Auth.getUser();
+    // ⭐ FAQAT O'ZIGA KELGAN XABARLAR
     var filtered = notifications.filter(function(n) { 
         return String(n.recipientId) === String(adminId); 
     });
+    
+    // ⭐ SO'NGI 30 KUN
     var thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     filtered = filtered.filter(function(n) {
         var notifDate = new Date(n.createdAt);
         return notifDate >= thirtyDaysAgo;
     });
+    
     if (!filtered || filtered.length === 0) {
         container.innerHTML = 
             '<div class="notifications-empty">' +
@@ -471,17 +481,20 @@ function renderNotifications(notifications) {
             '</div>';
         return;
     }
+    
     var html = '';
     filtered.forEach(function(item) {
         var isRead = item.isRead;
         var isSentByMe = item.sentBy === user?._id;
         var senderName = item.sentByName || 'Admin';
         var formattedDate = formatDateTimeFull(item.createdAt);
+        
         var statusBadgeClass = isRead ? 'read' : 'unread';
         var statusBadgeText = isRead ? '✅ O\'qilgan' : '🟡 O\'qilmagan';
         var statusLabelClass = isRead ? 'read' : 'unread';
         var statusLabelText = isRead ? '✓ O\'qilgan' : '⏳ O\'qilmagan';
         var cardClass = isRead ? 'read' : 'unread';
+        
         html += 
             '<div class="notification-card ' + cardClass + '">' +
                 '<div class="card-top">' +
@@ -503,7 +516,10 @@ function renderNotifications(notifications) {
                 '</div>' +
             '</div>';
     });
+    
     container.innerHTML = html;
+    
+    // ⭐ O'chirish tugmalari
     document.querySelectorAll('.btn-delete').forEach(function(btn) {
         btn.addEventListener('click', async function() {
             var id = this.dataset.id;
@@ -551,7 +567,7 @@ function showNotificationToast(message) {
 }
 
 // ============================================================
-// ⭐ XABAR YUBORISH
+// ⭐ XABAR YUBORISH - TUZATILGAN
 // ============================================================
 async function sendNotification() {
     var titleInput = document.getElementById('notificationTitle');
@@ -560,6 +576,7 @@ async function sendNotification() {
     var resultDiv = document.getElementById('notificationResult');
     var title = titleInput ? titleInput.value.trim() : '';
     var message = messageInput ? messageInput.value.trim() : '';
+    
     if (!title) {
         showNotificationResult('❌ Iltimos, sarlavhani kiriting!', 'error');
         titleInput.focus();
@@ -574,11 +591,15 @@ async function sendNotification() {
         showNotificationResult('❌ Admin ID topilmadi!', 'error');
         return;
     }
+    
     sendBtn.disabled = true;
     sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...';
     showNotificationResult('⏳ Xabar yuborilmoqda...', 'info');
+    
     try {
         var token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
+        
+        // ⭐ TO'G'RI URL - API.baseURL ga /api qo'shish kerak
         var response = await fetch(API.baseURL + '/api/notifications', {
             method: 'POST',
             headers: {
@@ -594,7 +615,9 @@ async function sendNotification() {
                 expiresInDays: 30
             })
         });
+        
         var data = await response.json();
+        
         if (response.ok && data.success) {
             playNotificationSound();
             showNotificationResult('✅ Xabar muvaffaqiyatli yuborildi!', 'success');

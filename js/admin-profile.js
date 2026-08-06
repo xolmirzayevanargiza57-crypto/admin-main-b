@@ -1,5 +1,5 @@
 // ============================================================
-// ADMIN PROFILE - ADMIN-MAIN (TO'LIQ TUZATILGAN)
+// ADMIN PROFILE - ADMIN-MAIN (TO'LIQ)
 // Loyiha: Admin-Main Frontend
 // Fayl: js/admin-profile.js
 // ============================================================
@@ -19,18 +19,13 @@ function createNotificationSound() {
         if (!audioContext) {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
-        
         if (audioContext.state === 'suspended') {
             audioContext.resume();
         }
-        
         if (audioContext.state === 'closed') {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
-        
         var now = audioContext.currentTime;
-        
-        // 1-OVOZ: 880 Hz
         var osc1 = audioContext.createOscillator();
         var gain1 = audioContext.createGain();
         osc1.connect(gain1);
@@ -41,8 +36,6 @@ function createNotificationSound() {
         gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
         osc1.start(now);
         osc1.stop(now + 0.2);
-        
-        // 2-OVOZ: 1100 Hz
         var osc2 = audioContext.createOscillator();
         var gain2 = audioContext.createGain();
         osc2.connect(gain2);
@@ -53,11 +46,8 @@ function createNotificationSound() {
         gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
         osc2.start(now + 0.15);
         osc2.stop(now + 0.35);
-        
-        console.log('🔔 Ovoz chiqdi (Admin-Profile)');
         return true;
     } catch (error) {
-        console.warn('⚠️ Ovoz xatosi:', error);
         return false;
     }
 }
@@ -65,6 +55,7 @@ function createNotificationSound() {
 function playNotificationSound() {
     try {
         createNotificationSound();
+        setTimeout(function() { createNotificationSound(); }, 200);
     } catch (e) {}
 }
 
@@ -75,10 +66,7 @@ function initAudio() {
         if (audioContext.state === 'suspended') {
             audioContext.resume();
         }
-        console.log('✅ AudioContext tayyor (Admin-Profile)');
-    } catch (e) {
-        console.warn('⚠️ AudioContext xatosi:', e);
-    }
+    } catch (e) {}
 }
 
 // ============================================================
@@ -111,24 +99,12 @@ const PAYMENT_METHODS = {
 function detectPaymentMethod(text) {
     if (!text) return PAYMENT_METHODS.other;
     var lowerText = text.toLowerCase().trim();
-    
     var keywords = {
-        'uzum': 'uzum',
-        'tezpay': 'tezpay',
-        'apple pay': 'applepay',
-        'applepay': 'applepay',
-        'hamkor': 'hamkorbank',
-        'xalq': 'xalqbanki',
-        'paypal': 'paypal',
-        'mastercard': 'mastercard',
-        'american': 'americanexpress',
-        'click': 'click',
-        'uzcard': 'uzcard',
-        'xazna': 'xazna',
-        'payme': 'payme',
-        'paynet': 'paynet'
+        'uzum': 'uzum', 'tezpay': 'tezpay', 'apple pay': 'applepay', 'applepay': 'applepay',
+        'hamkor': 'hamkorbank', 'xalq': 'xalqbanki', 'paypal': 'paypal', 'mastercard': 'mastercard',
+        'american': 'americanexpress', 'click': 'click', 'uzcard': 'uzcard', 'xazna': 'xazna',
+        'payme': 'payme', 'paynet': 'paynet'
     };
-    
     for (var key in keywords) {
         if (lowerText.includes(key)) {
             return PAYMENT_METHODS[keywords[key]] || PAYMENT_METHODS.other;
@@ -196,16 +172,13 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = 'index.html';
         return;
     }
-    
     var params = new URLSearchParams(window.location.search);
     adminId = params.get('id');
-    
     if (!adminId) {
         alert('Admin ID topilmadi!');
         window.location.href = 'admins.html';
         return;
     }
-    
     console.log('🔍 Admin ID:', adminId);
     
     // ⭐ AUDIO INIT
@@ -222,7 +195,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     loadProfile();
     loadNotifications();
-    
     initEditModal();
     initPaymentModal();
     initSubscriptionModal();
@@ -246,7 +218,6 @@ function initSidebar() {
     var sidebar = document.getElementById('sidebar');
     var overlay = document.getElementById('sidebarOverlay');
     if (!menuToggle || !sidebar) return;
-    
     var newToggle = menuToggle.cloneNode(true);
     menuToggle.parentNode.replaceChild(newToggle, menuToggle);
     newToggle.addEventListener('click', function(e) {
@@ -254,7 +225,6 @@ function initSidebar() {
         sidebar.classList.toggle('open');
         if (overlay) overlay.classList.toggle('show');
     });
-    
     if (overlay) {
         var newOverlay = overlay.cloneNode(true);
         overlay.parentNode.replaceChild(newOverlay, overlay);
@@ -294,7 +264,6 @@ function renderProfile(admin) {
     document.getElementById('profileEmail').textContent = admin.email || '-';
     document.getElementById('profilePhone').textContent = admin.phone || '-';
     document.getElementById('profileInitial').textContent = (admin.fullName || 'A').charAt(0).toUpperCase();
-    
     var statusEl = document.getElementById('profileStatus');
     if (statusEl) {
         if (admin.status === 'active') {
@@ -308,7 +277,6 @@ function renderProfile(admin) {
             statusEl.className = 'status-badge inactive';
         }
     }
-    
     var sub = admin.subscription || {};
     var subLabelEl = document.getElementById('profileSubscription');
     if (subLabelEl) {
@@ -328,10 +296,8 @@ function renderProfile(admin) {
             subLabelEl.className = 'subscription-badge inactive';
         }
     }
-    
     document.getElementById('profileSubType').textContent = sub.type || 'Yo\'q';
     document.getElementById('profileSubAmount').textContent = formatMoney(sub.amount || 0);
-    
     var history = admin.paymentHistory || admin.subscriptionHistory || [];
     renderSubscriptionHistory(history);
 }
@@ -346,11 +312,9 @@ function renderSubscriptionHistory(history) {
         historyList.innerHTML = '<p class="text-muted">To\'lov tarixi yo\'q</p>';
         return;
     }
-    
     var sortedHistory = history.slice().sort(function(a, b) {
         return new Date(b.purchaseDate) - new Date(a.purchaseDate);
     });
-    
     var html = '';
     sortedHistory.forEach(function(item, index) {
         var startDate = item.startDate ? formatDateTimeFull(item.startDate) : '-';
@@ -359,13 +323,11 @@ function renderSubscriptionHistory(history) {
         var endDateTime = item.endDate ? new Date(item.endDate) : null;
         var isExpired = endDateTime && endDateTime < now;
         var isActive = item.status === 'active' && !isExpired;
-        
         var statusLabel = '❌ Faol emas';
         var statusClass = 'inactive';
         var statusColor = '#ff3b30';
         if (isActive) { statusLabel = '✅ Faol'; statusClass = 'active'; statusColor = '#34c759'; }
         else if (isExpired) { statusLabel = '⏰ Muddati tugagan'; statusClass = 'expired'; statusColor = '#ff9500'; }
-        
         var typeLabel = { monthly: '📅 Oylik', '6months': '📅 6 oylik', yearly: '📅 Yillik', custom: '⚙️ Custom' }[item.type] || item.type;
         var amount = item.amount || 0;
         var note = item.note ? '<p class="history-dates"><i class="fas fa-sticky-note"></i> ' + item.note + '</p>' : '';
@@ -377,7 +339,6 @@ function renderSubscriptionHistory(history) {
                 '<img src="' + methodInfo.icon + '" style="width: 20px; height: 20px; object-fit: contain; border-radius: 4px; background: white; padding: 2px;" onerror="this.style.display=\'none\'">' +
                 methodInfo.name +
             '</span>' : '';
-        
         html += 
             '<div class="history-item" style="border-left: 4px solid ' + statusColor + ';">' +
                 '<div class="history-left">' +
@@ -442,25 +403,24 @@ async function loadNotifications() {
     try {
         var token = Auth.getToken();
         if (!token) return;
-
-        // ⭐ TIMEOUT BILAN (5 sekund)
         var controller = new AbortController();
         var timeoutId = setTimeout(function() { controller.abort(); }, 5000);
-
         try {
             var response = await fetch(API.baseURL + '/api/notifications', {
                 headers: API.getHeaders(),
-                signal: controller.signal
+                signal: controller.signal,
+                cache: 'no-cache'
             });
             clearTimeout(timeoutId);
+            if (!response.ok) {
+                console.warn('⚠️ Notifications response not OK:', response.status);
+                return;
+            }
             var data = await response.json();
-
             if (data.success && data.data) {
-                // ⭐ YANGI XABAR KELGANDA OVOZ
                 var oldUnread = getUnreadCount(data.data);
                 renderNotifications(data.data);
                 var newUnread = getUnreadCount(data.data);
-                
                 if (newUnread > lastUnreadCount && lastUnreadCount > 0) {
                     playNotificationSound();
                     var diff = newUnread - lastUnreadCount;
@@ -493,20 +453,16 @@ function getUnreadCount(notifications) {
 function renderNotifications(notifications) {
     var container = document.getElementById('notificationsList');
     if (!container) return;
-    
     var user = Auth.getUser();
     var filtered = notifications.filter(function(n) { 
         return String(n.recipientId) === String(adminId); 
     });
-    
-    // ⭐ SO'NGI 30 KUN
     var thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     filtered = filtered.filter(function(n) {
         var notifDate = new Date(n.createdAt);
         return notifDate >= thirtyDaysAgo;
     });
-    
     if (!filtered || filtered.length === 0) {
         container.innerHTML = 
             '<div class="notifications-empty">' +
@@ -515,20 +471,17 @@ function renderNotifications(notifications) {
             '</div>';
         return;
     }
-    
     var html = '';
     filtered.forEach(function(item) {
         var isRead = item.isRead;
         var isSentByMe = item.sentBy === user?._id;
         var senderName = item.sentByName || 'Admin';
         var formattedDate = formatDateTimeFull(item.createdAt);
-        
         var statusBadgeClass = isRead ? 'read' : 'unread';
         var statusBadgeText = isRead ? '✅ O\'qilgan' : '🟡 O\'qilmagan';
         var statusLabelClass = isRead ? 'read' : 'unread';
         var statusLabelText = isRead ? '✓ O\'qilgan' : '⏳ O\'qilmagan';
         var cardClass = isRead ? 'read' : 'unread';
-        
         html += 
             '<div class="notification-card ' + cardClass + '">' +
                 '<div class="card-top">' +
@@ -550,10 +503,7 @@ function renderNotifications(notifications) {
                 '</div>' +
             '</div>';
     });
-    
     container.innerHTML = html;
-    
-    // ⭐ O'chirish tugmalari
     document.querySelectorAll('.btn-delete').forEach(function(btn) {
         btn.addEventListener('click', async function() {
             var id = this.dataset.id;
@@ -577,7 +527,6 @@ function renderNotifications(notifications) {
 function showNotificationToast(message) {
     var existing = document.querySelector('.notification-toast');
     if (existing) existing.remove();
-
     var toast = document.createElement('div');
     toast.className = 'notification-toast';
     toast.innerHTML = 
@@ -589,9 +538,7 @@ function showNotificationToast(message) {
             window.location.href = 'notifications.html';
         }
     });
-
     document.body.appendChild(toast);
-
     setTimeout(function() {
         if (toast.parentElement) {
             toast.style.opacity = '0';
@@ -613,7 +560,6 @@ async function sendNotification() {
     var resultDiv = document.getElementById('notificationResult');
     var title = titleInput ? titleInput.value.trim() : '';
     var message = messageInput ? messageInput.value.trim() : '';
-    
     if (!title) {
         showNotificationResult('❌ Iltimos, sarlavhani kiriting!', 'error');
         titleInput.focus();
@@ -628,13 +574,11 @@ async function sendNotification() {
         showNotificationResult('❌ Admin ID topilmadi!', 'error');
         return;
     }
-    
     sendBtn.disabled = true;
     sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuborilmoqda...';
     showNotificationResult('⏳ Xabar yuborilmoqda...', 'info');
-    
     try {
-        var token = localStorage.getItem('adminToken');
+        var token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
         var response = await fetch(API.baseURL + '/api/notifications', {
             method: 'POST',
             headers: {
@@ -689,7 +633,7 @@ function showNotificationResult(msg, type) {
 }
 
 // ============================================================
-// ⭐ TO'LOV QO'SHISH MODAL
+// ⭐ PAYMENT MODAL
 // ============================================================
 function initPaymentModal() {
     var modal = document.getElementById('paymentModal');
@@ -700,9 +644,7 @@ function initPaymentModal() {
     var paymentType = document.getElementById('paymentType');
     var amountGroup = document.getElementById('paymentAmountGroup');
     var customGroup = document.getElementById('paymentCustomDurationGroup');
-    
     if (!modal || !addBtn) return;
-    
     var newAddBtn = addBtn.cloneNode(true);
     addBtn.parentNode.replaceChild(newAddBtn, addBtn);
     newAddBtn.addEventListener('click', function() {
@@ -719,7 +661,6 @@ function initPaymentModal() {
         document.getElementById('paymentNote').value = '';
         if (amountGroup) amountGroup.style.display = 'none';
         if (customGroup) customGroup.style.display = 'none';
-        
         var select = document.getElementById('paymentMethodSelect');
         if (select) {
             select.value = '';
@@ -729,12 +670,10 @@ function initPaymentModal() {
                 previewDiv.style.display = 'none';
             }
         }
-        
         var now = new Date();
         document.getElementById('paymentStartDate').value = now.toISOString().slice(0, 16);
         initPaymentMethodSelect();
     });
-    
     if (closeBtn) {
         var newBtn = closeBtn.cloneNode(true);
         closeBtn.parentNode.replaceChild(newBtn, closeBtn);
@@ -743,7 +682,6 @@ function initPaymentModal() {
             document.body.style.overflow = '';
         });
     }
-    
     if (cancelBtn) {
         var newBtn = cancelBtn.cloneNode(true);
         cancelBtn.parentNode.replaceChild(newBtn, cancelBtn);
@@ -752,14 +690,12 @@ function initPaymentModal() {
             document.body.style.overflow = '';
         });
     }
-    
     modal.addEventListener('click', function(e) {
         if (e.target === modal) {
             modal.classList.remove('active');
             document.body.style.overflow = '';
         }
     });
-    
     if (paymentType) {
         paymentType.addEventListener('change', function() {
             var isCustom = this.value === 'custom';
@@ -775,13 +711,11 @@ function initPaymentModal() {
             calculatePaymentEndDate();
         });
     }
-    
     var startDateInput = document.getElementById('paymentStartDate');
     if (startDateInput) {
         startDateInput.addEventListener('change', calculatePaymentEndDate);
         startDateInput.addEventListener('input', calculatePaymentEndDate);
     }
-    
     ['paymentCustomDays', 'paymentCustomHours', 'paymentCustomMinutes', 'paymentCustomSeconds'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) {
@@ -789,7 +723,6 @@ function initPaymentModal() {
             el.addEventListener('input', calculatePaymentEndDate);
         }
     });
-    
     if (saveBtn) {
         var newBtn = saveBtn.cloneNode(true);
         saveBtn.parentNode.replaceChild(newBtn, saveBtn);
@@ -932,7 +865,7 @@ async function savePayment() {
 }
 
 // ============================================================
-// OBUNA SOTISH MODAL
+// ⭐ SUBSCRIPTION MODAL
 // ============================================================
 function initSubscriptionModal() {
     var modal = document.getElementById('subscriptionModal');
@@ -1113,7 +1046,7 @@ async function saveSubscription() {
 }
 
 // ============================================================
-// UNBAN MODAL
+// ⭐ UNBAN MODAL
 // ============================================================
 function initUnbanModal() {
     var modal = document.getElementById('unbanModal');

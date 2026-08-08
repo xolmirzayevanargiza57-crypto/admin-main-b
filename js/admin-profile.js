@@ -122,7 +122,7 @@ function formatMoney(amount) {
 }
 
 // ============================================================
-// ⭐ SANANI FORMATLASH (TO'G'RI FORMAT - 2026-08-08 10:39:01)
+// ⭐ SANANI FORMATLASH (TO'G'RI FORMAT)
 // ============================================================
 function formatDateTimeFull(date) {
     if (!date) return 'Noma\'lum vaqt';
@@ -141,7 +141,7 @@ function formatDateTimeFull(date) {
     }
 }
 
-// ⭐ SANANI KUN BO'YICHA GURUHLASH UCHUN (2026-08-08)
+// ⭐ SANANI KUN BO'YICHA GURUHLASH UCHUN
 function formatDateKey(date) {
     if (!date) return 'Noma\'lum';
     try {
@@ -157,25 +157,24 @@ function formatDateKey(date) {
 }
 
 // ============================================================
-// ⭐ O'QILMAGAN XABARLAR SONI - TO'G'RI FILTR
+// ⭐ O'QILMAGAN XABARLAR SONI - TO'G'RI FILTR (recipientId YOKI sentBy)
 // ============================================================
 function getUnreadCount(notifications) {
     var user = Auth.getUser();
     if (!user) return 0;
     if (!notifications || !Array.isArray(notifications)) return 0;
     
-    // ⭐ FAQAT O'ZIGA KELGAN VA O'Z YUBORMAGAN VA O'QILMAGAN XABARLAR
+    // ⭐ FAQAT O'ZIGA KELGAN YOKI O'ZI YUBORGAN VA O'QILMAGAN XABARLAR
     var filtered = notifications.filter(function(n) {
-        // 1. recipientId o'ziga tegishli bo'lishi kerak
+        // 1. recipientId o'ziga tegishli bo'lishi kerak YOKI o'zi yuborgan bo'lishi kerak
         var isForMe = String(n.recipientId) === String(adminId);
-        // 2. o'zi yuborgan xabarlarni hisobga olmaslik
-        var isNotSentByMe = String(n.sentBy) !== String(user._id);
-        // 3. o'qilmagan bo'lishi kerak
+        var isSentByMe = String(n.sentBy) === String(adminId);
+        // 2. o'qilmagan bo'lishi kerak
         var isUnread = !n.isRead;
-        // 4. faqat admin_customer uchun
+        // 3. faqat admin_customer uchun
         var isForCustomer = n.recipientRole === 'admin_customer' || n.recipientRole === 'all';
         
-        return isForMe && isNotSentByMe && isUnread && isForCustomer;
+        return (isForMe || isSentByMe) && isUnread && isForCustomer;
     });
     
     console.log('📊 O\'qilmagan xabarlar soni:', filtered.length);
@@ -443,7 +442,7 @@ function updateCountdown() {
 }
 
 // ============================================================
-// ⭐ XABARLARNI YUKLASH (REAL TIME) - TUZATILGAN
+// ⭐ XABARLARNI YUKLASH (REAL TIME)
 // ============================================================
 async function loadNotifications() {
     try {
@@ -498,7 +497,7 @@ async function loadNotifications() {
 }
 
 // ============================================================
-// ⭐ XABARLARNI RENDER QILISH (TO'G'RI SANA FORMATI VA FILTR BILAN)
+// ⭐ XABARLARNI RENDER QILISH (TO'G'RI FILTR - recipientId YOKI sentBy)
 // ============================================================
 function renderNotifications(notifications) {
     var container = document.getElementById('notificationsList');
@@ -511,22 +510,21 @@ function renderNotifications(notifications) {
     }
     
     console.log('📨 Barcha xabarlar:', notifications ? notifications.length : 0);
-    console.log('👤 Admin ID:', adminId);
-    console.log('👤 User ID:', user._id);
+    console.log('👤 Admin ID (ko\'rilayotgan):', adminId);
+    console.log('👤 User ID (Admin-Main):', user._id);
     
-    // ⭐ FAQAT O'ZIGA KELGAN XABARLAR (o'zi yuborganlarni olib tashlash)
+    // ⭐ FAQAT O'ZIGA KELGAN YOKI O'ZI YUBORGAN XABARLAR
     var filtered = notifications.filter(function(n) {
-        // 1. recipientId o'ziga tegishli bo'lishi kerak
+        // 1. recipientId o'ziga tegishli bo'lishi kerak YOKI o'zi yuborgan bo'lishi kerak
         var isForMe = String(n.recipientId) === String(adminId);
-        // 2. o'zi yuborgan xabarlarni olib tashlash
-        var isNotSentByMe = String(n.sentBy) !== String(user._id);
-        // 3. faqat admin_customer uchun
+        var isSentByMe = String(n.sentBy) === String(adminId);
+        // 2. faqat admin_customer uchun
         var isForCustomer = n.recipientRole === 'admin_customer' || n.recipientRole === 'all';
         
-        return isForMe && isNotSentByMe && isForCustomer;
+        return (isForMe || isSentByMe) && isForCustomer;
     });
     
-    console.log('📨 Filtrdan keyin (o\'zimga kelganlar):', filtered.length);
+    console.log('📨 Filtrdan keyin (o\'zimga kelgan yoki yuborgan):', filtered.length);
     
     // ⭐ SO'NGI 30 KUN
     var thirtyDaysAgo = new Date();
@@ -545,7 +543,7 @@ function renderNotifications(notifications) {
         return;
     }
     
-    // ⭐ Xabarlarni sana bo'yicha guruhlash (TO'G'RI FORMAT)
+    // ⭐ Xabarlarni sana bo'yicha guruhlash
     var grouped = {};
     filtered.forEach(function(item) {
         var dateKey = formatDateKey(item.createdAt);
@@ -568,6 +566,7 @@ function renderNotifications(notifications) {
             var isRead = item.isRead;
             var senderName = item.sentByName || 'Admin';
             var formattedDate = formatDateTimeFull(item.createdAt);
+            var isSentByMe = String(item.sentBy) === String(adminId);
             
             var statusBadgeClass = isRead ? 'read' : 'unread';
             var statusBadgeText = isRead ? '✅ O\'qilgan' : '🟡 O\'qilmagan';
@@ -575,13 +574,16 @@ function renderNotifications(notifications) {
             var statusLabelText = isRead ? '✓ O\'qilgan' : '⏳ O\'qilmagan';
             var cardClass = isRead ? 'read' : 'unread';
             
+            // ⭐ YUBORUVCHI
+            var senderDisplay = isSentByMe ? '✉️ Men' : '✉️ ' + senderName;
+            
             html += 
                 '<div class="notification-card ' + cardClass + '">' +
                     '<div class="card-top">' +
                         '<div class="left">' +
                             '<span class="title">' + (item.title || 'Xabar') + '</span>' +
                             '<span class="badge-status ' + statusBadgeClass + '">' + statusBadgeText + '</span>' +
-                            '<span class="sender">✉️ ' + senderName + '</span>' +
+                            '<span class="sender">' + senderDisplay + '</span>' +
                         '</div>' +
                         '<span class="date">' + formattedDate + '</span>' +
                     '</div>' +

@@ -122,14 +122,13 @@ function formatMoney(amount) {
 }
 
 // ============================================================
-// ⭐ SANANI FORMATLASH (TO'G'RI FORMAT)
+// ⭐ SANANI FORMATLASH (TO'G'RI FORMAT - 2026-08-08 10:39:01)
 // ============================================================
 function formatDateTimeFull(date) {
     if (!date) return 'Noma\'lum vaqt';
     try {
         var d = new Date(date);
         if (isNaN(d.getTime())) return 'Noma\'lum vaqt';
-        // ⭐ TO'G'RI FORMAT: 2026-08-08 10:39:01
         var year = d.getFullYear();
         var month = String(d.getMonth() + 1).padStart(2, '0');
         var day = String(d.getDate()).padStart(2, '0');
@@ -142,7 +141,7 @@ function formatDateTimeFull(date) {
     }
 }
 
-// ⭐ SANANI KUN BO'YICHA GURUHLASH UCHUN
+// ⭐ SANANI KUN BO'YICHA GURUHLASH UCHUN (2026-08-08)
 function formatDateKey(date) {
     if (!date) return 'Noma\'lum';
     try {
@@ -157,7 +156,9 @@ function formatDateKey(date) {
     }
 }
 
-// ⭐ O'QILGAN XABARLAR SONI
+// ============================================================
+// ⭐ O'QILMAGAN XABARLAR SONI - TO'G'RI FILTR
+// ============================================================
 function getUnreadCount(notifications) {
     var user = Auth.getUser();
     if (!user) return 0;
@@ -171,8 +172,10 @@ function getUnreadCount(notifications) {
         var isNotSentByMe = String(n.sentBy) !== String(user._id);
         // 3. o'qilmagan bo'lishi kerak
         var isUnread = !n.isRead;
+        // 4. faqat admin_customer uchun
+        var isForCustomer = n.recipientRole === 'admin_customer' || n.recipientRole === 'all';
         
-        return isForMe && isNotSentByMe && isUnread;
+        return isForMe && isNotSentByMe && isUnread && isForCustomer;
     });
     
     console.log('📊 O\'qilmagan xabarlar soni:', filtered.length);
@@ -495,20 +498,35 @@ async function loadNotifications() {
 }
 
 // ============================================================
-// ⭐ XABARLARNI RENDER QILISH (TO'G'RI SANA FORMATI BILAN)
+// ⭐ XABARLARNI RENDER QILISH (TO'G'RI SANA FORMATI VA FILTR BILAN)
 // ============================================================
 function renderNotifications(notifications) {
     var container = document.getElementById('notificationsList');
     if (!container) return;
     
     var user = Auth.getUser();
+    if (!user) {
+        container.innerHTML = '<p class="text-muted">Foydalanuvchi ma\'lumotlari topilmadi</p>';
+        return;
+    }
+    
+    console.log('📨 Barcha xabarlar:', notifications ? notifications.length : 0);
+    console.log('👤 Admin ID:', adminId);
+    console.log('👤 User ID:', user._id);
     
     // ⭐ FAQAT O'ZIGA KELGAN XABARLAR (o'zi yuborganlarni olib tashlash)
     var filtered = notifications.filter(function(n) {
+        // 1. recipientId o'ziga tegishli bo'lishi kerak
         var isForMe = String(n.recipientId) === String(adminId);
-        var isNotSentByMe = String(n.sentBy) !== String(user?._id);
-        return isForMe && isNotSentByMe;
+        // 2. o'zi yuborgan xabarlarni olib tashlash
+        var isNotSentByMe = String(n.sentBy) !== String(user._id);
+        // 3. faqat admin_customer uchun
+        var isForCustomer = n.recipientRole === 'admin_customer' || n.recipientRole === 'all';
+        
+        return isForMe && isNotSentByMe && isForCustomer;
     });
+    
+    console.log('📨 Filtrdan keyin (o\'zimga kelganlar):', filtered.length);
     
     // ⭐ SO'NGI 30 KUN
     var thirtyDaysAgo = new Date();

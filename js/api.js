@@ -1,8 +1,9 @@
 // ============================================
-// API - Admin Main (TO'LIQ)
+// API - Admin Main (TO'LIQ TUZATILGAN)
 // ============================================
 
 const API = {
+    // ⭐ baseURL - /api BILAN TUGAYDI
     baseURL: 'https://admin-main-backend.onrender.com/api',
 
     TIMEOUT_MS: 30000,
@@ -36,7 +37,9 @@ const API = {
 
     async request(endpoint, options = {}) {
         try {
-            const url = `${this.baseURL}${endpoint}`;
+            // ⭐ endpoint / bilan boshlanishiga ishonch hosil qilish
+            const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+            const url = `${this.baseURL}${cleanEndpoint}`;
             console.log('📡 API:', url);
 
             const res = await this.fetchWithTimeout(url, {
@@ -57,10 +60,27 @@ const API = {
         }
     },
 
-    async get(endpoint)         { return this.request(endpoint, { method: 'GET' }); },
-    async post(endpoint, data)  { return this.request(endpoint, { method: 'POST',   body: JSON.stringify(data) }); },
-    async put(endpoint, data)   { return this.request(endpoint, { method: 'PUT',    body: JSON.stringify(data) }); },
-    async delete(endpoint)      { return this.request(endpoint, { method: 'DELETE' }); },
+    async get(endpoint) {
+        return this.request(endpoint, { method: 'GET' });
+    },
+
+    async post(endpoint, data) {
+        return this.request(endpoint, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    },
+
+    async put(endpoint, data) {
+        return this.request(endpoint, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+    },
+
+    async delete(endpoint) {
+        return this.request(endpoint, { method: 'DELETE' });
+    },
 
     async handleResponse(res) {
         let data = null;
@@ -91,3 +111,6 @@ const API = {
         return data || { success: true };
     }
 };
+
+console.log('✅ api.js yuklandi (Admin-Main)');
+console.log('📡 API baseURL:', API.baseURL);

@@ -122,59 +122,58 @@ function formatMoney(amount) {
 }
 
 // ============================================================
-// ⭐ SANANI FORMATLASH (TO'G'RI FORMAT)
+// ⭐ SANANI FORMATLASH (TO'G'RI FORMAT - 08.08.2026 11:25:30)
 // ============================================================
 function formatDateTimeFull(date) {
     if (!date) return 'Noma\'lum vaqt';
     try {
         var d = new Date(date);
         if (isNaN(d.getTime())) return 'Noma\'lum vaqt';
-        var year = d.getFullYear();
-        var month = String(d.getMonth() + 1).padStart(2, '0');
         var day = String(d.getDate()).padStart(2, '0');
+        var month = String(d.getMonth() + 1).padStart(2, '0');
+        var year = d.getFullYear();
         var hours = String(d.getHours()).padStart(2, '0');
         var minutes = String(d.getMinutes()).padStart(2, '0');
         var seconds = String(d.getSeconds()).padStart(2, '0');
-        return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+        return day + '.' + month + '.' + year + ' ' + hours + ':' + minutes + ':' + seconds;
     } catch (error) {
         return 'Noma\'lum vaqt';
     }
 }
 
-// ⭐ SANANI KUN BO'YICHA GURUHLASH UCHUN
+// ⭐ SANANI KUN BO'YICHA GURUHLASH UCHUN (08.08.2026)
 function formatDateKey(date) {
     if (!date) return 'Noma\'lum';
     try {
         var d = new Date(date);
         if (isNaN(d.getTime())) return 'Noma\'lum';
-        var year = d.getFullYear();
-        var month = String(d.getMonth() + 1).padStart(2, '0');
         var day = String(d.getDate()).padStart(2, '0');
-        return year + '-' + month + '-' + day;
+        var month = String(d.getMonth() + 1).padStart(2, '0');
+        var year = d.getFullYear();
+        return day + '.' + month + '.' + year;
     } catch (error) {
         return 'Noma\'lum';
     }
 }
 
 // ============================================================
-// ⭐ O'QILMAGAN XABARLAR SONI - TO'G'RI FILTR (recipientId YOKI sentBy)
+// ⭐ O'QILMAGAN XABARLAR SONI (FAQAT recipientId BO'YICHA VA isRead=false)
 // ============================================================
 function getUnreadCount(notifications) {
     var user = Auth.getUser();
     if (!user) return 0;
     if (!notifications || !Array.isArray(notifications)) return 0;
     
-    // ⭐ FAQAT O'ZIGA KELGAN YOKI O'ZI YUBORGAN VA O'QILMAGAN XABARLAR
+    // ⭐ FAQAT O'ZIGA KELGAN VA O'QILMAGAN XABARLAR
     var filtered = notifications.filter(function(n) {
-        // 1. recipientId o'ziga tegishli bo'lishi kerak YOKI o'zi yuborgan bo'lishi kerak
+        // 1. recipientId o'ziga tegishli bo'lishi kerak
         var isForMe = String(n.recipientId) === String(adminId);
-        var isSentByMe = String(n.sentBy) === String(adminId);
-        // 2. o'qilmagan bo'lishi kerak
-        var isUnread = !n.isRead;
+        // 2. o'qilmagan bo'lishi kerak (isRead = false)
+        var isUnread = n.isRead === false;
         // 3. faqat admin_customer uchun
         var isForCustomer = n.recipientRole === 'admin_customer' || n.recipientRole === 'all';
         
-        return (isForMe || isSentByMe) && isUnread && isForCustomer;
+        return isForMe && isUnread && isForCustomer;
     });
     
     console.log('📊 O\'qilmagan xabarlar soni:', filtered.length);
@@ -497,7 +496,7 @@ async function loadNotifications() {
 }
 
 // ============================================================
-// ⭐ XABARLARNI RENDER QILISH (TO'G'RI FILTR - recipientId YOKI sentBy)
+// ⭐ XABARLARNI RENDER QILISH (FAQAT recipientId BO'YICHA)
 // ============================================================
 function renderNotifications(notifications) {
     var container = document.getElementById('notificationsList');
@@ -513,18 +512,12 @@ function renderNotifications(notifications) {
     console.log('👤 Admin ID (ko\'rilayotgan):', adminId);
     console.log('👤 User ID (Admin-Main):', user._id);
     
-    // ⭐ FAQAT O'ZIGA KELGAN YOKI O'ZI YUBORGAN XABARLAR
+    // ⭐ FAQAT adminId GA YUBORILGAN XABARLAR
     var filtered = notifications.filter(function(n) {
-        // 1. recipientId o'ziga tegishli bo'lishi kerak YOKI o'zi yuborgan bo'lishi kerak
-        var isForMe = String(n.recipientId) === String(adminId);
-        var isSentByMe = String(n.sentBy) === String(adminId);
-        // 2. faqat admin_customer uchun
-        var isForCustomer = n.recipientRole === 'admin_customer' || n.recipientRole === 'all';
-        
-        return (isForMe || isSentByMe) && isForCustomer;
+        return String(n.recipientId) === String(adminId);
     });
     
-    console.log('📨 Filtrdan keyin (o\'zimga kelgan yoki yuborgan):', filtered.length);
+    console.log('📨 Filtrdan keyin (o\'ziga kelganlar):', filtered.length);
     
     // ⭐ SO'NGI 30 KUN
     var thirtyDaysAgo = new Date();
@@ -543,7 +536,7 @@ function renderNotifications(notifications) {
         return;
     }
     
-    // ⭐ Xabarlarni sana bo'yicha guruhlash
+    // ⭐ Xabarlarni sana bo'yicha guruhlash (TO'G'RI FORMAT - 08.08.2026)
     var grouped = {};
     filtered.forEach(function(item) {
         var dateKey = formatDateKey(item.createdAt);
@@ -566,7 +559,7 @@ function renderNotifications(notifications) {
             var isRead = item.isRead;
             var senderName = item.sentByName || 'Admin';
             var formattedDate = formatDateTimeFull(item.createdAt);
-            var isSentByMe = String(item.sentBy) === String(adminId);
+            var isSentByMe = String(item.sentBy) === String(user?._id);
             
             var statusBadgeClass = isRead ? 'read' : 'unread';
             var statusBadgeText = isRead ? '✅ O\'qilgan' : '🟡 O\'qilmagan';

@@ -10,7 +10,7 @@ let countdownInterval = null;
 let notificationRefreshInterval = null;
 let lastUnreadCount = 0;
 let audioContext = null;
-let allNotifications = []; // ⭐ GLOBAL O'ZGARUVCHI
+let allNotifications = [];
 
 // ============================================================
 // ⭐ OVOZ YARATISH
@@ -121,24 +121,62 @@ function formatMoney(amount) {
     return num.toLocaleString('uz-UZ') + ' so\'m';
 }
 
+// ============================================================
+// ⭐ SANANI FORMATLASH (TO'G'RI FORMAT)
+// ============================================================
 function formatDateTimeFull(date) {
     if (!date) return 'Noma\'lum vaqt';
     try {
         var d = new Date(date);
         if (isNaN(d.getTime())) return 'Noma\'lum vaqt';
-        return d.toLocaleString('uz-UZ', {
-            timeZone: 'Asia/Tashkent',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false
-        });
+        // ⭐ TO'G'RI FORMAT: 2026-08-08 10:39:01
+        var year = d.getFullYear();
+        var month = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        var hours = String(d.getHours()).padStart(2, '0');
+        var minutes = String(d.getMinutes()).padStart(2, '0');
+        var seconds = String(d.getSeconds()).padStart(2, '0');
+        return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
     } catch (error) {
         return 'Noma\'lum vaqt';
     }
+}
+
+// ⭐ SANANI KUN BO'YICHA GURUHLASH UCHUN
+function formatDateKey(date) {
+    if (!date) return 'Noma\'lum';
+    try {
+        var d = new Date(date);
+        if (isNaN(d.getTime())) return 'Noma\'lum';
+        var year = d.getFullYear();
+        var month = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        return year + '-' + month + '-' + day;
+    } catch (error) {
+        return 'Noma\'lum';
+    }
+}
+
+// ⭐ O'QILGAN XABARLAR SONI
+function getUnreadCount(notifications) {
+    var user = Auth.getUser();
+    if (!user) return 0;
+    if (!notifications || !Array.isArray(notifications)) return 0;
+    
+    // ⭐ FAQAT O'ZIGA KELGAN VA O'Z YUBORMAGAN VA O'QILMAGAN XABARLAR
+    var filtered = notifications.filter(function(n) {
+        // 1. recipientId o'ziga tegishli bo'lishi kerak
+        var isForMe = String(n.recipientId) === String(adminId);
+        // 2. o'zi yuborgan xabarlarni hisobga olmaslik
+        var isNotSentByMe = String(n.sentBy) !== String(user._id);
+        // 3. o'qilmagan bo'lishi kerak
+        var isUnread = !n.isRead;
+        
+        return isForMe && isNotSentByMe && isUnread;
+    });
+    
+    console.log('📊 O\'qilmagan xabarlar soni:', filtered.length);
+    return filtered.length;
 }
 
 function initPasswordToggles() {
@@ -427,7 +465,6 @@ async function loadNotifications() {
             
             var data = await response.json();
             if (data.success && data.data) {
-                // ⭐ GLOBAL O'ZGARUVCHIGA SAQLASH
                 allNotifications = data.data;
                 
                 // ⭐ O'QILMAGAN XABARLARNI HISOBLASH
@@ -458,31 +495,7 @@ async function loadNotifications() {
 }
 
 // ============================================================
-// ⭐ O'QILMAGAN XABARLARNI HISOBLASH (FAQAT O'ZIGA KELGANLAR)
-// ============================================================
-function getUnreadCount(notifications) {
-    var user = Auth.getUser();
-    if (!user) return 0;
-    
-    if (!notifications || !Array.isArray(notifications)) return 0;
-    
-    // ⭐ FAQAT O'ZIGA KELGAN VA O'Z YUBORMAGAN VA O'QILMAGAN XABARLAR
-    var filtered = notifications.filter(function(n) {
-        // 1. recipientId o'ziga tegishli bo'lishi kerak
-        var isForMe = String(n.recipientId) === String(adminId);
-        // 2. o'zi yuborgan xabarlarni hisobga olmaslik
-        var isNotSentByMe = String(n.sentBy) !== String(user._id);
-        // 3. o'qilmagan bo'lishi kerak
-        var isUnread = !n.isRead;
-        
-        return isForMe && isNotSentByMe && isUnread;
-    });
-    
-    return filtered.length;
-}
-
-// ============================================================
-// ⭐ XABARLARNI RENDER QILISH (SCROLL BILAN)
+// ⭐ XABARLARNI RENDER QILISH (TO'G'RI SANA FORMATI BILAN)
 // ============================================================
 function renderNotifications(notifications) {
     var container = document.getElementById('notificationsList');
@@ -514,39 +527,59 @@ function renderNotifications(notifications) {
         return;
     }
     
-    var html = '';
+    // ⭐ Xabarlarni sana bo'yicha guruhlash (TO'G'RI FORMAT)
+    var grouped = {};
     filtered.forEach(function(item) {
-        var isRead = item.isRead;
-        var senderName = item.sentByName || 'Admin';
-        var formattedDate = formatDateTimeFull(item.createdAt);
-        
-        var statusBadgeClass = isRead ? 'read' : 'unread';
-        var statusBadgeText = isRead ? '✅ O\'qilgan' : '🟡 O\'qilmagan';
-        var statusLabelClass = isRead ? 'read' : 'unread';
-        var statusLabelText = isRead ? '✓ O\'qilgan' : '⏳ O\'qilmagan';
-        var cardClass = isRead ? 'read' : 'unread';
-        
+        var dateKey = formatDateKey(item.createdAt);
+        if (!grouped[dateKey]) grouped[dateKey] = [];
+        grouped[dateKey].push(item);
+    });
+    
+    var html = '';
+    Object.keys(grouped).sort().reverse().forEach(function(dateKey) {
         html += 
-            '<div class="notification-card ' + cardClass + '">' +
-                '<div class="card-top">' +
-                    '<div class="left">' +
-                        '<span class="title">' + (item.title || 'Xabar') + '</span>' +
-                        '<span class="badge-status ' + statusBadgeClass + '">' + statusBadgeText + '</span>' +
-                        '<span class="sender">✉️ ' + senderName + '</span>' +
+            '<div style="margin-bottom:12px;">' +
+                '<div style="padding:6px 0;font-size:0.78rem;font-weight:600;color:var(--text-muted);border-bottom:2px solid var(--border-color);margin-bottom:8px;display:flex;align-items:center;gap:8px;">' +
+                    '<i class="fas fa-calendar"></i> ' + dateKey +
+                    '<span style="font-size:0.65rem;font-weight:400;color:var(--text-muted);margin-left:8px;">' +
+                        grouped[dateKey].length + ' ta xabar' +
+                    '</span>' +
+                '</div>';
+        
+        grouped[dateKey].forEach(function(item) {
+            var isRead = item.isRead;
+            var senderName = item.sentByName || 'Admin';
+            var formattedDate = formatDateTimeFull(item.createdAt);
+            
+            var statusBadgeClass = isRead ? 'read' : 'unread';
+            var statusBadgeText = isRead ? '✅ O\'qilgan' : '🟡 O\'qilmagan';
+            var statusLabelClass = isRead ? 'read' : 'unread';
+            var statusLabelText = isRead ? '✓ O\'qilgan' : '⏳ O\'qilmagan';
+            var cardClass = isRead ? 'read' : 'unread';
+            
+            html += 
+                '<div class="notification-card ' + cardClass + '">' +
+                    '<div class="card-top">' +
+                        '<div class="left">' +
+                            '<span class="title">' + (item.title || 'Xabar') + '</span>' +
+                            '<span class="badge-status ' + statusBadgeClass + '">' + statusBadgeText + '</span>' +
+                            '<span class="sender">✉️ ' + senderName + '</span>' +
+                        '</div>' +
+                        '<span class="date">' + formattedDate + '</span>' +
                     '</div>' +
-                    '<span class="date">' + formattedDate + '</span>' +
-                '</div>' +
-                // ⭐ CARD BODY - SCROLL QILADIGAN QISM
-                '<div class="card-body" style="max-height:80px;overflow-y:auto;overflow-x:auto;word-wrap:break-word;word-break:break-word;padding-right:4px;">' +
-                    '<div class="card-message">' + (item.message || '') + '</div>' +
-                '</div>' +
-                '<div class="card-footer">' +
-                    '<button class="btn-delete" data-id="' + item._id + '">' +
-                        '<i class="fas fa-trash"></i> O\'chirish' +
-                    '</button>' +
-                    '<span class="status-label ' + statusLabelClass + '">' + statusLabelText + '</span>' +
-                '</div>' +
-            '</div>';
+                    '<div class="card-body" style="max-height:80px;overflow-y:auto;overflow-x:auto;word-wrap:break-word;word-break:break-word;padding-right:4px;">' +
+                        '<div class="card-message">' + (item.message || '') + '</div>' +
+                    '</div>' +
+                    '<div class="card-footer">' +
+                        '<button class="btn-delete" data-id="' + item._id + '">' +
+                            '<i class="fas fa-trash"></i> O\'chirish' +
+                        '</button>' +
+                        '<span class="status-label ' + statusLabelClass + '">' + statusLabelText + '</span>' +
+                    '</div>' +
+                '</div>';
+        });
+        
+        html += '</div>';
     });
     
     container.innerHTML = html;

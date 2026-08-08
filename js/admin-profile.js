@@ -204,10 +204,10 @@ document.addEventListener('DOMContentLoaded', function() {
     initSidebar();
     initPasswordToggles();
     
-    // ⭐ HAR 0.5 SONIYADA XABARLARNI YANGILASH (REAL TIME)
+    // ⭐ HAR 1 SONIYADA XABARLARNI YANGILASH (REAL TIME)
     notificationRefreshInterval = setInterval(function() {
         loadNotifications();
-    }, 500);
+    }, 1000);
 });
 
 // ============================================================
@@ -405,11 +405,12 @@ async function loadNotifications() {
         if (!token) return;
         
         var controller = new AbortController();
-        var timeoutId = setTimeout(function() { controller.abort(); }, 3000);
+        var timeoutId = setTimeout(function() { controller.abort(); }, 5000);
         
         try {
-            // ⭐ TO'G'RI URL - /api/notifications
-            var response = await fetch(API.baseURL + '/api/notifications', {
+            // ⭐ TO'G'RI: API.baseURL = 'https://admin-main-backend.onrender.com/api'
+            // SHUNING UCHUN '/notifications' QO'SHISH KIFAYT
+            var response = await fetch(API.baseURL + '/notifications', {
                 headers: API.getHeaders(),
                 signal: controller.signal,
                 cache: 'no-cache'
@@ -599,8 +600,9 @@ async function sendNotification() {
     try {
         var token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
         
-        // ⭐ TO'G'RI URL - /api/notifications
-        var response = await fetch(API.baseURL + '/api/notifications', {
+        // ⭐ TO'G'RI: API.baseURL = 'https://admin-main-backend.onrender.com/api'
+        // SHUNING UCHUN '/notifications' QO'SHISH KIFAYT
+        var response = await fetch(API.baseURL + '/notifications', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

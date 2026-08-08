@@ -10,6 +10,7 @@ let countdownInterval = null;
 let notificationRefreshInterval = null;
 let lastUnreadCount = 0;
 let audioContext = null;
+let allNotifications = []; // ⭐ GLOBAL O'ZGARUVCHI
 
 // ============================================================
 // ⭐ OVOZ YARATISH
@@ -401,7 +402,7 @@ function updateCountdown() {
 }
 
 // ============================================================
-// ⭐ XABARLARNI YUKLASH (REAL TIME) - TO'LIQ TUZATILGAN
+// ⭐ XABARLARNI YUKLASH (REAL TIME) - TUZATILGAN
 // ============================================================
 async function loadNotifications() {
     try {
@@ -412,7 +413,6 @@ async function loadNotifications() {
         var timeoutId = setTimeout(function() { controller.abort(); }, 5000);
         
         try {
-            // ⭐ TO'G'RI URL
             var response = await fetch(API.baseURL + '/notifications', {
                 headers: API.getHeaders(),
                 signal: controller.signal,
@@ -427,23 +427,20 @@ async function loadNotifications() {
             
             var data = await response.json();
             if (data.success && data.data) {
-                // ⭐ O'ZGARISHLARNI TEKSHIRISH
-                var oldNotifications = JSON.stringify(allNotifications);
+                // ⭐ GLOBAL O'ZGARUVCHIGA SAQLASH
                 allNotifications = data.data;
                 
-                // ⭐ FAQAT O'ZIGA KELGAN VA O'QILMAGAN XABARLARNI HISOBLASH
+                // ⭐ O'QILMAGAN XABARLARNI HISOBLASH
                 var unreadCount = getUnreadCount(allNotifications);
-                
                 console.log('🔔 O\'qilmagan xabarlar:', unreadCount);
                 
                 // ⭐ YANGI XABAR KELGANDA OVOZ
-                var newUnread = unreadCount;
-                if (newUnread > lastUnreadCount && lastUnreadCount > 0) {
+                if (unreadCount > lastUnreadCount && lastUnreadCount > 0) {
                     playNotificationSound();
-                    var diff = newUnread - lastUnreadCount;
+                    var diff = unreadCount - lastUnreadCount;
                     showNotificationToast('🔔 ' + diff + ' ta yangi xabar keldi!');
                 }
-                lastUnreadCount = newUnread;
+                lastUnreadCount = unreadCount;
                 
                 // ⭐ XABARLARNI RENDER QILISH
                 renderNotifications(allNotifications);
@@ -467,7 +464,9 @@ function getUnreadCount(notifications) {
     var user = Auth.getUser();
     if (!user) return 0;
     
-    // ⭐ FAQAT O'ZIGA KELGAN VA O'Z YUBORMAGAN XABARLAR
+    if (!notifications || !Array.isArray(notifications)) return 0;
+    
+    // ⭐ FAQAT O'ZIGA KELGAN VA O'Z YUBORMAGAN VA O'QILMAGAN XABARLAR
     var filtered = notifications.filter(function(n) {
         // 1. recipientId o'ziga tegishli bo'lishi kerak
         var isForMe = String(n.recipientId) === String(adminId);
@@ -483,7 +482,7 @@ function getUnreadCount(notifications) {
 }
 
 // ============================================================
-// ⭐ XABARLARNI RENDER QILISH
+// ⭐ XABARLARNI RENDER QILISH (SCROLL BILAN)
 // ============================================================
 function renderNotifications(notifications) {
     var container = document.getElementById('notificationsList');
@@ -537,7 +536,8 @@ function renderNotifications(notifications) {
                     '</div>' +
                     '<span class="date">' + formattedDate + '</span>' +
                 '</div>' +
-                '<div class="card-body">' +
+                // ⭐ CARD BODY - SCROLL QILADIGAN QISM
+                '<div class="card-body" style="max-height:80px;overflow-y:auto;overflow-x:auto;word-wrap:break-word;word-break:break-word;padding-right:4px;">' +
                     '<div class="card-message">' + (item.message || '') + '</div>' +
                 '</div>' +
                 '<div class="card-footer">' +

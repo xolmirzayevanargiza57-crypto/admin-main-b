@@ -204,10 +204,14 @@ document.addEventListener('DOMContentLoaded', function() {
     initSidebar();
     initPasswordToggles();
     
-    // ⭐ HAR 1 SONIYADA XABARLARNI YANGILASH (REAL TIME)
+    // ⭐ HAR 2 SONIYADA XABARLARNI YANGILASH (REAL TIME)
+    if (notificationRefreshInterval) {
+        clearInterval(notificationRefreshInterval);
+        notificationRefreshInterval = null;
+    }
     notificationRefreshInterval = setInterval(function() {
         loadNotifications();
-    }, 1000);
+    }, 2000);
 });
 
 // ============================================================
@@ -397,7 +401,7 @@ function updateCountdown() {
 }
 
 // ============================================================
-// ⭐ XABARLARNI YUKLASH (REAL TIME) - TUZATILGAN
+// ⭐ XABARLARNI YUKLASH (REAL TIME) - TO'LIQ TUZATILGAN
 // ============================================================
 async function loadNotifications() {
     try {
@@ -408,8 +412,7 @@ async function loadNotifications() {
         var timeoutId = setTimeout(function() { controller.abort(); }, 5000);
         
         try {
-            // ⭐ TO'G'RI: API.baseURL = 'https://admin-main-backend.onrender.com/api'
-            // SHUNING UCHUN '/notifications' QO'SHISH KIFAYT
+            // ⭐ TO'G'RI URL
             var response = await fetch(API.baseURL + '/notifications', {
                 headers: API.getHeaders(),
                 signal: controller.signal,
@@ -424,15 +427,26 @@ async function loadNotifications() {
             
             var data = await response.json();
             if (data.success && data.data) {
-                var oldUnread = getUnreadCount(data.data);
-                renderNotifications(data.data);
-                var newUnread = getUnreadCount(data.data);
+                // ⭐ O'ZGARISHLARNI TEKSHIRISH
+                var oldNotifications = JSON.stringify(allNotifications);
+                allNotifications = data.data;
+                
+                // ⭐ FAQAT O'ZIGA KELGAN VA O'QILMAGAN XABARLARNI HISOBLASH
+                var unreadCount = getUnreadCount(allNotifications);
+                
+                console.log('🔔 O\'qilmagan xabarlar:', unreadCount);
+                
+                // ⭐ YANGI XABAR KELGANDA OVOZ
+                var newUnread = unreadCount;
                 if (newUnread > lastUnreadCount && lastUnreadCount > 0) {
                     playNotificationSound();
                     var diff = newUnread - lastUnreadCount;
                     showNotificationToast('🔔 ' + diff + ' ta yangi xabar keldi!');
                 }
                 lastUnreadCount = newUnread;
+                
+                // ⭐ XABARLARNI RENDER QILISH
+                renderNotifications(allNotifications);
             }
         } catch (fetchError) {
             if (fetchError.name === 'AbortError') {
@@ -446,11 +460,26 @@ async function loadNotifications() {
     }
 }
 
+// ============================================================
+// ⭐ O'QILMAGAN XABARLARNI HISOBLASH (FAQAT O'ZIGA KELGANLAR)
+// ============================================================
 function getUnreadCount(notifications) {
+    var user = Auth.getUser();
+    if (!user) return 0;
+    
+    // ⭐ FAQAT O'ZIGA KELGAN VA O'Z YUBORMAGAN XABARLAR
     var filtered = notifications.filter(function(n) {
-        return String(n.recipientId) === String(adminId);
+        // 1. recipientId o'ziga tegishli bo'lishi kerak
+        var isForMe = String(n.recipientId) === String(adminId);
+        // 2. o'zi yuborgan xabarlarni hisobga olmaslik
+        var isNotSentByMe = String(n.sentBy) !== String(user._id);
+        // 3. o'qilmagan bo'lishi kerak
+        var isUnread = !n.isRead;
+        
+        return isForMe && isNotSentByMe && isUnread;
     });
-    return filtered.filter(function(n) { return !n.isRead; }).length;
+    
+    return filtered.length;
 }
 
 // ============================================================
@@ -461,9 +490,12 @@ function renderNotifications(notifications) {
     if (!container) return;
     
     var user = Auth.getUser();
-    // ⭐ FAQAT O'ZIGA KELGAN XABARLAR
-    var filtered = notifications.filter(function(n) { 
-        return String(n.recipientId) === String(adminId); 
+    
+    // ⭐ FAQAT O'ZIGA KELGAN XABARLAR (o'zi yuborganlarni olib tashlash)
+    var filtered = notifications.filter(function(n) {
+        var isForMe = String(n.recipientId) === String(adminId);
+        var isNotSentByMe = String(n.sentBy) !== String(user?._id);
+        return isForMe && isNotSentByMe;
     });
     
     // ⭐ SO'NGI 30 KUN
@@ -486,7 +518,6 @@ function renderNotifications(notifications) {
     var html = '';
     filtered.forEach(function(item) {
         var isRead = item.isRead;
-        var isSentByMe = item.sentBy === user?._id;
         var senderName = item.sentByName || 'Admin';
         var formattedDate = formatDateTimeFull(item.createdAt);
         
@@ -502,7 +533,7 @@ function renderNotifications(notifications) {
                     '<div class="left">' +
                         '<span class="title">' + (item.title || 'Xabar') + '</span>' +
                         '<span class="badge-status ' + statusBadgeClass + '">' + statusBadgeText + '</span>' +
-                        '<span class="sender">' + (isSentByMe ? '✉️ Men' : '✉️ ' + senderName) + '</span>' +
+                        '<span class="sender">✉️ ' + senderName + '</span>' +
                     '</div>' +
                     '<span class="date">' + formattedDate + '</span>' +
                 '</div>' +
@@ -568,7 +599,7 @@ function showNotificationToast(message) {
 }
 
 // ============================================================
-// ⭐ XABAR YUBORISH - TUZATILGAN
+// ⭐ XABAR YUBORISH
 // ============================================================
 async function sendNotification() {
     var titleInput = document.getElementById('notificationTitle');
@@ -600,8 +631,6 @@ async function sendNotification() {
     try {
         var token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
         
-        // ⭐ TO'G'RI: API.baseURL = 'https://admin-main-backend.onrender.com/api'
-        // SHUNING UCHUN '/notifications' QO'SHISH KIFAYT
         var response = await fetch(API.baseURL + '/notifications', {
             method: 'POST',
             headers: {
